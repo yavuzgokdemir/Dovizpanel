@@ -1,4 +1,4 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
@@ -12,7 +12,7 @@
     <meta name="theme-color" content="#0062cc">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2921/2921237.png">
 
-    <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIkVudGVycHJpc2UgQ3VycmVuY3kgVGVybWluYWwiLAogICJzaG9ydF9uYW1lIjogIkTDtnZpeiBUZXJtIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmMGYyZjUiLAogICJ0aGVtZV9jb2xvciI6ICIjMDA2MmNjIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly9jZG4taWNvbnMtcG5nLmZsYXRpY29uLmNvbS81MTIvMjkyMS8yOTIxMjM3LnBuZyIsCiAgICAgICJzaXplcyI6ICI1MTJ4NTEyIiwKIC2InR5cGUiOiAiaW1hZ2UvcG5nIgogICAgfQogIF0KfQ==">
+    <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIkVudGVycHJpc2UgQ3VycmVuY3kgVGVybWluYWwiLAogICJzaG9ydF9uYW1lIjogIkTDtnZpeiBUZXJtIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmMGYyZjUiLAogICJ0aGVtZV9jb2xvciI6ICIjMDA2MmNjIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly9jZG4taWNvbnMtcG5nLmZsYXRpY29uLmNvbS81MTIvMjkyMS8yOTIxMjM3LnBuZyIsCiAgICAgICJzaXplcyI6ICI1MTJ4NTEyIiwKICAidHlwZSI6ICJpbWFnZS9wbmciCiAgICB9CiAgXQp9">
 
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
@@ -234,7 +234,7 @@
     const GOLD_ICON = "https://cdn-icons-png.flaticon.com/512/2921/2921237.png";
     const CRYPTO_ICON = "https://cdn-icons-png.flaticon.com/512/2091/2091665.png";
     const DEFAULT_ICON = "https://cdn-icons-png.flaticon.com/512/197/197518.png";
-    const PROXY = "https://api.allorigins.win/raw?url=";
+    const PROXY = "https://api.allorigins.win/get?url="; // Değiştirildi: /get?url=
     const FCA_KEY = "fca_live_e7OHXuh5dRNQXADIaNbMCwl7oeL8XJIVMaDVfubj";
     
     let currencies = [];
@@ -324,7 +324,6 @@
             if (source === 'truncgil') {
                 const targetUrl = 'https://finans.truncgil.com/v4/today.json';
                 const response = await fetch(`${PROXY}${encodeURIComponent(targetUrl)}&ts=${Date.now()}`);
-                if (!response.ok) throw new Error("Proxy Hatası");
                 const wrapper = await response.json();
                 apiResults = JSON.parse(wrapper.contents);
                 addLog("Truncgil API Verileri Alındı", "SYNC");
@@ -352,16 +351,16 @@
                 }
             } else if (source === 'genelpara') {
                 const [d, a, k] = await Promise.all([
-                    fetch(`${PROXY}${encodeURIComponent('https://api.genelpara.com/json/?list=doviz&sembol=all')}`).then(r => r.json()),
-                    fetch(`${PROXY}${encodeURIComponent('https://api.genelpara.com/json/?list=altin&sembol=all')}`).then(r => r.json()),
-                    fetch(`${PROXY}${encodeURIComponent('https://api.genelpara.com/json/?list=kripto&sembol=all')}`).then(r => r.json())
+                    fetch(`${PROXY}${encodeURIComponent('https://api.genelpara.com/json/?list=doviz&sembol=all')}`).then(r => r.json()).then(j => JSON.parse(j.contents)),
+                    fetch(`${PROXY}${encodeURIComponent('https://api.genelpara.com/json/?list=altin&sembol=all')}`).then(r => r.json()).then(j => JSON.parse(j.contents)),
+                    fetch(`${PROXY}${encodeURIComponent('https://api.genelpara.com/json/?list=kripto&sembol=all')}`).then(r => r.json()).then(j => JSON.parse(j.contents))
                 ]);
                 apiResults = { ...d, ...a, ...k };
             } else if (source === 'tcmb') {
                 const response = await fetch(`${PROXY}${encodeURIComponent('https://www.tcmb.gov.tr/kurlar/today.xml')}`);
-                const xmlText = await response.text();
+                const wrapper = await response.json();
                 const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+                const xmlDoc = parser.parseFromString(wrapper.contents, "text/xml");
                 const items = xmlDoc.getElementsByTagName("Currency");
                 for (let i = 0; i < items.length; i++) {
                     const code = items[i].getAttribute("CurrencyCode");
@@ -419,7 +418,7 @@
             }
         } catch (e) {
             console.error(e);
-            addLog("Bağlantı Hatası! Tekrar deneniyor...", "ERR");
+            addLog("Bağlantı Hatası! Proxy kontrol ediliyor...", "ERR");
             if(dot) dot.style.backgroundColor = 'var(--danger)';
             if (isAutoMode) syncTimer = setTimeout(fetchMarketData, 5000); 
         }
