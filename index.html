@@ -1,0 +1,590 @@
+!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Enterprise Currency Terminal v3.2 Pro</title>
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Döviz Terminal">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0062cc">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2921/2921237.png">
+
+    <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIkVudGVycHJpc2UgQ3VycmVuY3kgVGVybWluYWwiLAogICJzaG9ydF9uYW1lIjogIkTDtnZpeiBUZXJtIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmMGYyZjUiLAogICJ0aGVtZV9jb2xvciI6ICIjMDA2MmNjIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly9jZG4taWNvbnMtcG5nLmZsYXRpY29uLmNvbS81MTIvMjkyMS8yOTIxMjM3LnBuZyIsCiAgICAgICJzaXplcyI6ICI1MTJ4NTEyIiwKIC2InR5cGUiOiAiaW1hZ2UvcG5nIgogICAgfQogIF0KfQ==">
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg: #f0f2f5; --card: #ffffff; --text: #1c1e21; --primary: #007bff;
+            --secondary: #65676b; --success: #00c853; --danger: #ff5252; --border: #e4e6eb;
+            --header-gradient: linear-gradient(135deg, #0062cc 0%, #004a99 100%);
+            --overlay: rgba(0,0,0,0.5);
+        }
+        [data-theme="dark"] {
+            --bg: #0f1011; --card: #1c1e21; --text: #e4e6eb; --secondary: #b0b3b8;
+            --border: #333537; --header-gradient: linear-gradient(135deg, #161719 0%, #25272a 100%);
+            --overlay: rgba(0,0,0,0.8);
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; display: flex; justify-content: center; transition: 0.3s; }
+        .container { width: 100%; max-width: 500px; padding: 0 12px 100px 12px; }
+        
+        .header { background: var(--header-gradient); padding: 12px 18px; border-radius: 0 0 20px 20px; margin: 0 -12px 15px -12px; color: white; box-shadow: 0 5px 15px rgba(0,0,0,0.15); position: sticky; top:0; z-index:1001; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; }
+        
+        .brand-section { display: flex; align-items: center; gap: 10px; }
+        .chameleon-icon { font-size: 24px; animation: bounce 2s infinite ease-in-out; display: inline-block; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-5px) rotate(10deg); } }
+        
+        .compact-info-row { display: flex; align-items: center; gap: 8px; font-size: 11px; background: rgba(0,0,0,0.2); padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); }
+        .header-stats { display: flex; align-items: center; gap: 6px; font-weight: 600; color: #00ff88; }
+        .countdown-box { font-family: monospace; font-weight: bold; color: white; opacity: 0.8; border-left: 1px solid rgba(255,255,255,0.2); padding-left: 8px; }
+
+        .toolbar-btns { display: flex; gap: 6px; }
+        .btn-round { width: 34px; height: 34px; border-radius: 10px; border: none; background: rgba(255,255,255,0.15); color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; font-size: 14px; }
+        .btn-round.active-green { background: var(--success); box-shadow: 0 0 10px var(--success); }
+        .btn-round.active-blue { background: var(--primary); box-shadow: 0 0 10px var(--primary); }
+        
+        #settings-panel, #tv-panel { background: var(--card); border-radius: 18px; padding: 18px; margin-bottom: 15px; border: 1px solid var(--border); display: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .input-box { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 10px; font-size: 13px; }
+        .label-style { font-size: 10px; font-weight: 800; color: var(--secondary); margin-bottom: 4px; display: block; }
+
+        .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 22px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--success); }
+        input:checked + .slider:before { transform: translateX(22px); }
+
+        .currency-card { background: var(--card); border-radius: 15px; padding: 14px; margin-bottom: 10px; display: grid; grid-template-columns: auto auto 1fr auto auto; align-items: center; gap: 12px; border: 1px solid var(--border); cursor: pointer; transition: transform 0.1s; position: relative; }
+        .drag-handle { color: var(--secondary); cursor: grab; padding: 5px; opacity: 0.5; }
+        .flag-box { position: relative; width: 42px; height: 42px; }
+        .flag-anim { width: 100%; height: 100%; border-radius: 50%; border: 2px solid var(--primary); object-fit: cover; }
+        .price-col { text-align: right; min-width: 85px; }
+        .price-val { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 800; color: var(--primary); }
+        .margin-tag { font-size: 9px; color: var(--secondary); font-weight: bold; margin-top: 2px; }
+        .internal-logs { background: var(--bg); border-radius: 10px; padding: 10px; margin-top: 15px; max-height: 150px; overflow-y: auto; border: 1px solid var(--border); }
+        .log-entry { display: flex; flex-direction: column; font-size: 10px; padding: 6px 0; border-bottom: 1px solid var(--border); color: var(--secondary); }
+        .log-entry b { color: var(--primary); }
+        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: var(--overlay); display: none; justify-content: center; align-items: center; z-index: 2000; padding: 20px; backdrop-filter: blur(4px); }
+        .modal-content { background: var(--card); width: 100%; max-width: 400px; border-radius: 20px; padding: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); padding: 8px 20px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; z-index: 1000; height: 60px; }
+        .lock-indicator { position: absolute; top: 5px; left: 5px; font-size: 10px; color: var(--secondary); }
+        .sortable-ghost { opacity: 0.3; background: var(--primary) !important; }
+        
+        .bottom-tv-control { display: flex; align-items: center; gap: 10px; background: var(--bg); padding: 5px 12px; border-radius: 12px; border: 1px solid var(--border); }
+    </style>
+</head>
+<body data-theme="light">
+
+<div class="modal-overlay" id="update-modal">
+    <div class="modal-content">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px">
+            <h3 id="edit-title" style="margin:0; font-size:16px">Dövizi Düzenle</h3>
+            <button class="btn-round" onclick="closeModal()" style="background:var(--bg); color:var(--text)"><i class="fas fa-times"></i></button>
+        </div>
+        <input type="hidden" id="edit-id">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px">
+            <div><label class="label-style">GÜNCEL ALIŞ FİYATI</label><input type="number" id="edit-buy-price" class="input-box" step="0.0001"></div>
+            <div><label class="label-style">GÜNCEL SATIŞ FİYATI</label><input type="number" id="edit-sell-price" class="input-box" step="0.0001"></div>
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px">
+            <div><label class="label-style">ALIŞ MARJI (-)</label><input type="number" id="edit-buy-margin" class="input-box" step="0.0001"></div>
+            <div><label class="label-style">SATIŞ MARJI (+)</label><input type="number" id="edit-sell-margin" class="input-box" step="0.0001"></div>
+        </div>
+        
+        <div style="display:flex; align-items:center; gap:10px; margin: 10px 0; background: var(--bg); padding:10px; border-radius:8px">
+            <label class="switch"><input type="checkbox" id="edit-auto-sync"><span class="slider"></span></label>
+            <label for="edit-auto-sync" style="font-size:12px; font-weight:bold">Oto-Mod Aktif</label>
+        </div>
+
+        <div style="display:flex; gap:10px">
+            <button class="btn-round" style="flex:1; background:var(--danger); border-radius:8px; font-weight:bold" onclick="deleteCurrency()"><i class="fas fa-trash"></i> SİL</button>
+            <button class="btn-round" style="flex:3; background:var(--success); border-radius:8px; font-weight:bold" onclick="saveManualUpdate()">KAYDET</button>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <header class="header">
+        <div class="header-top">
+            <div class="brand-section">
+                <span class="chameleon-icon">🦎</span>
+                <div class="compact-info-row">
+                    <div class="header-stats"><i class="fas fa-layer-group"></i> <span id="stat-count">0</span></div>
+                    <div class="header-stats" style="color:#00e5ff; border-left: 1px solid rgba(255,255,255,0.2); padding-left: 8px;"><i class="fas fa-clock"></i> <span id="stat-sync">--:--</span></div>
+                    <div class="countdown-box" id="timer-box">--</div>
+                </div>
+            </div>
+            <div class="toolbar-btns">
+                <button class="btn-round" onclick="toggleAuto()" id="auto-btn"><i class="fas fa-robot"></i></button>
+                <button class="btn-round" onclick="toggleTvPanel()" id="tv-btn"><i class="fas fa-tv"></i></button>
+                <button class="btn-round" onclick="toggleSettings()" id="settings-btn"><i class="fas fa-cog"></i></button>
+                <button class="btn-round" onclick="toggleTheme()"><i class="fas fa-moon"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <div id="tv-panel">
+        <div class="tv-select-group">
+            <label class="label-style">TV TASARIM SEÇİMİ</label>
+            <select id="tv-screen-select" class="input-box" onchange="saveTvSettings()">
+                <option value="1">1. Bloomberg Tasarımı</option>
+                <option value="2">2. Ekotürk Tasarımı</option>
+                <option value="3">3. CNBC-e Tasarımı</option>
+                <option value="4">4. Genel Bilgi Panosu</option>
+                <option value="5">5. Geleneksel Pano</option>
+                <option value="6">6. Modern Pro Pano</option>
+            </select>
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px">
+            <div>
+                <label class="label-style">DEĞER HASSASİYETİ</label>
+                <select id="tv-value-select" class="input-box" onchange="saveTvSettings()">
+                    <option value="1">Standart</option>
+                    <option value="2">Geniş</option>
+                    <option value="3">Sıkıştırılmış</option>
+                </select>
+            </div>
+            <div>
+                <label class="label-style">KUR GÖRÜNÜMÜ</label>
+                <select id="tv-rate-select" class="input-box" onchange="saveTvSettings()">
+                    <option value="1">Dikey Liste</option>
+                    <option value="2">Yatay Şerit</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div id="settings-panel">
+        <span class="label-style">API KAYNAK YÖNETİMİ</span>
+        <select id="api-source-select" class="input-box" style="background: var(--primary); color: white; border: none; font-weight: bold;">
+            <option value="truncgil">Truncgil V4 (Hızlı/TR)</option>
+            <option value="hexarate">Hexarate API (Global/Dinamik)</option>
+            <option value="genelpara">GenelPara.com (Yerel/TR)</option>
+            <option value="tcmb">TCMB (Merkez Bankası)</option>
+            <option value="global">FreeCurrencyAPI (Global)</option>
+        </select>
+
+        <label class="label-style">GÜNCELLEME HIZI (SANİYE)</label>
+        <input type="number" id="sync-interval" class="input-box" value="30">
+
+        <div style="padding:15px; background:var(--bg); border-radius:12px; border:1px solid var(--border)">
+            <span class="label-style" style="color:var(--primary)">YENİ VARLIK EKLE</span>
+            <input type="text" id="new-name" class="input-box" placeholder="Sembol (USD, GA, BTC, EUR...)">
+            
+            <label class="label-style">API KATEGORİSİ</label>
+            <select id="new-api-cat" class="input-box">
+                <option value="doviz">Döviz (USD, EUR, GBP...)</option>
+                <option value="altin">Altın (GA, C, Y, A...)</option>
+                <option value="kripto">Kripto (BTC, ETH, SOL...)</option>
+            </select>
+
+            <input type="text" id="new-flag" class="input-box" placeholder="Bayrak Kodu (us, eu, gold, btc)">
+            
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px">
+                <div><label class="label-style">ALIŞ MARJI</label><input type="number" id="new-buy-margin" class="input-box" value="0.100"></div>
+                <div><label class="label-style">SATIŞ MARJI</label><input type="number" id="new-sell-margin" class="input-box" value="0.250"></div>
+            </div>
+            <button class="btn-round" style="width:100%; background:var(--primary); border-radius:8px; font-weight:bold" onclick="addNewCurrency()">VARLIĞI SİSTEME EKLE</button>
+        </div>
+        <div class="internal-logs">
+            <div id="log-list"></div>
+        </div>
+    </div>
+
+    <div id="currency-list"></div>
+</div>
+
+<div class="bottom-nav">
+    <div style="display:flex; align-items:center; gap:8px">
+        <div id="status-dot" style="width:10px; height:10px; background:var(--success); border-radius:50%"></div>
+        <small id="footer-status" style="font-size:11px; font-weight:bold">V3.2 Pro Terminal Aktif</small>
+    </div>
+    
+    <div class="bottom-tv-control">
+        <small style="font-size:10px; font-weight:800; color:var(--secondary)">TV YAYIN</small>
+        <label class="switch">
+            <input type="checkbox" id="tv-master-switch" onchange="saveTvSettings()">
+            <span class="slider"></span>
+        </label>
+    </div>
+</div>
+
+<script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCfcppc4rGYxmAj7fTzmYMZgcyBO4s8bFI",
+      authDomain: "doviz-kurlari-35554.firebaseapp.com",
+      databaseURL: "https://doviz-kurlari-35554-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "doviz-kurlari-35554",
+      storageBucket: "doviz-kurlari-35554.firebasestorage.app",
+      messagingSenderId: "822410580056",
+      appId: "1:822410580056:web:40d02d7729d7cf72aafa2d"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const GOLD_ICON = "https://cdn-icons-png.flaticon.com/512/2921/2921237.png";
+    const CRYPTO_ICON = "https://cdn-icons-png.flaticon.com/512/2091/2091665.png";
+    const DEFAULT_ICON = "https://cdn-icons-png.flaticon.com/512/197/197518.png";
+    const PROXY = "https://api.allorigins.win/raw?url=";
+    const FCA_KEY = "fca_live_e7OHXuh5dRNQXADIaNbMCwl7oeL8XJIVMaDVfubj";
+    
+    let currencies = [];
+    let isAutoMode = false;
+    let syncTimer = null;
+    let countdownTimer = null;
+    let secondsLeft = 0;
+
+    function initApp() {
+        addLog("Sistem Başlatıldı", "INFO");
+        
+        db.ref('terminal_data/currencies').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) { 
+                const newData = Array.isArray(data) ? data : Object.values(data);
+                if(currencies.length !== newData.length) {
+                    currencies = newData.sort((a,b) => (a.order || 0) - (b.order || 0));
+                    render();
+                } else {
+                    newData.forEach(newItem => {
+                        let target = currencies.find(c => c.id === newItem.id);
+                        if(target) Object.assign(target, newItem);
+                    });
+                    render();
+                }
+            }
+        });
+
+        db.ref('terminal_data/tv_settings').on('value', (snapshot) => {
+            const tv = snapshot.val();
+            if(tv) {
+                document.getElementById('tv-master-switch').checked = tv.master || false;
+                document.getElementById('tv-screen-select').value = tv.screen || "1";
+                document.getElementById('tv-value-select').value = tv.value || "1";
+                document.getElementById('tv-rate-select').value = tv.rate || "1";
+                updateTvButtonState(tv.master);
+            }
+        });
+
+        const el = document.getElementById('currency-list');
+        Sortable.create(el, {
+            handle: '.drag-handle',
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+            onEnd: function() {
+                reorderCurrencies();
+            }
+        });
+    }
+
+    function reorderCurrencies() {
+        const items = document.querySelectorAll('.currency-card');
+        const newOrderedList = [];
+        items.forEach((item, index) => {
+            const id = parseInt(item.getAttribute('data-id'));
+            const curr = currencies.find(c => c.id === id);
+            if(curr) {
+                curr.order = index;
+                newOrderedList.push(curr);
+            }
+        });
+        currencies = newOrderedList;
+        saveToFirebase();
+        addLog("Sıralama Güncellendi", "INFO");
+    }
+
+    function updateTvButtonState(master) {
+        const tvBtn = document.getElementById('tv-btn');
+        if(master) {
+            tvBtn.classList.add('active-green');
+            tvBtn.innerHTML = '<i class="fas fa-tv fa-pulse"></i>';
+        } else {
+            tvBtn.classList.remove('active-green');
+            tvBtn.innerHTML = '<i class="fas fa-tv"></i>';
+        }
+    }
+
+    async function fetchMarketData() {
+        if (!isAutoMode) return;
+        const source = document.getElementById('api-source-select').value;
+        const dot = document.getElementById('status-dot');
+        if(dot) dot.style.backgroundColor = 'orange';
+        
+        try {
+            let apiResults = {};
+            
+            if (source === 'truncgil') {
+                const targetUrl = 'https://finans.truncgil.com/v4/today.json';
+                const response = await fetch(`${PROXY}${encodeURIComponent(targetUrl)}&ts=${Date.now()}`);
+                if (!response.ok) throw new Error("Proxy Hatası");
+                const wrapper = await response.json();
+                apiResults = JSON.parse(wrapper.contents);
+                addLog("Truncgil API Verileri Alındı", "SYNC");
+            } else if (source === 'hexarate') {
+                for (const c of currencies) {
+                    if(!c.autoSync) continue;
+                    let base = "USD", target = "TRY";
+                    const cleanName = c.name.toUpperCase().trim();
+                    if(cleanName.includes('/')) {
+                        const parts = cleanName.split('/');
+                        base = parts[0].trim(); target = parts[1].trim();
+                    } else if (cleanName === "GA" || cleanName === "XAU") {
+                        base = "XAU"; target = "TRY";
+                    } else {
+                        base = cleanName; target = "TRY";
+                    }
+                    try {
+                        const reqUrl = `https://hexarate.paikama.co/api/rates/${base}/${target}/latest`;
+                        const response = await fetch(reqUrl);
+                        const resJson = await response.json();
+                        if(resJson && resJson.data && resJson.data.mid) {
+                            apiResults[c.name] = { satis: resJson.data.mid };
+                        }
+                    } catch (err) { console.error(err); }
+                }
+            } else if (source === 'genelpara') {
+                const [d, a, k] = await Promise.all([
+                    fetch(`${PROXY}${encodeURIComponent('https://api.genelpara.com/json/?list=doviz&sembol=all')}`).then(r => r.json()),
+                    fetch(`${PROXY}${encodeURIComponent('https://api.genelpara.com/json/?list=altin&sembol=all')}`).then(r => r.json()),
+                    fetch(`${PROXY}${encodeURIComponent('https://api.genelpara.com/json/?list=kripto&sembol=all')}`).then(r => r.json())
+                ]);
+                apiResults = { ...d, ...a, ...k };
+            } else if (source === 'tcmb') {
+                const response = await fetch(`${PROXY}${encodeURIComponent('https://www.tcmb.gov.tr/kurlar/today.xml')}`);
+                const xmlText = await response.text();
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+                const items = xmlDoc.getElementsByTagName("Currency");
+                for (let i = 0; i < items.length; i++) {
+                    const code = items[i].getAttribute("CurrencyCode");
+                    const sellingNode = items[i].getElementsByTagName("ForexSelling")[0];
+                    if(sellingNode) apiResults[code] = { satis: sellingNode.textContent.replace(',', '.') };
+                }
+            } else {
+                const res = await fetch(`https://api.freecurrencyapi.com/v1/latest?apikey=${FCA_KEY}&base_currency=TRY`);
+                const data = await res.json();
+                if(data && data.data) {
+                    Object.keys(data.data).forEach(key => { apiResults[key] = 1 / data.data[key]; });
+                }
+            }
+
+            let hasChange = false;
+            currencies = currencies.map(c => {
+                if(!c.autoSync) return c;
+                let apiPrice = 0;
+
+                if(source === 'truncgil') {
+                    const sym = c.name.toUpperCase().trim();
+                    if(apiResults[sym]) {
+                        let valStr = apiResults[sym].Selling;
+                        if(typeof valStr === 'string') valStr = valStr.replace(/\./g, '').replace(',', '.');
+                        apiPrice = parseFloat(valStr);
+                    }
+                } else if(source === 'hexarate') {
+                    if(apiResults[c.name]) apiPrice = parseFloat(apiResults[c.name].satis);
+                } else {
+                    const sym = c.name.toUpperCase().split('/')[0].split(' ')[0].trim();
+                    if(apiResults[sym]) apiPrice = parseFloat(apiResults[sym].satis || apiResults[sym]);
+                }
+
+                if(!isNaN(apiPrice) && apiPrice > 0) {
+                    const newSell = parseFloat((apiPrice + (c.sellMargin || 0)).toFixed(3));
+                    const newBuy = parseFloat((apiPrice - (c.buyMargin || 0)).toFixed(3));
+                    
+                    if(c.sell !== newSell || c.buy !== newBuy) {
+                        hasChange = true;
+                        addLog(`<b>${c.name}</b> Terminal Fiyatı Güncellendi: ${newSell.toFixed(3)}`, "UPDATE");
+                        return { ...c, basePrice: apiPrice, buy: newBuy, sell: newSell };
+                    }
+                }
+                return c;
+            });
+
+            if(hasChange) saveToFirebase();
+            if(dot) dot.style.backgroundColor = 'var(--success)';
+            document.getElementById('stat-sync').innerText = new Date().toLocaleTimeString('tr-TR');
+            resetCountdown();
+
+            if (isAutoMode) {
+                const interval = Math.max(5, parseInt(document.getElementById('sync-interval').value) || 30);
+                syncTimer = setTimeout(fetchMarketData, interval * 1000);
+            }
+        } catch (e) {
+            console.error(e);
+            addLog("Bağlantı Hatası! Tekrar deneniyor...", "ERR");
+            if(dot) dot.style.backgroundColor = 'var(--danger)';
+            if (isAutoMode) syncTimer = setTimeout(fetchMarketData, 5000); 
+        }
+    }
+
+    function toggleAuto() {
+        isAutoMode = !isAutoMode;
+        document.getElementById('auto-btn').classList.toggle('active-green', isAutoMode);
+        clearTimeout(syncTimer);
+        clearInterval(countdownTimer);
+        if(isAutoMode) {
+            fetchMarketData();
+            addLog("Oto-Mod Başlatıldı", "INFO");
+        } else {
+            document.getElementById('timer-box').innerText = "--";
+            addLog("Oto-Mod Kapatıldı", "WARN");
+        }
+    }
+
+    function saveTvSettings() {
+        const settings = {
+            master: document.getElementById('tv-master-switch').checked,
+            screen: document.getElementById('tv-screen-select').value,
+            value: document.getElementById('tv-value-select').value,
+            rate: document.getElementById('tv-rate-select').value,
+            lastUpdate: Date.now()
+        };
+        db.ref('terminal_data/tv_settings').set(settings);
+        addLog(`TV Durumu: ${settings.master ? 'AÇIK' : 'KAPALI'}`, "TV");
+    }
+
+    function addNewCurrency() {
+        const name = document.getElementById('new-name').value.toUpperCase().trim();
+        const cat = document.getElementById('new-api-cat').value;
+        const flag = document.getElementById('new-flag').value.trim() || 'tr';
+        const bm = parseFloat(document.getElementById('new-buy-margin').value) || 0;
+        const sm = parseFloat(document.getElementById('new-sell-margin').value) || 0;
+        if(!name) return alert("Sembol boş olamaz!");
+        
+        const newItem = {
+            id: Date.now() + Math.floor(Math.random() * 1000),
+            name: name, category: cat, flag: flag.toLowerCase(),
+            basePrice: 0, buy: 0, sell: 0,
+            buyMargin: bm, sellMargin: sm, autoSync: true, order: currencies.length
+        };
+        currencies.push(newItem);
+        saveToFirebase();
+        addLog(`Varlık Eklendi: <b>${name}</b>`, "ADD");
+        document.getElementById('new-name').value = '';
+    }
+
+    function render() {
+        const list = document.getElementById('currency-list');
+        list.innerHTML = '';
+        currencies.forEach(c => {
+            const precision = 3;
+            let iconUrl;
+            const flagCode = c.flag ? c.flag.toLowerCase().trim() : '';
+            if(c.category === 'altin' || flagCode === 'gold' || flagCode === 'ga') iconUrl = GOLD_ICON;
+            else if(c.category === 'kripto' || flagCode === 'btc' || flagCode === 'eth') iconUrl = CRYPTO_ICON;
+            else if(flagCode.length === 2) iconUrl = `https://flagcdn.com/w80/${flagCode}.png`;
+            else iconUrl = DEFAULT_ICON;
+
+            list.innerHTML += `
+                <div class="currency-card" data-id="${c.id}" onclick="openUpdateModal(${c.id})">
+                    <div class="drag-handle"><i class="fas fa-grip-vertical"></i></div>
+                    <div class="lock-indicator">${c.autoSync ? '<i class="fas fa-sync-alt fa-spin"></i>' : '<i class="fas fa-lock"></i>'}</div>
+                    <div class="flag-box"><img src="${iconUrl}" class="flag-anim" onerror="this.onerror=null; this.src='${DEFAULT_ICON}';"></div>
+                    <div class="currency-meta"><b>${c.name}</b><span style="font-size:9px">${c.category.toUpperCase()}</span></div>
+                    <div class="price-col">
+                        <span class="label-style">ALIŞ</span>
+                        <div class="price-val">${(c.buy || 0).toFixed(precision)}</div>
+                        <div class="margin-tag">M: -${(c.buyMargin || 0).toFixed(3)}</div>
+                    </div>
+                    <div class="price-col">
+                        <span class="label-style">SATIŞ</span>
+                        <div class="price-val">${(c.sell || 0).toFixed(precision)}</div>
+                        <div class="margin-tag">M: +${(c.sellMargin || 0).toFixed(3)}</div>
+                    </div>
+                </div>`;
+        });
+        document.getElementById('stat-count').innerText = currencies.length;
+    }
+
+    function openUpdateModal(id) {
+        const c = currencies.find(x => x.id === id);
+        if(!c) return;
+        document.getElementById('edit-id').value = c.id;
+        document.getElementById('edit-title').innerText = c.name;
+        document.getElementById('edit-buy-price').value = c.buy;
+        document.getElementById('edit-sell-price').value = c.sell;
+        document.getElementById('edit-buy-margin').value = c.buyMargin;
+        document.getElementById('edit-sell-margin').value = c.sellMargin;
+        document.getElementById('edit-auto-sync').checked = c.autoSync;
+        document.getElementById('update-modal').style.display = 'flex';
+    }
+
+    function saveManualUpdate() {
+        const id = parseInt(document.getElementById('edit-id').value);
+        const buyVal = parseFloat(document.getElementById('edit-buy-price').value) || 0;
+        const sellVal = parseFloat(document.getElementById('edit-sell-price').value) || 0;
+        const bMargin = parseFloat(document.getElementById('edit-buy-margin').value) || 0;
+        const sMargin = parseFloat(document.getElementById('edit-sell-margin').value) || 0;
+        const aSync = document.getElementById('edit-auto-sync').checked;
+        currencies = currencies.map(c => {
+            if(c.id === id) {
+                addLog(`<b>${c.name}</b> Ayarları Değiştirildi`, "MANUAL");
+                return { ...c, buy: buyVal, sell: sellVal, buyMargin: bMargin, sellMargin: sMargin, basePrice: sellVal, autoSync: aSync };
+            }
+            return c;
+        });
+        saveToFirebase(); closeModal();
+    }
+
+    function deleteCurrency() {
+        if(!confirm("Emin misiniz?")) return;
+        const id = parseInt(document.getElementById('edit-id').value);
+        currencies = currencies.filter(c => c.id !== id);
+        saveToFirebase(); closeModal();
+        addLog("Varlık Silindi", "DELETE");
+    }
+
+    function toggleSettings() {
+        const p = document.getElementById('settings-panel');
+        const isVisible = p.style.display === 'block';
+        p.style.display = isVisible ? 'none' : 'block';
+        document.getElementById('currency-list').style.display = isVisible ? 'block' : 'none';
+        document.getElementById('tv-panel').style.display = 'none';
+        document.getElementById('settings-btn').classList.toggle('active-blue', !isVisible);
+    }
+
+    function toggleTvPanel() {
+        const p = document.getElementById('tv-panel');
+        const isVisible = p.style.display === 'block';
+        p.style.display = isVisible ? 'none' : 'block';
+        document.getElementById('currency-list').style.display = isVisible ? 'block' : 'none';
+        document.getElementById('settings-panel').style.display = 'none';
+        document.getElementById('settings-btn').classList.remove('active-blue');
+    }
+
+    function resetCountdown() {
+        clearInterval(countdownTimer);
+        secondsLeft = Math.max(1, parseInt(document.getElementById('sync-interval').value) || 30);
+        countdownTimer = setInterval(() => {
+            secondsLeft--;
+            document.getElementById('timer-box').innerText = secondsLeft + "s";
+            if(secondsLeft <= 0) clearInterval(countdownTimer);
+        }, 1000);
+    }
+
+    function saveToFirebase() { db.ref('terminal_data/currencies').set(currencies); }
+    function closeModal() { document.getElementById('update-modal').style.display = 'none'; }
+    function toggleTheme() { 
+        const current = document.body.getAttribute('data-theme');
+        document.body.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark'); 
+    }
+
+    function addLog(m, type) {
+        const l = document.getElementById('log-list');
+        const time = new Date().toLocaleTimeString('tr-TR');
+        l.innerHTML = `<div class="log-entry"><span>[${time}] [${type}]</span><span>${m}</span></div>` + l.innerHTML;
+        if(l.children.length > 50) l.lastElementChild.remove();
+    }
+
+    initApp();
+</script>
+</body>
+</html>
