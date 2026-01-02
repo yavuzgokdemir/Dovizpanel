@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise TV Terminal v3.2 - Live</title>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --eko-red: #c61118; --eko-green: #118c4f; --eko-turkuaz: #0087b3; --eko-dark: #121516;
+            --gold: #FFD700; --buy-red: #FF3B30; --sell-green: #4CD964; --eko-gray: #2d2f30;
+        }
+
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; color: #fff; font-family: 'Montserrat', sans-serif; }
+        
+        /* CANLI YAYIN ARKA PLAN (YOUTUBE) */
+        .video-bg-container {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            pointer-events: none; /* Mouse ile videoya tıklanmasını engeller */
+        }
+        .video-bg-container iframe {
+            width: 100vw; height: 56.25vw; /* 16:9 Oranı */
+            min-height: 100vh; min-width: 177.77vh;
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* DİĞER CSS YAPILARI (MOD 1 ÖNCELİKLİ) */
+        #tv-container { display: none; width: 100%; height: 100%; position: relative; }
+        .eko-layout .layer-headline { position: absolute; bottom: 134px; width: 100%; height: 60px; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); display: flex; align-items: center; padding-left: 30px; border-top: 2px solid rgba(255,255,255,0.1); }
+        .eko-layout .layer-stocks { position: absolute; bottom: 102px; width: 100%; height: 32px; background: var(--eko-gray); display: flex; align-items: center; overflow: hidden; }
+        .eko-layout .layer-currency { position: absolute; bottom: 32px; width: calc(100% - 140px); height: 70px; background: var(--eko-dark); display: flex; }
+        .eko-layout .side-panel { position: absolute; right: 0; bottom: 32px; width: 140px; height: 132px; background: #004d66; display: flex; flex-direction: column; align-items: center; justify-content: space-around; }
+        
+        .currency-box { flex: 1; border-right: 1px solid #333; padding: 10px; display: flex; flex-direction: column; }
+        .flip-container { height: 35px; overflow: hidden; position: relative; }
+        .flip-inner { position: absolute; width: 100%; transition: transform 0.8s ease-in-out; }
+        .flip-row { height: 35px; display: flex; align-items: center; justify-content: space-between; color: white; font-size: 1.4rem; font-weight: 700; }
+        
+        .marquee-track { display: flex; animation: scroll-left 40s linear infinite; white-space: nowrap; }
+        @keyframes scroll-left { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        .up-trend { background: rgba(17, 140, 79, 0.2); color: #00ff88; }
+        .down-trend { background: rgba(198, 17, 24, 0.2); color: #ff4d4d; }
+    </style>
+</head>
+<body>
+
+<div id="standby-screen">
+    <h1 style="font-size:3rem">SİSTEM HAZIRLANIYOR...</h1>
+</div>
+
+<div id="tv-container">
+    <div class="video-bg-container">
+        <iframe id="yt-player" 
+            src="https://www.youtube.com/embed/SeH7QdZJrV0?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&iv_load_policy=3&loop=1&playlist=SeH7QdZJrV0" 
+            frameborder="0" allow="autoplay; encrypted-media"></iframe>
+    </div>
+    
+    <div id="dynamic-content"></div>
+</div>
+
+<script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCfcppc4rGYxmAj7fTzmYMZgcyBO4s8bFI",
+      databaseURL: "https://doviz-kurlari-35554-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "doviz-kurlari-35554",
+      appId: "1:822410580056:web:40d02d7729d7cf72aafa2d"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let currentCurrencies = [];
+    let currentSettings = { master: false, screen: "1" };
+    let flipState = false;
+
+    db.ref('terminal_data/tv_settings').on('value', snap => {
+        currentSettings = snap.val() || { master: false, screen: "1" };
+        handleScreenState();
+    });
+
+    db.ref('terminal_data/currencies').on('value', snap => {
+        const data = snap.val();
+        currentCurrencies = data ? Object.values(data) : [];
+        if(currentSettings.master) renderSelectedLayout();
+    });
+
+    function handleScreenState() {
+        const tv = document.getElementById('tv-container');
+        const standby = document.getElementById('standby-screen');
+        if (currentSettings.master) {
+            tv.style.display = 'block';
+            standby.style.display = 'none';
+            renderSelectedLayout();
+        } else {
+            tv.style.display = 'none';
+            standby.style.display = 'flex';
+        }
+    }
+
+    function renderSelectedLayout() {
+        const container = document.getElementById('dynamic-content');
+        const tvMain = document.getElementById('tv-container');
+        tvMain.className = (currentSettings.screen === "1") ? "eko-layout" : "";
+
+        if (currentSettings.screen === "1") {
+            container.innerHTML = `
+                <div class="side-panel">
+                    <div style="font-weight:900; font-size:1.2rem; color:white">EKOTÜRK TV</div>
+                    <div id="liveTime" style="font-size:1.5rem; font-weight:bold">00:00</div>
+                </div>
+                <div class="layer-headline">CANLI YAYIN: KÜRESEL PİYASALARDA SON DURUM</div>
+                <div class="layer-stocks"><div class="marquee-track">${generateStockTicker()}</div></div>
+                <div class="layer-currency">${generateFlipGrid()}</div>
+                <div style="position:absolute; bottom:0; width:100%; height:32px; background:var(--eko-turkuaz); display:flex; align-items:center;">
+                    <marquee style="color:white; font-weight:bold;">TCMB Para Politikası Kurulu Toplantısı Yarın Gerçekleştirilecek...</marquee>
+                </div>
+            `;
+        }
+    }
+
+    function generateFlipGrid() {
+        return currentCurrencies.slice(0, 5).map(item => `
+            <div class="currency-box up-trend">
+                <div style="font-size:0.75rem; color:#aaa; font-weight:bold;">${item.name}</div>
+                <div class="flip-container">
+                    <div class="flip-inner curr-flip" style="transform: translateY(${flipState ? '-35px' : '0px'})">
+                        <div class="flip-row"><span>${parseFloat(item.buy).toFixed(4)}</span> <small>ALIŞ</small></div>
+                        <div class="flip-row"><span>${parseFloat(item.sell).toFixed(4)}</span> <small>SATIŞ</small></div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function generateStockTicker() {
+        return currentCurrencies.map(s => `<div style="padding:0 25px; font-weight:bold; border-right:1px solid #555;">${s.name} <span style="color:white">${parseFloat(s.sell).toFixed(2)}</span> <span style="color:#00ff88">▲</span></div>`).join('');
+    }
+
+    setInterval(() => {
+        flipState = !flipState;
+        document.querySelectorAll('.curr-flip').forEach(el => el.style.transform = flipState ? 'translateY(-35px)' : 'translateY(0px)');
+    }, 4000);
+
+    setInterval(() => {
+        const tStr = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+        if (document.getElementById('liveTime')) document.getElementById('liveTime').innerText = tStr;
+    }, 1000);
+</script>
+</body>
+</html>
