@@ -165,6 +165,7 @@
     <div id="settings-panel">
         <span class="label-style">API KAYNAK YÖNETİMİ</span>
         <select id="api-source-select" class="input-box" style="background: var(--primary); color: white; border: none; font-weight: bold;">
+            <option value="hexarate">Hexarate API (Global/Dinamik)</option>
             <option value="truncgil">Truncgil V4 (Hızlı/TR)</option>
             <option value="genelpara">GenelPara.com (Yerel/TR)</option>
             <option value="tcmb">TCMB (Merkez Bankası)</option>
@@ -233,9 +234,7 @@
     const GOLD_ICON = "https://cdn-icons-png.flaticon.com/512/2921/2921237.png";
     const CRYPTO_ICON = "https://cdn-icons-png.flaticon.com/512/2091/2091665.png";
     const DEFAULT_ICON = "https://cdn-icons-png.flaticon.com/512/197/197518.png";
-    
-    // YENİ PROXY: corsproxy.io (allorigins'ten daha stabil)
-    const PROXY = "https://corsproxy.io/?"; 
+    const PROXY = "https://api.allorigins.win/raw?url=";
     const FCA_KEY = "fca_live_e7OHXuh5dRNQXADIaNbMCwl7oeL8XJIVMaDVfubj";
     
     let currencies = [];
@@ -251,16 +250,8 @@
             const data = snapshot.val();
             if (data) { 
                 const newData = Array.isArray(data) ? data : Object.values(data);
-                if(currencies.length !== newData.length) {
-                    currencies = newData.sort((a,b) => (a.order || 0) - (b.order || 0));
-                    render();
-                } else {
-                    newData.forEach(newItem => {
-                        let target = currencies.find(c => c.id === newItem.id);
-                        if(target) Object.assign(target, newItem);
-                    });
-                    render();
-                }
+                currencies = newData.sort((a,b) => (a.order || 0) - (b.order || 0));
+                render();
             }
         });
 
@@ -280,9 +271,7 @@
             handle: '.drag-handle',
             animation: 150,
             ghostClass: 'sortable-ghost',
-            onEnd: function() {
-                reorderCurrencies();
-            }
+            onEnd: function() { reorderCurrencies(); }
         });
     }
 
@@ -316,20 +305,36 @@
     async function fetchMarketData() {
         if (!isAutoMode) return;
         const source = document.getElementById('api-source-select').value;
-        const dot = document.getElementById('status-dot');
-        if(dot) dot.style.backgroundColor = 'orange';
-        
+        const startTime = Date.now();
+        let apiResults = {};
+
         try {
-            let apiResults = {};
-            
-            if (source === 'truncgil') {
-                const targetUrl = 'https://finans.truncgil.com/v4/today.json';
-                const response = await fetch(`${PROXY}${encodeURIComponent(targetUrl)}`);
-                apiResults = await response.json();
-                addLog("Truncgil Verileri Alındı", "SYNC");
+            if (source === 'hexarate') {
+                for (const c of currencies) {
+                    if(!c.autoSync) continue;
+                    let base = "USD", target = "TRY";
+                    const cleanName = c.name.toUpperCase().trim();
+                    if(cleanName.includes('/')) {
+                        const parts = cleanName.split('/');
+                        base = parts[0].trim(); target = parts[1].trim();
+                    } else if (cleanName === "GA" || cleanName === "XAU") {
+                        base = "XAU"; target = "TRY";
+                    } else { base = cleanName; target = "TRY"; }
+
+                    try {
+                        const response = await fetch(`https://hexarate.paikama.co/api/rates/${base}/${target}/latest`);
+                        const resJson = await response.json();
+                        if(resJson?.data?.mid) apiResults[c.name] = { satis: parseFloat(resJson.data.mid) };
+                    } catch (err) { console.error("Hexa fetch err", err); }
+                }
+            } else if (source === 'truncgil') {
+                const response = await fetch(`${PROXY}${encodeURIComponent('https://finans.truncgil.com/v4/today.json')}`);
+                const data = await response.json();
+                apiResults = data.contents ? JSON.parse(data.contents) : data;
             } else if (source === 'genelpara') {
-                const response = await fetch(`${PROXY}${encodeURIComponent('https://api.genelpara.com/json/?list=doviz&sembol=all')}`);
-                apiResults = await response.json();
+                const response = await fetch(`${PROXY}${encodeURIComponent('https://api.genelpara.com/json/?list=all')}`);
+                const data = await response.json();
+                apiResults = data.contents ? JSON.parse(data.contents) : data;
             } else if (source === 'tcmb') {
                 const response = await fetch(`${PROXY}${encodeURIComponent('https://www.tcmb.gov.tr/kurlar/today.xml')}`);
                 const xmlText = await response.text();
@@ -341,35 +346,33 @@
                     const sellingNode = items[i].getElementsByTagName("ForexSelling")[0];
                     if(sellingNode) apiResults[code] = { satis: sellingNode.textContent.replace(',', '.') };
                 }
-            } else if (source === 'global') {
+            } else {
                 const res = await fetch(`https://api.freecurrencyapi.com/v1/latest?apikey=${FCA_KEY}&base_currency=TRY`);
                 const data = await res.json();
-                if(data && data.data) {
-                    Object.keys(data.data).forEach(key => { apiResults[key] = 1 / data.data[key]; });
-                }
+                if(data?.data) Object.keys(data.data).forEach(key => { apiResults[key] = 1 / data.data[key]; });
             }
 
             let hasChange = false;
             currencies = currencies.map(c => {
                 if(!c.autoSync) return c;
                 let apiPrice = 0;
-                const sym = c.name.toUpperCase().trim();
+                const sym = c.name.toUpperCase().split('/')[0].split(' ')[0].trim();
 
-                if(source === 'truncgil' && apiResults[sym]) {
-                    let valStr = apiResults[sym].Selling;
-                    if(typeof valStr === 'string') valStr = valStr.replace(/\./g, '').replace(',', '.');
-                    apiPrice = parseFloat(valStr);
-                } else if(apiResults[sym]) {
-                    apiPrice = parseFloat(apiResults[sym].satis || apiResults[sym]);
+                if (source === 'truncgil' && apiResults[sym]) {
+                    apiPrice = parseFloat(apiResults[sym].Selling.replace(',', '.'));
+                } else if(apiResults[c.name] || apiResults[sym]) {
+                    const found = apiResults[c.name] || apiResults[sym];
+                    apiPrice = parseFloat(found.satis || found.Selling || found);
                 }
 
                 if(!isNaN(apiPrice) && apiPrice > 0) {
-                    const newSell = parseFloat((apiPrice + (c.sellMargin || 0)).toFixed(3));
-                    const newBuy = parseFloat((apiPrice - (c.buyMargin || 0)).toFixed(3));
+                    const formatToZeroEnding = (val) => parseFloat((Math.floor(val * 1000) / 1000).toFixed(3));
+                    const newSell = formatToZeroEnding(apiPrice + (c.sellMargin || 0));
+                    const newBuy = formatToZeroEnding(apiPrice - (c.buyMargin || 0));
                     
-                    if(Math.abs(c.sell - newSell) > 0.0001 || Math.abs(c.buy - newBuy) > 0.0001) {
+                    if(Math.abs(c.sell - newSell) > 0.0001) {
                         hasChange = true;
-                        addLog(`<b>${c.name}</b> Fiyat Güncellendi`, "UPDATE");
+                        addLog(`<b>${c.name}</b> Güncellendi: ${newSell.toFixed(3)}`, "UPDATE");
                         return { ...c, basePrice: apiPrice, buy: newBuy, sell: newSell };
                     }
                 }
@@ -377,19 +380,12 @@
             });
 
             if(hasChange) saveToFirebase();
-            if(dot) dot.style.backgroundColor = 'var(--success)';
             document.getElementById('stat-sync').innerText = new Date().toLocaleTimeString('tr-TR');
             resetCountdown();
-
-            if (isAutoMode) {
-                const interval = Math.max(5, parseInt(document.getElementById('sync-interval').value) || 30);
-                syncTimer = setTimeout(fetchMarketData, interval * 1000);
-            }
+            if (isAutoMode) syncTimer = setTimeout(fetchMarketData, (parseInt(document.getElementById('sync-interval').value) || 30) * 1000);
         } catch (e) {
-            console.error(e);
-            addLog("Bağlantı Hatası!", "ERR");
-            if(dot) dot.style.backgroundColor = 'var(--danger)';
-            if (isAutoMode) syncTimer = setTimeout(fetchMarketData, 5000); 
+            addLog("API Hatası! Kaynak değiştirin.", "ERROR");
+            if (isAutoMode) syncTimer = setTimeout(fetchMarketData, 10000);
         }
     }
 
@@ -398,13 +394,8 @@
         document.getElementById('auto-btn').classList.toggle('active-green', isAutoMode);
         clearTimeout(syncTimer);
         clearInterval(countdownTimer);
-        if(isAutoMode) {
-            fetchMarketData();
-            addLog("Oto-Mod Başlatıldı", "INFO");
-        } else {
-            document.getElementById('timer-box').innerText = "--";
-            addLog("Oto-Mod Kapatıldı", "WARN");
-        }
+        if(isAutoMode) { fetchMarketData(); addLog("Oto-Mod Başlatıldı", "INFO"); }
+        else { document.getElementById('timer-box').innerText = "--"; addLog("Oto-Mod Kapatıldı", "WARN"); }
     }
 
     function saveTvSettings() {
@@ -420,20 +411,15 @@
 
     function addNewCurrency() {
         const name = document.getElementById('new-name').value.toUpperCase().trim();
-        const cat = document.getElementById('new-api-cat').value;
-        const flag = document.getElementById('new-flag').value.trim() || 'tr';
-        const bm = parseFloat(document.getElementById('new-buy-margin').value) || 0;
-        const sm = parseFloat(document.getElementById('new-sell-margin').value) || 0;
         if(!name) return alert("Sembol girin!");
-        
         const newItem = {
-            id: Date.now() + Math.floor(Math.random() * 1000),
-            name: name, category: cat, flag: flag.toLowerCase(),
-            basePrice: 0, buy: 0, sell: 0,
-            buyMargin: bm, sellMargin: sm, autoSync: true, order: currencies.length
+            id: Date.now(), name: name, category: document.getElementById('new-api-cat').value,
+            flag: (document.getElementById('new-flag').value || 'tr').toLowerCase(),
+            buy: 0, sell: 0, buyMargin: parseFloat(document.getElementById('new-buy-margin').value) || 0,
+            sellMargin: parseFloat(document.getElementById('new-sell-margin').value) || 0,
+            autoSync: true, order: currencies.length
         };
-        currencies.push(newItem);
-        saveToFirebase();
+        currencies.push(newItem); saveToFirebase();
         document.getElementById('new-name').value = '';
     }
 
@@ -441,28 +427,20 @@
         const list = document.getElementById('currency-list');
         list.innerHTML = '';
         currencies.forEach(c => {
-            let iconUrl;
-            const flagCode = c.flag ? c.flag.toLowerCase().trim() : '';
-            if(c.category === 'altin' || flagCode === 'gold' || flagCode === 'ga') iconUrl = GOLD_ICON;
-            else if(c.category === 'kripto' || flagCode === 'btc' || flagCode === 'eth') iconUrl = CRYPTO_ICON;
-            else if(flagCode.length === 2) iconUrl = `https://flagcdn.com/w80/${flagCode}.png`;
-            else iconUrl = DEFAULT_ICON;
-
+            let iconUrl = c.flag.length === 2 ? `https://flagcdn.com/w80/${c.flag}.png` : (c.flag === 'gold' ? GOLD_ICON : (c.flag === 'btc' ? CRYPTO_ICON : DEFAULT_ICON));
             list.innerHTML += `
                 <div class="currency-card" data-id="${c.id}" onclick="openUpdateModal(${c.id})">
                     <div class="drag-handle"><i class="fas fa-grip-vertical"></i></div>
                     <div class="lock-indicator">${c.autoSync ? '<i class="fas fa-sync-alt fa-spin"></i>' : '<i class="fas fa-lock"></i>'}</div>
-                    <div class="flag-box"><img src="${iconUrl}" class="flag-anim" onerror="this.onerror=null; this.src='${DEFAULT_ICON}';"></div>
+                    <div class="flag-box"><img src="${iconUrl}" class="flag-anim" onerror="this.src='${DEFAULT_ICON}'"></div>
                     <div class="currency-meta"><b>${c.name}</b><span style="font-size:9px">${c.category.toUpperCase()}</span></div>
                     <div class="price-col">
                         <span class="label-style">ALIŞ</span>
                         <div class="price-val">${(c.buy || 0).toFixed(3)}</div>
-                        <div class="margin-tag">M: -${(c.buyMargin || 0).toFixed(3)}</div>
                     </div>
                     <div class="price-col">
                         <span class="label-style">SATIŞ</span>
                         <div class="price-val">${(c.sell || 0).toFixed(3)}</div>
-                        <div class="margin-tag">M: +${(c.sellMargin || 0).toFixed(3)}</div>
                     </div>
                 </div>`;
         });
@@ -484,68 +462,49 @@
 
     function saveManualUpdate() {
         const id = parseInt(document.getElementById('edit-id').value);
-        currencies = currencies.map(c => {
-            if(c.id === id) {
-                return { 
-                    ...c, 
-                    buy: parseFloat(document.getElementById('edit-buy-price').value),
-                    sell: parseFloat(document.getElementById('edit-sell-price').value),
-                    buyMargin: parseFloat(document.getElementById('edit-buy-margin').value),
-                    sellMargin: parseFloat(document.getElementById('edit-sell-margin').value),
-                    autoSync: document.getElementById('edit-auto-sync').checked
-                };
-            }
-            return c;
-        });
+        currencies = currencies.map(c => c.id === id ? {
+            ...c, buy: parseFloat(document.getElementById('edit-buy-price').value),
+            sell: parseFloat(document.getElementById('edit-sell-price').value),
+            buyMargin: parseFloat(document.getElementById('edit-buy-margin').value),
+            sellMargin: parseFloat(document.getElementById('edit-sell-margin').value),
+            autoSync: document.getElementById('edit-auto-sync').checked
+        } : c);
         saveToFirebase(); closeModal();
     }
 
     function deleteCurrency() {
-        if(!confirm("Emin misiniz?")) return;
-        const id = parseInt(document.getElementById('edit-id').value);
-        currencies = currencies.filter(c => c.id !== id);
+        if(!confirm("Silinsin mi?")) return;
+        currencies = currencies.filter(c => c.id !== parseInt(document.getElementById('edit-id').value));
         saveToFirebase(); closeModal();
     }
 
     function toggleSettings() {
-        const p = document.getElementById('settings-panel');
-        const isVisible = p.style.display === 'block';
-        p.style.display = isVisible ? 'none' : 'block';
-        document.getElementById('currency-list').style.display = isVisible ? 'block' : 'none';
-        document.getElementById('tv-panel').style.display = 'none';
-        document.getElementById('settings-btn').classList.toggle('active-blue', !isVisible);
+        const s = document.getElementById('settings-panel');
+        s.style.display = s.style.display === 'block' ? 'none' : 'block';
+        document.getElementById('currency-list').style.display = s.style.display === 'block' ? 'none' : 'block';
     }
 
     function toggleTvPanel() {
-        const p = document.getElementById('tv-panel');
-        const isVisible = p.style.display === 'block';
-        p.style.display = isVisible ? 'none' : 'block';
-        document.getElementById('currency-list').style.display = isVisible ? 'block' : 'none';
-        document.getElementById('settings-panel').style.display = 'none';
+        const t = document.getElementById('tv-panel');
+        t.style.display = t.style.display === 'block' ? 'none' : 'block';
+        document.getElementById('currency-list').style.display = t.style.display === 'block' ? 'none' : 'block';
     }
 
     function resetCountdown() {
         clearInterval(countdownTimer);
-        secondsLeft = Math.max(1, parseInt(document.getElementById('sync-interval').value) || 30);
+        secondsLeft = parseInt(document.getElementById('sync-interval').value) || 30;
         countdownTimer = setInterval(() => {
-            secondsLeft--;
-            document.getElementById('timer-box').innerText = secondsLeft + "s";
+            secondsLeft--; document.getElementById('timer-box').innerText = secondsLeft + "s";
             if(secondsLeft <= 0) clearInterval(countdownTimer);
         }, 1000);
     }
 
     function saveToFirebase() { db.ref('terminal_data/currencies').set(currencies); }
     function closeModal() { document.getElementById('update-modal').style.display = 'none'; }
-    function toggleTheme() { 
-        const current = document.body.getAttribute('data-theme');
-        document.body.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark'); 
-    }
-
+    function toggleTheme() { document.body.setAttribute('data-theme', document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); }
     function addLog(m, type) {
         const l = document.getElementById('log-list');
-        const time = new Date().toLocaleTimeString('tr-TR');
-        l.innerHTML = `<div class="log-entry"><span>[${time}] [${type}]</span><span>${m}</span></div>` + l.innerHTML;
-        if(l.children.length > 50) l.lastElementChild.remove();
+        l.innerHTML = `<div class="log-entry"><span>[${new Date().toLocaleTimeString()}] [${type}]</span><span>${m}</span></div>` + l.innerHTML;
     }
 
     initApp();
