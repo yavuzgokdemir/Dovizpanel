@@ -59,7 +59,7 @@
 
 <div id="tv-container">
     <div class="video-container">
-        <video id="tv-video" autoplay muted loop>
+        <video id="tv-video" autoplay muted loop playsinline>
             <source src="video1.mp4" type="video/mp4">
         </video>
     </div>
@@ -94,13 +94,18 @@
     function handleScreenState() {
         const standby = document.getElementById('standby-screen');
         const tv = document.getElementById('tv-container');
+        const video = document.getElementById('tv-video');
+
         if (currentSettings.master) {
             standby.style.display = 'none';
             tv.style.display = 'block';
+            // Video oynatımını JS ile zorla başlat
+            if(video) video.play().catch(e => console.log("Auto-play blocked"));
             renderSelectedLayout();
         } else {
             standby.style.display = 'flex';
             tv.style.display = 'none';
+            if(video) video.pause();
         }
     }
 
