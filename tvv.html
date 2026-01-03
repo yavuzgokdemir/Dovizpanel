@@ -99,13 +99,19 @@
         if (currentSettings.master) {
             standby.style.display = 'none';
             tv.style.display = 'block';
-            // Video oynatımını JS ile zorla başlat
-            if(video) video.play().catch(e => console.log("Auto-play blocked"));
+            
+            // Video oynatımını başlatmayı dene
+            if (video) {
+                video.play().catch(error => {
+                    console.log("Video otomatik oynatılamadı (Etkileşim gerekiyor):", error);
+                });
+            }
+
             renderSelectedLayout();
         } else {
             standby.style.display = 'flex';
             tv.style.display = 'none';
-            if(video) video.pause();
+            if (video) video.pause();
         }
     }
 
