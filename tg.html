@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Ekotürk Canlı Terminal - Global</title>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+    <style>
+        :root {
+            --eko-red: #c61118;
+            --eko-green: #118c4f;
+            --eko-turkuaz: #0087b3;
+            --eko-dark: #121516;
+            --eko-gray: #2d2f30;
+        }
+
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+        /* VİDEO ARKA PLAN */
+        .video-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: #000; }
+        video { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.7); }
+
+        /* 1. KATMAN: ÜST BANNER (DİKEY AKIŞLI) */
+        .layer-headline {
+            position: absolute; bottom: 134px; width: 100%; height: 60px;
+            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(15px);
+            overflow: hidden;
+            border-top: 2px solid rgba(255,255,255,0.1);
+        }
+        #headlineStack {
+            display: flex; flex-direction: column; transition: transform 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+            height: 60px;
+        }
+        .headline-item {
+            min-height: 60px; height: 60px; display: flex; align-items: center; padding-left: 30px;
+            color: white; font-size: 1.6rem; font-weight: 600; letter-spacing: 0.5px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+
+        /* 2. KATMAN: GLOBAL BORSA BANDI */
+        .layer-stocks {
+            position: absolute; bottom: 102px; width: 100%; height: 32px;
+            background: var(--eko-gray); display: flex; align-items: center;
+            overflow: hidden; border-bottom: 1px solid #444;
+        }
+        .stock-ticker { display: flex; animation: scroll 60s linear infinite; }
+        .stock-item {
+            padding: 0 30px; display: flex; align-items: center; gap: 10px;
+            font-weight: bold; font-size: 0.9rem; color: #ddd; border-right: 1px solid #555;
+            white-space: nowrap;
+        }
+
+        /* 3. KATMAN: DÖVİZ MOTORU */
+        .layer-currency {
+            position: absolute; bottom: 32px; width: calc(100% - 140px); height: 70px;
+            background: var(--eko-dark); display: flex;
+        }
+        .currency-box { 
+            flex: 1; border-right: 1px solid rgba(255,255,255,0.1); padding: 10px; 
+            display: flex; flex-direction: column; 
+            position: relative;
+        }
+        .curr-name { font-size: 0.75rem; color: rgba(255,255,255,0.7); font-weight: bold; margin-bottom: 5px; z-index: 1; }
+        .flip-container { height: 35px; overflow: hidden; position: relative; z-index: 1; }
+        .flip-inner { position: absolute; width: 100%; transition: transform 0.8s ease-in-out; }
+        .flip-row { height: 35px; display: flex; align-items: center; justify-content: space-between; color: white; font-size: 1.4rem; font-weight: 700; }
+        .curr-val-wrapper { display: flex; align-items: center; gap: 4px; }
+        .trend-arrow { font-size: 0.8rem; }
+        .change-tag { font-size: 0.8rem; padding: 2px 5px; border-radius: 3px; background: rgba(0,0,0,0.3); }
+
+        /* 4. KATMAN: ALT BİLGİ */
+        .layer-info { position: absolute; bottom: 0; width: 100%; height: 32px; background: var(--eko-turkuaz); display: flex; align-items: center; }
+        .info-marquee { color: white; font-weight: bold; font-size: 0.9rem; width: 100%; }
+
+        /* SAĞ PANEL */
+        .side-panel {
+            position: absolute; right: 0; bottom: 32px; width: 140px; height: 132px;
+            background: #004d66; border-left: 1px solid rgba(255,255,255,0.2);
+            display: flex; flex-direction: column; align-items: center; justify-content: space-around;
+        }
+        .logo-area { font-weight: 900; color: white; font-size: 1.2rem; text-align: center; }
+        .logo-area span { display: block; font-size: 0.6rem; font-weight: normal; letter-spacing: 2px; }
+        .time-area { text-align: center; color: white; border-top: 1px solid #006b8f; width: 100%; padding-top: 5px; }
+        .clock { font-size: 1.4rem; font-weight: bold; }
+        .date { font-size: 0.7rem; opacity: 0.8; }
+
+        @keyframes scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    </style>
+</head>
+<body>
+
+<div class="video-container">
+    <video autoplay muted loop playsinline>
+        <source src="video1.mp4" type="video/mp4">
+    </video>
+</div>
+
+<div class="side-panel">
+    <div class="logo-area">EKOTÜRK <span>TÜRKİYE'NİN EKONOMİ TELEVİZYONU</span></div>
+    <div class="time-area">
+        <div class="clock" id="liveTime">00:00</div>
+        <div class="date" id="liveDate">...</div>
+    </div>
+</div>
+
+<div class="layer-headline">
+    <div id="headlineStack">
+        <div class="headline-item">YÜKLENİYOR...</div>
+    </div>
+</div>
+
+<div class="layer-stocks">
+    <div class="stock-ticker" id="stockTicker"></div>
+</div>
+
+<div class="layer-currency" id="currencyGrid"></div>
+
+<div class="layer-info">
+    <marquee class="info-marquee" scrollamount="6" id="bottomNews">Haberler güncelleniyor...</marquee>
+</div>
+
+<script>
+    let newsList = [];
+    let currentNewsIndex = 0;
+
+    const currencyColors = [
+        'rgba(0, 77, 102, 0.6)', 'rgba(198, 17, 24, 0.4)', 'rgba(17, 140, 79, 0.4)', 'rgba(81, 45, 168, 0.4)', 'rgba(230, 81, 0, 0.4)'
+    ];
+
+    async function updateData() {
+        const NEWS_RSS = `https://www.aa.com.tr/tr/rss/default?cat=ekonomi`;
+        try {
+            const newsRes = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(NEWS_RSS)}`);
+            const newsData = await newsRes.json();
+            
+            if(newsData.items && newsData.items.length > 0) {
+                newsList = newsData.items.map(i => i.title.toUpperCase());
+                renderHeadlineStack();
+                document.getElementById('bottomNews').innerText = newsList.join(" +++ ");
+            }
+
+            const marketItems = [
+                {n: "S&P 500", v: "5.137,08", c: "+0,80"}, {n: "NASDAQ", v: "16.274,94", c: "+1,14"}, {n: "DAX", v: "17.735,03", c: "-0,11"}, {n: "NIKKEI", v: "39.910,82", c: "+1,90"}, {n: "FTSE 100", v: "7.640,33", c: "+0,69"}, {n: "DOW JONES", v: "39.087,38", c: "+0,23"}
+            ];
+
+            document.getElementById('stockTicker').innerHTML = [...marketItems, ...marketItems].map(s => `
+                <div class="stock-item">
+                    ${s.n} <span style="color:white">${s.v}</span> 
+                    <span style="color:${s.c.includes('-') ? '#ff4d4d':'#00ff88'}">${s.c.includes('-')?'▼':'▲'} %${s.c}</span>
+                </div>
+            `).join('');
+        } catch (e) { console.log("Veri hatası"); }
+    }
+
+    function renderHeadlineStack() {
+        const stack = document.getElementById('headlineStack');
+        stack.innerHTML = newsList.map(title => `<div class="headline-item">${title}</div>`).join('');
+    }
+
+    setInterval(() => {
+        if(newsList.length > 0) {
+            currentNewsIndex = (currentNewsIndex + 1) % newsList.length;
+            const offset = currentNewsIndex * 60;
+            document.getElementById('headlineStack').style.transform = `translateY(-${offset}px)`;
+        }
+    }, 30000);
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCfcppc4rGYxmAj7fTzmYMZgcyBO4s8bFI",
+      databaseURL: "https://doviz-kurlari-35554-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "doviz-kurlari-35554",
+      appId: "1:822410580056:web:40d02d7729d7cf72aafa2d"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let showSell = true;
+    function updateCurrencyGrid(data) {
+        const grid = document.getElementById('currencyGrid');
+        grid.innerHTML = data.slice(0, 5).map((item, index) => {
+            const changeVal = (Math.random() * 0.4 - 0.2).toFixed(2);
+            const isUp = changeVal >= 0;
+            const arrow = isUp ? '▲' : '▼';
+            const arrowColor = isUp ? '#00ff88' : '#ff4d4d';
+            const bgColor = currencyColors[index % currencyColors.length];
+            
+            return `<div class="currency-box" style="background-color: ${bgColor}">
+                <div class="curr-name">${item.name}</div>
+                <div class="flip-container">
+                    <div class="flip-inner">
+                        <div class="flip-row">
+                            <div class="curr-val-wrapper">
+                                <span>${item.buy.toFixed(4)}</span>
+                                <span class="trend-arrow" style="color:${arrowColor}">${arrow}</span>
+                            </div>
+                            <span class="change-tag">%${Math.abs(changeVal)}</span>
+                        </div>
+                        <div class="flip-row">
+                            <div class="curr-val-wrapper">
+                                <span>${item.sell.toFixed(4)}</span>
+                                <span class="trend-arrow" style="color:${arrowColor}">${arrow}</span>
+                            </div>
+                            <span class="change-tag">%${Math.abs(changeVal)}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    setInterval(() => {
+        showSell = !showSell;
+        document.querySelectorAll('.flip-inner').forEach(el => {
+            el.style.transform = showSell ? 'translateY(-35px)' : 'translateY(0px)';
+        });
+    }, 4000);
+
+    db.ref('terminal_data/currencies').on('value', (snap) => {
+        const data = snap.val();
+        if(data) updateCurrencyGrid(data);
+    });
+
+    setInterval(() => {
+        const now = new Date();
+        document.getElementById('liveTime').innerText = now.toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
+        document.getElementById('liveDate').innerText = now.toLocaleDateString('tr-TR', { day: '2-digit', month: 'long' }).toUpperCase();
+    }, 1000);
+
+    updateData();
+    setInterval(updateData, 300000); 
+</script>
+</body>
+</html>
