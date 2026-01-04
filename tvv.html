@@ -1,221 +1,253 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dynamic Dashboard Engine v3.6 - Multi-Mode</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;600;900&family=Montserrat:wght@700;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Dashboard Engine v3.5 - Elite Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;600;700;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
 
-<style>
-:root {
-    --glass: rgba(255,255,255,0.1);
-    --border: rgba(255,255,255,0.2);
-    --eko-red: #c61118; --eko-green: #118c4f; --eko-turkuaz: #0087b3; --eko-dark: #121516;
-    --eko-gray: #2d2f30;
-}
+    <style>
+        :root {
+            --primary: #007bff;
+            --success: #00c853;
+            --danger: #ff5252;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+            --gold: #FFD700;
+            --buy-red: #FF3B30;
+            --sell-green: #4CD964;
+            --fx-up: #00ff66;
+            --fx-down: #ff3333;
+        }
 
-* { box-sizing:border-box; }
-body, html { margin:0; padding:0; width:100%; height:100%; background:#000; overflow:hidden; color:#fff; font-family:'Inter', sans-serif; }
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background: #000; color: #fff;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden; transition: background 0.8s ease;
+        }
 
-/* CANVAS & VIDEO BASE */
-#bg-canvas { position:absolute; inset:0; z-index:0; display:none; }
-.video-container { position:fixed; inset:0; z-index:0; display:none; }
-video { width:100%; height:100%; object-fit:cover; }
-.engine-container { width:100%; height:100%; position:relative; z-index:2; }
+        .engine-container { height: 100%; width: 100%; display: flex; justify-content: center; align-items: center; position: relative; z-index: 1; }
+        #bg-canvas, #gold-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+        
+        .main-card { position: relative; z-index: 2; padding: 4rem; background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(40px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 80px; text-align: center; max-width: 850px; width: 85%; box-shadow: 0 50px 100px rgba(0,0,0,0.8); animation: cardEntrance 1.5s ease-out; }
+        @keyframes cardEntrance { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        #clock { font-size: 11rem; font-weight: 200; letter-spacing: -8px; margin-bottom: -10px; line-height: 1; color: #fff; }
+        #greeting { font-weight: 900; letter-spacing: 12px; color: var(--primary); margin-bottom: 30px; font-size: 1.8rem; text-transform: uppercase; animation: glowText 3s infinite alternate; }
+        @keyframes glowText { 0% { opacity: 0.6; transform: scale(0.98); text-shadow: 0 0 10px rgba(0,123,255,0); } 100% { opacity: 1; transform: scale(1.02); text-shadow: 0 0 20px rgba(0,123,255,0.5); } }
+        .weather-container { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 25px; }
+        .temp-badge { background: rgba(255,255,255,0.08); color: #fff; padding: 12px 35px; border-radius: 40px; font-weight: 700; border: 1px solid rgba(255,255,255,0.15); font-size: 1.8rem; }
+        .weather-desc { font-size: 1.2rem; color: #aaa; text-transform: capitalize; }
 
-/* ===== MOD 0: PREMIUM STANDBY ===== */
-.standby-wrapper { width:100%; height:100%; display:flex; justify-content:center; align-items:center; background:#0f172a; }
-.main-card { padding:4rem; background:var(--glass); backdrop-filter:blur(25px); border:1px solid var(--border); border-radius:40px; text-align:center; max-width:600px; width:90%; animation:fadeIn 1.5s ease; }
-#sClock { font-size:6rem; font-weight:200; letter-spacing:-2px; background:linear-gradient(to bottom,#fff,#94a3b8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-#greeting { font-size:1.8rem; margin-top:10px; opacity:0.9; height:2rem; transition:opacity .8s; }
-.divider { width:60px; height:1px; background:rgba(255,255,255,.3); margin:2rem auto; }
-.weather { display:flex; justify-content:center; gap:15px; align-items:center; font-size:1.2rem; }
-.temp { background:#fff; color:#0f172a; padding:5px 15px; border-radius:20px; font-weight:600; }
+        .fx-wrapper { width: 100%; height: 100%; display: flex; flex-direction: column; padding: 1.5vh 1.5vw; gap: 2vh; }
+        .fx-top-section { display: flex; gap: 1.5vw; height: 45vh; }
+        .fx-card-big { flex: 1; background: #111; border: 0.5vh solid #222; border-radius: 2vh; padding: 2vh; display: flex; flex-direction: column; justify-content: space-between; }
+        .fx-header { display: flex; align-items: center; gap: 1.5vw; height: 20%; }
+        .fx-icon-big { height: 100%; aspect-ratio: 3/2; border-radius: 0.5vh; object-fit: cover; }
+        .fx-symbol-big { font-size: 4.5vw; font-weight: 900; letter-spacing: -2px; line-height: 1; }
+        .fx-price-area { display: flex; height: 75%; gap: 1vw; align-items: center; }
+        .fx-sub-box { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: center; background: rgba(255,255,255,0.03); border-radius: 1vh; padding: 1vh; }
+        .fx-label { font-size: 1.1vw; color: #666; text-align: center; margin-bottom: 0.5vh; font-weight: 700; text-transform: uppercase; }
+        .fx-val-big { font-family: 'JetBrains Mono', monospace; font-size: 7vw; text-align: center; font-weight: 700; line-height: 0.9; letter-spacing: -3px; }
+        .fx-bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5vw; height: 43vh; }
+        .fx-row { display: flex; align-items: center; justify-content: space-between; padding: 0 1.5vw; background: #0c0c0c; border: 1px solid #222; border-radius: 1.5vh; height: 100%; }
+        .fx-icon-small { width: 4vw; height: 2.8vw; border-radius: 0.3vh; object-fit: cover; }
+        .fx-symbol-small { font-size: 2.8vw; font-weight: 700; }
+        .fx-val-small { font-family: 'JetBrains Mono', monospace; font-size: 3.8vw; flex: 1; text-align: right; }
+        .fx-trend { width: 4vw; font-size: 2.5vw; text-align: center; }
+        .fx-buy { color: var(--fx-down); }
+        .fx-sell { color: var(--fx-up); }
 
-/* ===== MOD 1: EKOTÜRK TASARIMI ===== */
-.eko-layout { width:100%; height:100%; position:relative; font-family:'Montserrat', sans-serif; }
-.eko-layout .layer-headline { position:absolute; bottom:134px; width:100%; height:60px; background:rgba(0,0,0,0.4); backdrop-filter:blur(10px); display:flex; align-items:center; padding-left:30px; border-top:2px solid rgba(255,255,255,0.1); }
-.eko-layout .layer-stocks { position:absolute; bottom:102px; width:100%; height:32px; background:var(--eko-gray); display:flex; align-items:center; overflow:hidden; border-bottom:1px solid #444; }
-.eko-layout .layer-currency { position:absolute; bottom:32px; width:calc(100% - 140px); height:70px; background:var(--eko-dark); display:flex; }
-.eko-layout .side-panel { position:absolute; right:0; bottom:32px; width:140px; height:132px; background:#004d66; display:flex; flex-direction:column; align-items:center; justify-content:space-around; }
-.currency-box { flex:1; border-right:1px solid #333; padding:10px; display:flex; flex-direction:column; }
-.curr-name { font-size:0.75rem; color:#aaa; font-weight:bold; margin-bottom:5px; }
-.flip-container { height:35px; overflow:hidden; position:relative; }
-.flip-inner { position:absolute; width:100%; transition:transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
-.flip-row { height:35px; display:flex; align-items:center; color:white; font-size:1.5rem; font-weight:700; }
-.marquee-track { display:flex; animation:scroll-left 40s linear infinite; white-space:nowrap; }
-@keyframes scroll-left { from { transform:translateX(0); } to { transform:translateX(-50%); } }
-@keyframes fadeIn { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
-.up-trend { background:rgba(17, 140, 79, 0.2); }
-.down-trend { background:rgba(198, 17, 24, 0.2); }
-</style>
+        .gold-panel-wrapper { width: 100%; height: 100%; display: flex; flex-direction: column; padding: 2vh 5vw; box-sizing: border-box; }
+        .gold-header { text-align: center; margin-bottom: 3vh; border-bottom: 1px solid rgba(212, 175, 55, 0.3); padding-bottom: 2vh; }
+        .gold-header h1 { color: var(--gold); font-size: 3vw; font-weight: 900; letter-spacing: 0.5vw; margin: 0; text-shadow: 0 0 20px rgba(255, 215, 0, 0.4); }
+        .gold-container { display: flex; flex-direction: column; gap: 1.5vh; flex-grow: 1; }
+        .gold-row-item { display: grid; grid-template-columns: 8vw 1.5fr 1fr 0.4fr 1fr; align-items: center; background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(5px); padding: 1.5vh 2vw; border-radius: 10px; border-left: 4px solid var(--gold); transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1); border-right: 1px solid rgba(255, 215, 0, 0.1); }
+        .gold-firebase-icon { width: 4vw; height: 4vw; object-fit: contain; }
+        .gold-product-name { font-size: 2.2vw; font-weight: 900; padding-left: 1vw; letter-spacing: -1px; }
+        .gold-price-wrapper { display: flex; flex-direction: column; align-items: flex-end; }
+        .gold-label { font-size: 0.9vw; color: #888; font-weight: 700; margin-bottom: -0.5vh; text-transform: uppercase; }
+        .gold-buy-val { font-family: 'JetBrains Mono', monospace; font-size: 3.2vw; font-weight: 700; color: var(--buy-red); }
+        .gold-sell-val { font-family: 'JetBrains Mono', monospace; font-size: 3.2vw; font-weight: 700; color: var(--sell-green); }
+        .flash-up { background-color: rgba(76, 217, 100, 0.25) !important; transform: translateX(5px); }
+        .flash-down { background-color: rgba(255, 59, 48, 0.25) !important; transform: translateX(5px); }
+    </style>
 </head>
-
 <body>
-<div class="video-container" id="vCont"><video id="mainVid" autoplay muted loop playsinline><source src="Video1.mp4" type="video/mp4"></video></div>
+
 <canvas id="bg-canvas"></canvas>
+<canvas id="gold-canvas" style="display:none;"></canvas>
 <div id="dashboard-engine" class="engine-container"></div>
 
 <script>
-/* ===== FIREBASE ===== */
-firebase.initializeApp({
-    apiKey:"AIzaSyCfcppc4rGYxmAj7fTzmYMZgcyBO4s8bFI",
-    databaseURL:"https://doviz-kurlari-35554-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId:"doviz-kurlari-35554",
-    appId:"1:822410580056:web:40d02d7729d7cf72aafa2d"
-});
-const db=firebase.database();
+    const firebaseConfig = {
+        apiKey: "AIzaSyCfcppc4rGYxmAj7fTzmYMZgcyBO4s8bFI",
+        databaseURL: "https://doviz-kurlari-35554-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "doviz-kurlari-35554",
+        appId: "1:822410580056:web:40d02d7729d7cf72aafa2d"
+    };
 
-/* ===== ENGINE STATE ===== */
-let currentConfig={master:null,screen:null};
-let currentCurrencies=[];
-let intervals={clock:null,greet:null};
-let animId=null, flipState=false, greetingState=0, timeMessage="";
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-/* ===== DATABASE LISTENERS ===== */
-db.ref('terminal_data').on('value', snap => {
-    const d = snap.val(); if(!d) return;
-    const m = d.tv_settings?.master || false;
-    const s = String(d.tv_settings?.screen || "0");
-    currentCurrencies = d.currencies ? Object.values(d.currencies) : [];
+    let currentConfig = { master: null, screen: null };
+    let standbyIntervals = []; 
+    let activeIntervals = [];
 
-    if(m !== currentConfig.master || s !== currentConfig.screen) {
-        currentConfig = {master:m, screen:s};
-        updateUI();
-    } else if(currentConfig.screen === "1") {
-        renderMod1Content(); // Veri güncellendiğinde sadece Mod 1 içeriğini yenile
+    // GÜNCELLENMİŞ İKON FONKSİYONU
+    function getIcon(item) {
+        if (item.flag && item.flag !== "") return item.flag;
+        const name = item.name.toUpperCase();
+        
+        // Altın İkonu
+        if (name.includes("ALTIN") || name.includes("GOLD") || item.category === "altin") {
+            return "https://cdn-icons-png.flaticon.com/512/2933/2933116.png";
+        }
+        
+        // Belirli Bayraklar
+        if (name.includes("USD") || name.includes("DOLAR")) return "https://flagcdn.com/w160/us.png";
+        if (name.includes("EUR") || name.includes("EURO")) return "https://flagcdn.com/w160/eu.png";
+        if (name.includes("CHF") || name.includes("FRANK")) return "https://flagcdn.com/w160/ch.png";
+        if (name.includes("GBP") || name.includes("STERLİN")) return "https://flagcdn.com/w160/gb.png";
+        if (name.includes("AUD")) return "https://flagcdn.com/w160/au.png";
+        if (name.includes("CAD")) return "https://flagcdn.com/w160/ca.png";
+        if (name.includes("SAR") || name.includes("RİYAL")) return "https://flagcdn.com/w160/sa.png";
+        
+        // Diğerleri için BM Bayrağı
+        return "https://flagcdn.com/w160/un.png";
     }
-});
 
-function clearAll() {
-    Object.values(intervals).forEach(i => { if(i) clearInterval(i); });
-    if(animId) cancelAnimationFrame(animId);
-}
+    db.ref('terminal_data').on('value', (snapshot) => {
+        const data = snapshot.val();
+        if (!data) return;
+        const master = data.tv_settings?.master || false;
+        const screen = data.tv_settings?.screen || "1";
 
-/* ===== UI SWITCH ===== */
-function updateUI() {
-    clearAll();
-    const engine = document.getElementById("dashboard-engine");
-    const canvas = document.getElementById("bg-canvas");
-    const vCont = document.getElementById("vCont");
-    const video = document.getElementById("mainVid");
+        if (currentConfig.master !== master || currentConfig.screen !== screen) {
+            currentConfig.master = master;
+            currentConfig.screen = screen;
+            updateUI();
+        }
+    });
 
-    engine.innerHTML = "";
-    canvas.style.display = "none";
-    vCont.style.display = "none";
+    function updateUI() {
+        const container = document.getElementById('dashboard-engine');
+        const bgCanvas = document.getElementById('bg-canvas');
+        const goldCanvas = document.getElementById('gold-canvas');
+        standbyIntervals.forEach(clearInterval);
+        activeIntervals.forEach(clearInterval);
+        standbyIntervals = []; activeIntervals = [];
+        bgCanvas.style.display = "none";
+        goldCanvas.style.display = "none";
 
-    if(!currentConfig.master) {
-        renderStandby(engine);
-    } else if(currentConfig.screen === "1") {
-        vCont.style.display = "block";
-        video.play().catch(e=>console.log("Play blocked"));
-        renderMod1(engine);
-    } else if(currentConfig.screen === "3") {
-        vCont.style.display = "block";
-        video.play().catch(e=>console.log("Play blocked"));
-        engine.innerHTML = `<h1 style="padding:50px">MOD 3 - SADE VIDEO</h1>`;
+        if (!currentConfig.master) renderStandby(container, bgCanvas);
+        else if (currentConfig.screen === "4") renderMod4(container, goldCanvas);
+        else if (currentConfig.screen === "5") renderMod5(container, goldCanvas);
+        else if (currentConfig.screen === "6") renderMod6(container, goldCanvas);
+        else renderGenericScreen(container, currentConfig.screen);
     }
-}
 
-/* ===== MOD 0: STANDBY ===== */
-function renderStandby(container){
-    document.getElementById("bg-canvas").style.display="block";
-    container.innerHTML=`<div class="standby-wrapper"><div class="main-card"><div id="sClock">00:00</div><div id="greeting"></div><div class="divider"></div><div class="weather"><span>İSTANBUL</span><span class="temp">18°C</span><span>Az Bulutlu</span></div></div></div>`;
-    updateClock();
-    intervals.clock=setInterval(updateClock,1000);
-    intervals.greet=setInterval(toggleGreeting,5000);
-    initParticles();
-}
+    function renderStandby(container, canvas) {
+        document.body.style.background = "radial-gradient(circle at center, #0a0a0a 0%, #000 100%)";
+        canvas.style.display = "block";
+        container.innerHTML = `<div class="main-card"><div id="greeting">HOŞGELDİNİZ</div><div id="clock">00:00</div><div class="weather-container"><span class="temp-badge" id="temp">--°C</span><span class="weather-desc" id="weather-text">Hava Durumu Alınıyor</span></div><div style="margin-top:40px; font-size: 0.75rem; font-weight:700; letter-spacing: 5px; color: rgba(0, 123, 255, 0.4)">TERMINAL ONLINE</div></div>`;
+        initModernCanvas(canvas);
+        const updateTime = () => {
+            const now = new Date(); const hours = now.getHours();
+            if(document.getElementById('clock')) document.getElementById('clock').textContent = `${hours.toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+            let msg = hours < 12 ? "GÜNAYDIN" : hours < 18 ? "İYİ GÜNLER" : hours < 23 ? "İYİ AKŞAMLAR" : "İYİ GECELER";
+            if(document.getElementById('greeting')) document.getElementById('greeting').textContent = msg;
+        };
+        updateTime(); standbyIntervals.push(setInterval(updateTime, 1000));
+        fetchWeather();
+    }
 
-/* ===== MOD 1: EKOTÜRK (ENJECTE) ===== */
-function renderMod1(container) {
-    container.className = "engine-container eko-layout";
-    renderMod1Content();
-    if(!intervals.flip) {
-        intervals.flip = setInterval(() => {
-            flipState = !flipState;
-            document.querySelectorAll('.flip-inner').forEach(el => {
-                el.style.transform = flipState ? 'translateY(-35px)' : '0px';
+    function renderMod4(container, canvas) {
+        document.body.style.background = "#000"; canvas.style.display = "block";
+        initGoldRain(canvas);
+        container.innerHTML = `<div class="fx-wrapper"><div class="fx-top-section" id="fx-top"></div><div class="fx-bottom-grid" id="fx-bottom"></div></div>`;
+        db.ref('terminal_data/currencies').once('value', snap => {
+            const data = Object.values(snap.val() || {}).slice(0, 8);
+            const top = document.getElementById('fx-top'), bottom = document.getElementById('fx-bottom');
+            data.forEach((c, i) => {
+                const icon = getIcon(c);
+                const buy = parseFloat(c.buy).toFixed(3).replace('.',','), sell = parseFloat(c.sell).toFixed(3).replace('.',',');
+                if(i < 2) top.innerHTML += `<div class="fx-card-big" id="fx-${c.name}"><div class="fx-header"><img src="${icon}" class="fx-icon-big"><span class="fx-symbol-big">${c.name}</span></div><div class="fx-price-area"><div class="fx-sub-box"><span class="fx-label">ALIŞ</span><span class="fx-val-big fx-buy">${buy}</span></div><div class="fx-sub-box"><span class="fx-label">SATIŞ</span><span class="fx-val-big fx-sell">${sell}</span></div></div></div>`;
+                else bottom.innerHTML += `<div class="fx-row" id="fx-${c.name}"><div style="display:flex; align-items:center; gap:1vw; width:25%;"><img src="${icon}" class="fx-icon-small"><span class="fx-symbol-small">${c.name}</span></div><div style="display:flex; width:70%; justify-content:space-between; align-items:center;"><span class="fx-val-small fx-buy">${buy}</span><span class="fx-trend" style="color:var(--fx-up)">▲</span><span class="fx-val-small fx-sell">${sell}</span></div></div>`;
             });
-        }, 4000);
+        });
+        activeIntervals.push(setInterval(fxFlashEffect, 3000));
     }
-    intervals.clock = setInterval(updateClock, 1000);
-}
 
-function renderMod1Content() {
-    const container = document.getElementById("dashboard-engine");
-    if(currentConfig.screen !== "1" || !currentConfig.master) return;
-    
-    container.innerHTML = `
-        <div class="side-panel">
-            <div style="font-weight:900; color:white; font-size:1.2rem; text-align:center">EKOTÜRK</div>
-            <div id="liveTime" style="font-size:1.5rem; font-weight:bold">${new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'})}</div>
-        </div>
-        <div class="layer-headline"><div style="color:white; font-size:1.8rem;">PIYASALARDA VERI AKIŞI TAKİP EDİLİYOR</div></div>
-        <div class="layer-stocks"><div class="marquee-track">${generateStockTicker()}</div></div>
-        <div class="layer-currency">${generateFlipGrid()}</div>
-        <div style="position:absolute; bottom:0; width:100%; height:32px; background:var(--eko-turkuaz); display:flex; align-items:center;">
-            <marquee style="color:white; font-weight:bold;">TCMB Para Politikası Kararları Takip Ediliyor... Döviz Kurlarında Hareketlilik Sürüyor...</marquee>
-        </div>
-    `;
-}
+    function renderMod5(container, canvas) {
+        document.body.style.background = "#000"; canvas.style.display = "block";
+        initGoldRain(canvas);
+        container.innerHTML = `<div class="fx-wrapper"><div class="fx-top-section" id="gold-top"></div><div class="fx-bottom-grid" id="gold-bottom"></div></div>`;
+        db.ref('terminal_data/currencies').on('value', snap => {
+            if (currentConfig.screen !== "5") return;
+            const goldData = Object.values(snap.val() || {}).filter(item => item.category === 'altin').sort((a,b) => (a.order||0)-(b.order||0));
+            const top = document.getElementById('gold-top'), bottom = document.getElementById('gold-bottom');
+            if(!top || !bottom) return; top.innerHTML = ''; bottom.innerHTML = '';
+            goldData.forEach((c, i) => {
+                const icon = getIcon(c);
+                const buy = parseFloat(c.buy).toLocaleString('tr-TR', {minimumFractionDigits: 2}), sell = parseFloat(c.sell).toLocaleString('tr-TR', {minimumFractionDigits: 2});
+                if(i < 2) top.innerHTML += `<div class="fx-card-big" id="fx-${c.name}"><div class="fx-header"><img src="${icon}" class="fx-icon-big"><span class="fx-symbol-big" style="color:var(--gold)">${c.name}</span></div><div class="fx-price-area"><div class="fx-sub-box"><span class="fx-label">ALIŞ</span><span class="fx-val-big fx-buy">${buy}</span></div><div class="fx-sub-box"><span class="fx-label">SATIŞ</span><span class="fx-val-big fx-sell">${sell}</span></div></div></div>`;
+                else if(i < 10) bottom.innerHTML += `<div class="fx-row" id="fx-${c.name}"><div style="display:flex; align-items:center; gap:1vw; width:35%;"><img src="${icon}" class="fx-icon-small"><span class="fx-symbol-small">${c.name}</span></div><div style="display:flex; width:60%; justify-content:space-between; align-items:center;"><span class="fx-val-small fx-buy">${buy}</span><span class="fx-trend" style="color:var(--fx-up)">▲</span><span class="fx-val-small fx-sell">${sell}</span></div></div>`;
+            });
+        });
+        activeIntervals.push(setInterval(fxFlashEffect, 3000));
+    }
 
-function generateFlipGrid() {
-    return currentCurrencies.slice(0, 5).map(item => `
-        <div class="currency-box ${Math.random() > 0.5 ? 'up-trend' : 'down-trend'}">
-            <div class="curr-name">${item.name}</div>
-            <div class="flip-container">
-                <div class="flip-inner" style="transform: translateY(${flipState ? '-35px' : '0px'})">
-                    <div class="flip-row"><span>${parseFloat(item.buy).toFixed(4)}</span></div>
-                    <div class="flip-row"><span>${parseFloat(item.sell).toFixed(4)}</span></div>
-                </div>
-            </div>
-        </div>
-    `).join('');
-}
+    function renderMod6(container, canvas) {
+        document.body.style.background = "#0a0a0a"; canvas.style.display = "block";
+        initGoldRain(canvas);
+        container.innerHTML = `<div class="gold-panel-wrapper"><div class="gold-header"><h1>GÜNCEL ALTIN FİYATLARI</h1></div><div class="gold-container" id="gold-price-list"></div></div>`;
+        db.ref('terminal_data/currencies').on('value', snap => {
+            if (currentConfig.screen !== "6") return;
+            const goldData = Object.values(snap.val() || {}).filter(item => item.category === 'altin').sort((a,b) => (a.order||0)-(b.order||0));
+            const list = document.getElementById('gold-price-list');
+            if(list) list.innerHTML = goldData.map(item => {
+                const icon = getIcon(item);
+                return `<div class="gold-row-item" id="grow-${item.id}"><div class="gold-icon-box"><img src="${icon}" class="gold-firebase-icon"></div><div class="gold-product-name">${item.name}</div><div class="gold-price-wrapper"><span class="gold-label">ALIŞ</span><span class="gold-buy-val">${parseFloat(item.buy).toLocaleString('tr-TR',{minimumFractionDigits:2})}</span></div><div class="gold-trend-icon" id="gtrend-${item.id}">-</div><div class="gold-price-wrapper"><span class="gold-label">SATIŞ</span><span class="gold-sell-val">${parseFloat(item.sell).toLocaleString('tr-TR',{minimumFractionDigits:2})}</span></div></div>`
+            }).join('');
+        });
+    }
 
-function generateStockTicker() {
-    return [...currentCurrencies, ...currentCurrencies].map(s => `
-        <div style="padding:0 25px; font-weight:bold; border-right:1px solid #555;">
-            ${s.name} <span style="color:white">${parseFloat(s.sell).toFixed(2)}</span> <span style="color:#00ff88">▲</span>
-        </div>
-    `).join('');
-}
+    function fxFlashEffect() {
+        const rows = document.querySelectorAll('[id^="fx-"]');
+        if(rows.length === 0) return;
+        const target = rows[Math.floor(Math.random()*rows.length)];
+        const isUp = Math.random() > 0.5;
+        target.classList.add(isUp ? 'flash-up' : 'flash-down');
+        setTimeout(() => target.classList.remove('flash-up', 'flash-down'), 1000);
+    }
 
-/* ===== UTILS ===== */
-function updateClock(){
-    const n=new Date(); const h=n.getHours(); const m=n.getMinutes().toString().padStart(2,'0');
-    const clockEl = document.getElementById("sClock") || document.getElementById("liveTime");
-    if(clockEl) clockEl.innerText=`${h}:${m}`;
-    
-    if(h>=5&&h<12)timeMessage="GÜNAYDIN";
-    else if(h<18)timeMessage="İYİ GÜNLER";
-    else if(h<23)timeMessage="İYİ AKŞAMLAR";
-    else timeMessage="İYİ GECELER";
-}
+    function renderGenericScreen(container, id) {
+        container.innerHTML = `<div class="info-card"><div class="status-badge">TV YAYINDA</div><div class="mode-title">MOD ${id}</div></div>`;
+    }
 
-function toggleGreeting(){
-    const g=document.getElementById("greeting"); if(!g) return;
-    g.style.opacity=0;
-    setTimeout(()=>{
-        g.innerText=greetingState?timeMessage:"HOŞ GELDİNİZ";
-        greetingState=!greetingState; g.style.opacity=1;
-    },800);
-}
+    function initModernCanvas(c) {
+        const ctx = c.getContext('2d'); let p = []; c.width = window.innerWidth; c.height = window.innerHeight;
+        for(let i=0; i<80; i++) p.push({x:Math.random()*c.width, y:Math.random()*c.height, vx:(Math.random()-0.5)*0.3, vy:(Math.random()-0.5)*0.3});
+        function anim() { if(currentConfig.master) return; ctx.clearRect(0,0,c.width,c.height); p.forEach(i => { i.x+=i.vx; i.y+=i.vy; if(i.x<0||i.x>c.width) i.vx*=-1; if(i.y<0||i.y>c.height) i.vy*=-1; ctx.beginPath(); ctx.arc(i.x,i.y,1.5,0,Math.PI*2); ctx.fillStyle="rgba(0,123,255,0.4)"; ctx.fill(); }); requestAnimationFrame(anim); } anim();
+    }
 
-function initParticles(){
-    const c=document.getElementById("bg-canvas"); const ctx=c.getContext("2d");
-    c.width=innerWidth; c.height=innerHeight; let p=[];
-    for(let i=0;i<100;i++)p.push({x:Math.random()*c.width,y:Math.random()*c.height,s:Math.random()*2,vx:Math.random()*.4-.2,vy:Math.random()*.4-.2});
-    (function a(){
-        if(currentConfig.master)return; ctx.clearRect(0,0,c.width,c.height);
-        p.forEach(o=>{ o.x+=o.vx;o.y+=o.vy; if(o.x<0)o.x=c.width; if(o.y<0)o.y=c.height; if(o.x>c.width)o.x=0; if(o.y>c.height)o.y=0; ctx.fillStyle="rgba(255,255,255,.4)"; ctx.beginPath(); ctx.arc(o.x,o.y,o.s,0,Math.PI*2); ctx.fill(); });
-        animId=requestAnimationFrame(a);
-    })();
-}
+    function initGoldRain(c) {
+        const ctx = c.getContext('2d'); let pts = []; c.width = window.innerWidth; c.height = window.innerHeight;
+        for(let i=0; i<80; i++) pts.push({x:Math.random()*c.width, y:Math.random()*c.height, s:Math.random()*3+1, sp:Math.random()*2+1});
+        function anim() { if(!["4","5","6"].includes(currentConfig.screen) || !currentConfig.master) return; ctx.clearRect(0,0,c.width,c.height); pts.forEach(p => { p.y+=p.sp; if(p.y>c.height) p.y=-10; ctx.fillStyle="#FFD700"; ctx.globalAlpha=0.3; ctx.beginPath(); ctx.arc(p.x,p.y,p.s,0,Math.PI*2); ctx.fill(); }); requestAnimationFrame(anim); } anim();
+    }
+
+    async function fetchWeather() {
+        try {
+            const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=Istanbul&units=metric&lang=tr&appid=b1369b26f6345dfa62a6321453965555`);
+            const data = await res.json();
+            if(data.main) { document.getElementById('temp').textContent = Math.round(data.main.temp)+"°C"; document.getElementById('weather-text').textContent = data.weather[0].description; }
+        } catch(e) {}
+    }
 </script>
 </body>
 </html>
