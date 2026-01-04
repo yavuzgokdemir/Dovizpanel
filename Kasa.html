@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PaNeLX Finans - Ultra Modern</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        
+        :root {
+            --bg: #0b1220; 
+            --card: #131b2b; 
+            --text: #e7eef7; 
+            --muted: #94a3b8; 
+            --buy: #22c55e; 
+            --sell: #ef4444; 
+            --accent: #f59e0b; 
+            --header-bg: #101827;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f8fafc; 
+            color: #1e293b;
+            transition: all 0.3s Birim; 
+        }
+
+        .dark-mode { 
+            background-color: var(--bg) !important; 
+            color: var(--text) !important; 
+        }
+        .dark-mode .bg-white { 
+            background-color: var(--card) !important; 
+            border-color: rgba(255,255,255,0.05) !important; 
+            color: var(--text) !important;
+        }
+        .dark-mode .bg-slate-50, .dark-mode .bg-indigo-50, .dark-mode .bg-emerald-50, .dark-mode .bg-rose-50, .dark-mode .bg-orange-50 { 
+            background-color: rgba(255,255,255,0.03) !important; 
+        }
+        .dark-mode .text-slate-900, .dark-mode .text-indigo-900, .dark-mode .text-slate-500, .dark-mode .text-slate-400 { 
+            color: var(--text) !important; 
+        }
+        .dark-mode .sticky-summary { 
+            background: var(--card) !important; 
+            border-top: 1px solid rgba(255,255,255,0.1); 
+        }
+        .dark-mode header {
+            background-color: var(--header-bg) !important;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .dark-mode #pos-modal .bg-white, .dark-mode #note-modal .bg-white, .dark-mode #auth-modal .bg-white { background-color: var(--card) !important; }
+        .dark-mode #pos-modal button.bg-slate-100, .dark-mode #auth-modal button.bg-slate-100 { background-color: rgba(255,255,255,0.1) !important; color: white !important; }
+        .dark-mode #pos-display, .dark-mode #auth-display { background-color: rgba(0,0,0,0.3) !important; border-color: var(--accent); }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .compact-input { background: transparent; border: none; outline: none; width: 100%; font-size: 13px; font-weight: 700; color: inherit; }
+        .sticky-summary { position: fixed; bottom: 0; width: 100%; background: white; border-top: 1px solid #e2e8f0; z-index: 100; height: 80px; }
+        
+        .nav-active { color: var(--accent) !important; }
+        .nav-active .nav-icon::after { content: ''; position: absolute; top: -12px; width: 25px; height: 3px; background: var(--accent); border-radius: 10px; }
+        
+        .badge { font-size: 9px; padding: 4px 8px; border-radius: 8px; font-weight: 800; text-transform: uppercase; }
+        #pos-modal, #note-modal, #auth-modal { display: none; position: fixed; inset: 0; background: rgba(11, 18, 32, 0.9); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
+        
+        select { border: 1px solid rgba(0,0,0,0.1); background: #f1f5f9; font-weight: 700; font-size: 11px; padding: 6px 10px; border-radius: 10px; outline: none; }
+        .dark-mode select { background: var(--bg) !important; color: var(--text) !important; border-color: rgba(255,255,255,0.1) !important; }
+        .dark-mode input, .dark-mode textarea { background-color: rgba(255,255,255,0.05) !important; color: white !important; border-color: rgba(255,255,255,0.1) !important; }
+        
+        .btn-primary { background: var(--accent); color: #000; font-weight: 800; transition: all 0.2s; }
+        .btn-primary:active { transform: scale(0.95); }
+
+        .logo-box {
+            background: var(--card);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+        }
+
+        @keyframes pulse-x {
+            0%, 100% { opacity: 1; color: var(--accent); }
+            50% { opacity: 0.5; color: var(--sell); }
+        }
+        .connected-x { animation: pulse-x 1.5s infinite; }
+
+        .segmented-bar-container { height: 12px; border-radius: 6px; overflow: hidden; display: flex; background: rgba(0,0,0,0.05); }
+        .dark-mode .segmented-bar-container { background: rgba(255,255,255,0.05); }
+
+        .readonly-overlay {
+            position: fixed;
+            top: 80px;
+            left: 0;
+            right: 0;
+            background: #ef4444;
+            color: white;
+            text-align: center;
+            font-size: 10px;
+            font-weight: 900;
+            padding: 4px;
+            z-index: 40;
+            display: none;
+            letter-spacing: 1px;
+        }
+
+        .history-line { border-left: 2px solid var(--accent); padding-left: 10px; margin-bottom: 10px; position: relative; }
+        .history-line::before { content: ''; position: absolute; left: -5px; top: 0; width: 8px; height: 8px; background: var(--accent); border-radius: 50%; }
+
+        .excel-table { border-collapse: collapse; width: 100%; font-size: 10px; }
+        .excel-table th { background: #f1f5f9; color: #475569; padding: 8px; border: 1px solid #e2e8f0; text-transform: uppercase; }
+        .excel-table td { padding: 8px; border: 1px solid #e2e8f0; font-weight: 700; }
+        .dark-mode .excel-table th { background: #1e293b; color: #94a3b8; border-color: #334155; }
+        .dark-mode .excel-table td { border-color: #334155; }
+    </style>
+</head>
+<body class="pb-28">
+
+    <div id="auth-modal">
+        <div class="bg-white p-6 rounded-[2rem] w-80 space-y-4 shadow-2xl border border-slate-100 text-center">
+            <h2 class="text-xs font-black uppercase text-amber-500 tracking-[0.2em]">SİSTEM GÜVENLİĞİ</h2>
+            <div id="auth-display" class="bg-slate-50 p-6 rounded-2xl text-center text-4xl font-extrabold text-slate-800 border border-slate-100 tracking-[0.3em]">****</div>
+            <div class="grid grid-cols-3 gap-3">
+                <script>
+                    for(let i=1; i<=9; i++) document.write(`<button onclick="authPress(${i})" class="bg-slate-100 p-4 rounded-2xl font-bold text-xl active:scale-95 transition-transform">${i}</button>`);
+                </script>
+                <div class="p-4"></div>
+                <button onclick="authPress(0)" class="bg-slate-100 p-4 rounded-2xl font-bold text-xl">0</button>
+                <button onclick="authClear()" class="bg-rose-100 text-rose-600 p-4 rounded-2xl font-bold text-xl">C</button>
+            </div>
+            <p class="text-[9px] text-slate-400 font-bold uppercase">LÜTFEN 4 HANELİ PIN GİRİNİZ</p>
+        </div>
+    </div>
+
+    <div id="readonly-banner" class="readonly-overlay uppercase">⚠️ Arşiv İzleme Modu: Değişiklikler Kaydedilmez</div>
+
+    <div id="pos-modal">
+        <div class="bg-white p-6 rounded-[2rem] w-80 space-y-4 shadow-2xl border border-slate-100">
+            <div id="pos-display" class="bg-slate-50 p-6 rounded-2xl text-right text-4xl font-extrabold text-amber-500 border border-amber-100">0</div>
+            <div class="grid grid-cols-3 gap-3">
+                <script>
+                    for(let i=1; i<=9; i++) document.write(`<button onclick="posPress(${i})" class="bg-slate-100 p-4 rounded-2xl font-bold text-xl active:scale-95 transition-transform">${i}</button>`);
+                </script>
+                <button onclick="posPress('.')" class="bg-slate-100 p-4 rounded-2xl font-bold text-xl">.</button>
+                <button onclick="posPress(0)" class="bg-slate-100 p-4 rounded-2xl font-bold text-xl">0</button>
+                <button onclick="posClear()" class="bg-rose-100 text-rose-600 p-4 rounded-2xl font-bold text-xl">C</button>
+            </div>
+            <button onclick="posConfirm()" class="w-full btn-primary py-5 rounded-2xl font-black uppercase tracking-widest shadow-lg">GİRİŞİ ONAYLA</button>
+        </div>
+    </div>
+
+    <div id="note-modal">
+        <div class="bg-white p-6 rounded-[2rem] w-[90%] max-w-md space-y-4 shadow-2xl border border-slate-100 overflow-hidden flex flex-col max-h-[80vh]">
+            <div class="flex justify-between items-center">
+                <h3 class="text-sm font-black uppercase tracking-widest text-amber-500">İşlem Detayı & Geçmiş</h3>
+                <button onclick="closeNoteModal()" class="text-slate-400 font-bold text-xl">✕</button>
+            </div>
+            <textarea id="note-input" rows="3" class="w-full p-4 bg-slate-50 rounded-2xl font-bold text-xs outline-none border border-transparent focus:border-amber-500" placeholder="Açıklama veya not girin..."></textarea>
+            <button onclick="saveNote()" class="btn-primary py-3 rounded-xl font-black text-[10px] uppercase tracking-widest">AÇIKLAMAYI KAYDET</button>
+            <div class="border-t pt-4 flex-1 overflow-y-auto custom-scrollbar">
+                <p class="text-[9px] font-black text-slate-400 uppercase mb-3 tracking-widest">📜 Hareket Geçmişi</p>
+                <div id="history-container" class="space-y-4"></div>
+            </div>
+        </div>
+    </div>
+
+    <header class="bg-white/90 border-b border-slate-100 px-4 py-4 sticky top-0 z-50 shadow-sm backdrop-blur-md">
+        <div class="max-w-md mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="logo-box w-10 h-10 rounded-xl flex items-center justify-center text-lg font-black italic shadow-inner">🦎</div>
+                <div id="top-status-card" class="bg-slate-900 text-white px-4 py-2 rounded-2xl border border-slate-700 min-w-[150px]">
+                    <span id="bar-label" class="text-[8px] font-extrabold text-amber-500 uppercase block leading-none mb-1 tracking-widest">SİSTEM AKTİF</span>
+                    <span id="net-val" class="text-xs font-black leading-none block">₺0,00</span>
+                </div>
+            </div>
+            <div class="flex gap-4 items-center">
+                <button onclick="toggleDarkMode()" class="text-xl">🌓</button>
+                <button onclick="exportData()" class="bg-slate-100 dark:bg-slate-800 p-2.5 rounded-xl text-lg">📥</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto p-4 space-y-5">
+        
+        <div id="kasa-tab" class="tab-content active">
+            <div class="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
+                <div class="bg-slate-50/50 px-6 py-4 border-b flex justify-between items-center">
+                    <span class="text-[11px] font-black uppercase text-slate-500 tracking-wider">📋 Kasa Yönetimi</span>
+                    <button id="add-kasa-btn" onclick="addRow('kasa')" class="btn-primary w-8 h-8 rounded-xl font-bold text-xl">+</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-[11px] font-bold">
+                        <thead class="bg-slate-50/30 text-slate-400">
+                            <tr>
+                                <th class="p-3 text-left uppercase">Kur</th>
+                                <th class="p-3 text-right uppercase">V1</th>
+                                <th class="p-3 text-right uppercase">V2</th>
+                                <th class="p-3 text-right uppercase">Ana</th>
+                                <th class="p-3 text-right uppercase text-amber-500">Toplam</th>
+                                <th class="p-3"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="kasa-body" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="cari-tab" class="tab-content space-y-4">
+            <div class="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
+                <div class="bg-emerald-50/50 px-6 py-4 border-b flex justify-between items-center text-emerald-600 font-black text-[11px] tracking-wider">
+                    <span>📈 ALACAKLAR</span><button id="add-alacak-btn" onclick="addRow('alacak')" class="font-bold text-xl">+</button>
+                </div>
+                <table class="w-full text-xs font-bold"><tbody id="alacak-body" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody></table>
+            </div>
+            <div class="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
+                <div class="bg-rose-50/50 px-6 py-4 border-b flex justify-between items-center text-rose-600 font-black text-[11px] tracking-wider">
+                    <span>📉 BORÇLAR</span><button id="add-borc-btn" onclick="addRow('borc')" class="font-bold text-xl">+</button>
+                </div>
+                <table class="w-full text-xs font-bold"><tbody id="borc-body" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody></table>
+            </div>
+            <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-100">
+                <h3 class="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-4">👤 Kişi Ekstresi</h3>
+                <select id="ekstre-select" onchange="renderEkstre()" class="w-full mb-5 bg-slate-50 p-4 rounded-2xl font-bold text-xs"></select>
+                <div id="ekstre-sonuc" class="hidden space-y-3">
+                    <div class="flex justify-between p-4 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 text-emerald-600"><span class="text-[10px] font-bold">ALACAK</span><span id="ekstre-alacak" class="text-xs font-black">₺0,00</span></div>
+                    <div class="flex justify-between p-4 bg-rose-500/10 rounded-2xl border border-rose-500/20 text-rose-600"><span class="text-[10px] font-bold">BORÇ</span><span id="ekstre-borc" class="text-xs font-black">₺0,00</span></div>
+                    <div id="ekstre-net-bg" class="flex justify-between p-5 rounded-2xl text-white shadow-lg"><span class="text-[11px] font-black uppercase tracking-widest">NET DURUM</span><span id="ekstre-net" class="text-base font-black underline decoration-2">₺0,00</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="gider-tab" class="tab-content">
+            <div class="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
+                <div class="bg-amber-50/50 px-6 py-4 border-b flex justify-between items-center text-amber-600 font-black text-[11px] tracking-wider">
+                    <span>💸 GİDERLER</span><button id="add-gider-btn" onclick="addRow('gider')" class="font-bold text-xl">+</button>
+                </div>
+                <table class="w-full text-xs font-bold"><tbody id="gider-body" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody></table>
+            </div>
+        </div>
+
+        <div id="analiz-tab" class="tab-content space-y-5">
+            <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-100">
+                <h3 class="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Finansal Analiz & Risk</h3>
+                
+                <div class="mb-8 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Risk Oranı (Güvenlik Skoru)</span>
+                        <span id="risk-percent" class="text-[10px] font-black text-amber-500">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-100 dark:bg-white/5 h-3 rounded-full overflow-hidden flex border border-slate-200 dark:border-white/5">
+                        <div id="risk-bar" class="h-full transition-all duration-1000" style="width: 0%"></div>
+                    </div>
+                    <p class="text-[8px] text-slate-400 italic">Formül: (Eldeki + Alacak) / Borç</p>
+                </div>
+
+                <div class="grid grid-cols-1 gap-6 mb-8">
+                    <div class="space-y-3">
+                        <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Portföy Dağılımı</p>
+                        <div id="fin-segmented-bar" class="segmented-bar-container"></div>
+                        <div id="fin-legend" class="flex flex-wrap gap-x-4 gap-y-2"></div>
+                    </div>
+                    <div class="space-y-3">
+                        <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Döviz Kırılımı (Kasa)</p>
+                        <div id="curr-segmented-bar" class="segmented-bar-container"></div>
+                        <div id="curr-legend" class="flex flex-wrap gap-x-4 gap-y-2"></div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 dark:bg-white/5 p-4 rounded-2xl mb-6">
+                    <h4 class="text-[9px] font-black text-slate-400 uppercase mb-3 text-center">Harcama Dağılımı (Gider Çeşitleri)</h4>
+                    <div id="expense-segmented-bar" class="w-full h-6 rounded-lg overflow-hidden flex shadow-inner bg-slate-200 dark:bg-slate-800">
+                        </div>
+                    <div id="expense-legend" class="flex flex-wrap gap-2 mt-3 justify-center">
+                        </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-slate-900 p-4 rounded-2xl border border-slate-700">
+                            <span class="text-[8px] font-black text-amber-500 uppercase block mb-1">💰 Nakit</span>
+                            <span id="sum-kasa" class="text-sm font-black text-white">₺0,00</span>
+                        </div>
+                        <div class="bg-emerald-900/10 p-4 rounded-2xl border border-emerald-500/20">
+                            <span class="text-[8px] font-black text-emerald-500 uppercase block mb-1">📈 Alacak</span>
+                            <span id="sum-alacak-analiz" class="text-sm font-black text-emerald-600 dark:text-emerald-400">₺0,00</span>
+                        </div>
+                        <div class="bg-rose-900/10 p-4 rounded-2xl border border-rose-500/20">
+                            <span class="text-[8px] font-black text-rose-500 uppercase block mb-1">📉 Borç</span>
+                            <span id="sum-borc-analiz" class="text-sm font-black text-rose-600 dark:text-rose-400">₺0,00</span>
+                        </div>
+                        <div class="bg-amber-900/10 p-4 rounded-2xl border border-amber-500/20">
+                            <span class="text-[8px] font-black text-amber-500 uppercase block mb-1">💸 Gider</span>
+                            <span id="sum-gider-analiz" class="text-sm font-black text-amber-600 dark:text-amber-400">₺0,00</span>
+                        </div>
+                    </div>
+
+                    <div id="net-kazanc-bg" class="bg-slate-900 p-5 rounded-[1.5rem] border border-amber-500/30 flex justify-between items-center shadow-xl">
+                        <div>
+                            <span class="text-[9px] font-black text-amber-500 uppercase tracking-widest mb-1 block">🏆 NET PORTFÖY</span>
+                            <span id="sum-net-kazanc" class="text-xl font-black text-white block">₺0,00</span>
+                        </div>
+                        <div class="text-3xl connected-x">🦎</div>
+                    </div>
+                    <div id="breakdown-kasa" class="flex flex-wrap gap-2 pt-2"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="gecmis-tab" class="tab-content space-y-5">
+            <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-100">
+                <h3 class="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-6">🗓️ Ay Sonu Kasası & Geçmiş</h3>
+                
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <button onclick="setDateRange('thisMonth')" class="bg-indigo-500 text-white py-2 rounded-xl font-black text-[9px] uppercase tracking-wider shadow-md active:scale-95 transition">BU AY</button>
+                    <button onclick="setDateRange('lastMonth')" class="bg-slate-600 text-white py-2 rounded-xl font-black text-[9px] uppercase tracking-wider shadow-md active:scale-95 transition">GEÇEN AY</button>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 mb-6">
+                    <div>
+                        <label class="text-[8px] font-black text-slate-400 uppercase block mb-1 ml-2">Başlangıç</label>
+                        <input type="date" id="history-start" class="w-full p-3 bg-slate-50 dark:bg-white/5 rounded-xl font-bold text-xs border-none outline-none">
+                    </div>
+                    <div>
+                        <label class="text-[8px] font-black text-slate-400 uppercase block mb-1 ml-2">Bitiş</label>
+                        <input type="date" id="history-end" class="w-full p-3 bg-slate-50 dark:bg-white/5 rounded-xl font-bold text-xs border-none outline-none">
+                    </div>
+                </div>
+
+                <button onclick="renderHistoryTable()" class="w-full btn-primary py-3 rounded-xl font-black text-[10px] uppercase mb-6 tracking-widest">SORGULA & LİSTELE</button>
+
+                <div class="overflow-x-auto border rounded-xl dark:border-white/10">
+                    <table class="excel-table">
+                        <thead>
+                            <tr>
+                                <th>Tarih</th>
+                                <th class="text-right">Kasa Net</th>
+                                <th class="text-right">Fiş Adedi</th>
+                                <th class="text-right">Net Kar (Günlük)</th>
+                                <th>Gider Açıklama</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-table-body" class="dark:text-white">
+                            <tr><td colspan="5" class="text-center py-10 text-slate-400 italic">Verileri görmek için tarih seçip sorgulayın.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="settings-tab" class="tab-content space-y-5">
+            <div class="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm">
+                <h3 class="text-[11px] font-black text-slate-400 mb-4 uppercase tracking-widest">💾 Kayıt & Arşiv Yönetimi</h3>
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <button onclick="backupMonth()" class="bg-emerald-600 text-white py-4 rounded-2xl font-black text-[10px] shadow-lg active:scale-95 transition tracking-widest">DOSYAYI KAYDET</button>
+                    <div class="relative">
+                        <input type="file" id="importFile" onchange="loadArchive(event)" class="hidden">
+                        <button onclick="document.getElementById('importFile').click()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black text-[10px] shadow-lg active:scale-95 transition tracking-widest">DOSYA AÇ</button>
+                    </div>
+                </div>
+
+                <div id="archive-panel" class="hidden space-y-4 bg-slate-50 dark:bg-white/5 p-4 rounded-[1.5rem] border border-dashed border-slate-300 dark:border-white/10">
+                    <div class="flex justify-between items-center">
+                        <span id="archive-info" class="text-[9px] font-black text-amber-500 uppercase"></span>
+                        <button onclick="exitArchiveMode()" class="text-[8px] font-black bg-rose-500 text-white px-2 py-1 rounded-lg">İZLEMEDEN ÇIK</button>
+                    </div>
+                    <select id="archive-days-select" onchange="loadDayFromArchive()" class="w-full bg-white dark:bg-slate-900 border-none"></select>
+                    
+                    <div>
+                        <p class="text-[9px] font-black text-slate-400 uppercase mb-2 tracking-widest">📊 Ay İçi Karşılaştırma</p>
+                        <div id="comparison-list" class="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm">
+                <h3 class="text-[11px] font-black text-slate-400 mb-4 uppercase tracking-widest">💎 Varlık & Birim Yönetimi</h3>
+                
+                <div class="space-y-4 mb-6 bg-slate-50 dark:bg-white/5 p-4 rounded-3xl border border-slate-100 dark:border-white/5">
+                    <div class="flex gap-2">
+                        <input id="new-cat-name" type="text" placeholder="Kategori (örn: Altın)" class="flex-1 p-3 bg-white dark:bg-slate-800 rounded-xl font-bold text-xs uppercase outline-none border border-slate-200 focus:border-amber-500">
+                        <button onclick="addCategory()" class="btn-primary px-4 rounded-xl font-bold text-[10px]">EKLE</button>
+                    </div>
+                    <div class="flex gap-2">
+                        <select id="cat-select-for-unit" class="flex-1 bg-white dark:bg-slate-800"></select>
+                        <input id="new-unit-code" type="text" placeholder="Birim (örn: Ata)" class="w-24 p-3 bg-white dark:bg-slate-800 rounded-xl font-bold text-xs uppercase outline-none border border-slate-200 focus:border-amber-500">
+                        <button onclick="addUnitToCategory()" class="btn-primary px-4 rounded-xl font-bold text-[10px]">BİRİM EKLE</button>
+                    </div>
+                </div>
+
+                <div id="rate-management-list" class="space-y-6"></div>
+            </div>
+
+            <div class="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm">
+                <h3 class="text-[11px] font-black text-slate-400 mb-4 uppercase tracking-widest">💸 Gider Kategorileri</h3>
+                <div class="flex gap-3 mb-5">
+                    <input id="new-gider-cat" type="text" placeholder="Gider Adı (örn: Elektrik)" class="flex-1 p-3 bg-slate-100 dark:bg-slate-800 rounded-xl font-black text-xs uppercase outline-none border border-transparent focus:border-amber-500">
+                    <button onclick="addGiderCat()" class="btn-primary px-6 rounded-xl font-bold text-[11px]">EKLE</button>
+                </div>
+                <div id="gider-cat-display" class="flex flex-wrap gap-2"></div>
+            </div>
+
+            <div class="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm">
+                <h3 class="text-[11px] font-black text-slate-400 mb-4 uppercase tracking-widest">👤 Cari Rehber</h3>
+                <div class="flex gap-3 mb-5">
+                    <input id="new-cari-name" type="text" placeholder="İSİM VEYA FİRMA" class="flex-1 p-3 bg-slate-100 dark:bg-slate-800 rounded-xl font-black text-xs uppercase outline-none border border-transparent focus:border-amber-500">
+                    <button onclick="saveCariCard()" class="btn-primary px-6 rounded-xl font-bold text-[11px]">KAYDET</button>
+                </div>
+                <div id="cari-list-display" class="flex flex-wrap gap-2"></div>
+            </div>
+
+            <div class="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm border-amber-200">
+                <h3 class="text-[11px] font-black text-amber-500 mb-4 uppercase tracking-widest">🔐 Güvenlik Ayarları</h3>
+                <div class="flex justify-between items-center">
+                    <span class="text-[10px] font-bold text-slate-600">Sistem Kilidini Yeniden Aktif Et</span>
+                    <button onclick="lockSystem()" class="bg-slate-800 text-white px-4 py-2 rounded-xl text-[10px] font-black">SİSTEMİ KİLİTLE</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="sticky-summary shadow-[0_-10px_30px_rgba(0,0,0,0.1)]">
+        <div class="max-w-md mx-auto px-6 py-4">
+            <nav class="flex justify-between items-center text-slate-400">
+                <button id="btn-kasa" onclick="switchTab('kasa')" class="nav-btn nav-active flex flex-col items-center gap-1 w-1/6 relative">
+                    <span class="nav-icon text-2xl">📋</span><span class="text-[8px] font-extrabold uppercase tracking-tighter">Kasa</span>
+                </button>
+                <button id="btn-cari" onclick="switchTab('cari')" class="nav-btn flex flex-col items-center gap-1 w-1/6 relative">
+                    <span class="nav-icon text-2xl">👥</span><span class="text-[8px] font-extrabold uppercase tracking-tighter">Cari</span>
+                </button>
+                <button id="btn-gider" onclick="switchTab('gider')" class="nav-btn flex flex-col items-center gap-1 w-1/6 relative">
+                    <span class="nav-icon text-2xl">💸</span><span class="text-[8px] font-extrabold uppercase tracking-tighter">Gider</span>
+                </button>
+                <button id="btn-analiz" onclick="switchTab('analiz')" class="nav-btn flex flex-col items-center gap-1 w-1/6 relative">
+                    <span class="nav-icon text-2xl">📈</span><span class="text-[8px] font-extrabold uppercase tracking-tighter">Analiz</span>
+                </button>
+                <button id="btn-gecmis" onclick="switchTab('gecmis')" class="nav-btn flex flex-col items-center gap-1 w-1/6 relative">
+                    <span class="nav-icon text-2xl">🗓️</span><span class="text-[8px] font-extrabold uppercase tracking-tighter">Geçmiş</span>
+                </button>
+                <button id="btn-settings" onclick="switchTab('settings')" class="nav-btn flex flex-col items-center gap-1 w-1/6 relative">
+                    <span class="nav-icon text-2xl">⚙️</span><span class="text-[8px] font-extrabold uppercase tracking-tighter">Ayar</span>
+                </button>
+            </nav>
+        </div>
+    </div>
+
+    <script>
+        // SİSTEM AYARLARI VE DATABASE
+        let db = JSON.parse(localStorage.getItem('finans_v21')) || {
+            rates: { TRY: 1, USD: 33.5, EUR: 36.5 },
+            categories: { "Döviz": ["TRY", "USD", "EUR"] },
+            kasa: [{id: 1, v1:0, v2:0, ana:0, curr:'TRY', note: "", history: []}], 
+            alacak: [], borc: [], gider: [],
+            cariRehber: [], giderRehber: ["ELEKTRİK", "SU", "KİRA", "TELEFON"], 
+            dark: false
+        };
+
+        const SYSTEM_PIN = "2233";
+        let isAuthenticated = false;
+        let authInput = "";
+
+        // PIN FONKSİYONLARI
+        function checkAuth() {
+            if(!isAuthenticated) {
+                document.getElementById('auth-modal').style.display = 'flex';
+                return false;
+            }
+            return true;
+        }
+
+        function authPress(num) {
+            if(authInput.length < 4) {
+                authInput += num;
+                let display = "";
+                for(let i=0; i<authInput.length; i++) display += "*";
+                document.getElementById('auth-display').innerText = display || "****";
+                
+                if(authInput.length === 4) {
+                    if(authInput === SYSTEM_PIN) {
+                        isAuthenticated = true;
+                        document.getElementById('auth-modal').style.display = 'none';
+                        authInput = "";
+                        calculate();
+                        render();
+                    } else {
+                        alert("Hatalı PIN!");
+                        authClear();
+                    }
+                }
+            }
+        }
+
+        function authClear() {
+            authInput = "";
+            document.getElementById('auth-display').innerText = "****";
+        }
+
+        function lockSystem() {
+            isAuthenticated = false;
+            authClear();
+            document.getElementById('auth-modal').style.display = 'flex';
+        }
+
+        let currentPos = null, posValue = "", isReadOnly = false, archiveData = null, currentNoteObj = null;
+
+        // YENİ KASA (OTOMATİK DEVİR VE VERİ KAYBI ENGELLEME)
+        function save() { 
+            if(isReadOnly) return; 
+            
+            // Mevcut durumu LocalStorage'a kaydet
+            localStorage.setItem('finans_v21', JSON.stringify(db)); 
+
+            // Akıllı Arşivleme: O günün tarihini anahtar (key) kullanarak yerel arşive ekler
+            const todayKey = new Date().toLocaleDateString('tr-TR');
+            const months = ["OCAK", "SUBAT", "MART", "NISAN", "MAYIS", "HAZIRAN", "TEMMUZ", "AGUSTOS", "EYLUL", "EKIM", "KASIM", "ARALIK"];
+            const fileName = `archive_${months[new Date().getMonth()]}_${new Date().getFullYear()}`;
+            
+            let monthlyLocalArchive = JSON.parse(localStorage.getItem(fileName)) || {};
+            monthlyLocalArchive[todayKey] = JSON.parse(JSON.stringify(db));
+            localStorage.setItem(fileName, JSON.stringify(monthlyLocalArchive));
+
+            calculate(); 
+            render(); 
+        }
+
+        // TEK DOSYA, TAM HAFIZA: "DOSYAYI KAYDET" (BACKUP)
+        function backupMonth() {
+            const months_short = ["OCAK", "SUBAT", "MART", "NISAN", "MAYIS", "HAZIRAN", "TEMMUZ", "AGUSTOS", "EYLUL", "EKIM", "KASIM", "ARALIK"];
+            const now = new Date();
+            const yearShort = now.getFullYear().toString().slice(-2);
+            const customFileName = `${months_short[now.getMonth()]}${yearShort}.json`;
+            const storageKey = `archive_${months_short[now.getMonth()]}_${now.getFullYear()}`;
+
+            let fullMonthlyArchive = JSON.parse(localStorage.getItem(storageKey)) || {};
+            const todayKey = now.toLocaleDateString('tr-TR');
+            fullMonthlyArchive[todayKey] = JSON.parse(JSON.stringify(db));
+
+            const blob = new Blob([JSON.stringify(fullMonthlyArchive, null, 2)], {type: "application/json"});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = customFileName;
+            a.click();
+            
+            alert(customFileName + " (Ay Arşivi + Bugünün Verileri) kaydedildi!");
+        }
+
+        // AKILLI YÜKLEME: BİR DOSYA AÇILDIĞINDA TÜM GÜNLERİ GÖRÜR
+        function loadArchive(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (typeof parsed === 'object' && !parsed.kasa) {
+                        archiveData = parsed;
+                        renderArchivePanel(file.name);
+                    } else {
+                        archiveData = { "Yüklenen Gün": parsed };
+                        renderArchivePanel(file.name);
+                    }
+                } catch (err) {
+                    alert("Hata: Geçersiz dosya formatı.");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function renderArchivePanel(fileName) {
+            isReadOnly = true;
+            document.getElementById('archive-panel').classList.remove('hidden');
+            document.getElementById('readonly-banner').style.display = 'block';
+            document.getElementById('archive-info').innerText = "📂 " + fileName;
+            
+            const daySelect = document.getElementById('archive-days-select');
+            const compList = document.getElementById('comparison-list');
+            daySelect.innerHTML = '<option value="">BİR GÜN SEÇİN...</option>';
+            compList.innerHTML = '';
+
+            Object.keys(archiveData).sort((a,b) => {
+                const dateA = a.split('.').reverse().join('');
+                const dateB = b.split('.').reverse().join('');
+                return dateB - dateA;
+            }).forEach(day => {
+                const option = document.createElement('option');
+                option.value = day; 
+                option.innerText = day; 
+                daySelect.appendChild(option);
+                
+                const dayNet = calculateNetForArchive(archiveData[day]);
+                const item = document.createElement('div');
+                item.className = "flex justify-between items-center p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-white/5";
+                item.innerHTML = `<span class="text-[9px] font-bold text-slate-500">${day}</span><span class="text-[10px] font-black ${dayNet >= 0 ? 'text-emerald-500' : 'text-rose-500'}">₺${dayNet.toLocaleString('tr-TR', {minimumFractionDigits:2})}</span>`;
+                compList.appendChild(item);
+            });
+            document.querySelectorAll('#add-kasa-btn, #add-alacak-btn, #add-borc-btn, #add-gider-btn').forEach(b => b.classList.add('hidden'));
+        }
+
+        function loadDayFromArchive() {
+            const selectedDay = document.getElementById('archive-days-select').value;
+            if(!selectedDay) return;
+            db = JSON.parse(JSON.stringify(archiveData[selectedDay]));
+            calculate(); 
+            render();
+        }
+
+        function exitArchiveMode() {
+            isReadOnly = false; 
+            archiveData = null;
+            document.getElementById('archive-panel').classList.add('hidden');
+            document.getElementById('readonly-banner').style.display = 'none';
+            document.querySelectorAll('#add-kasa-btn, #add-alacak-btn, #add-borc-btn, #add-gider-btn').forEach(b => b.classList.remove('hidden'));
+            db = JSON.parse(localStorage.getItem('finans_v21'));
+            calculate(); 
+            render();
+        }
+
+        function calculateNetForArchive(tempDb) {
+            const getT = (arr, isK) => {
+                let total = 0;
+                arr.forEach(i => {
+                    const val = isK ? (i.v1 + i.v2 + i.ana) : i.val;
+                    total += (val * (tempDb.rates[i.curr] || 1));
+                });
+                return total;
+            };
+            return (getT(tempDb.kasa, true) + getT(tempDb.alacak, false)) - (getT(tempDb.borc, false) + getT(tempDb.gider, false));
+        }
+
+        function toggleDarkMode() { db.dark = !db.dark; applyDarkMode(); save(); }
+        function applyDarkMode() { 
+            if(db.dark) document.body.classList.add('dark-mode'); 
+            else document.body.classList.remove('dark-mode'); 
+        }
+
+        function openPos(type, id, field) { 
+            if(isReadOnly) return;
+            currentPos = { type, id, field }; 
+            posValue = ""; 
+            document.getElementById('pos-display').innerText = "0"; 
+            document.getElementById('pos-modal').style.display = 'flex'; 
+        }
+        
+        function posPress(v) { posValue += v.toString(); document.getElementById('pos-display').innerText = posValue; }
+        function posClear() { posValue = ""; document.getElementById('pos-display').innerText = "0"; }
+        
+        function posConfirm() {
+            const val = parseFloat(posValue) || 0;
+            let item = db[currentPos.type].find(x => x.id === currentPos.id);
+            if(item) {
+                if(!item.history) item.history = [];
+                const oldVal = item[currentPos.field] || 0;
+                if(oldVal !== val) {
+                    item.history.push({
+                        date: new Date().toLocaleString('tr-TR'),
+                        action: `${currentPos.field.toUpperCase()} Değişti: ${oldVal} -> ${val}`
+                    });
+                }
+                item[currentPos.field] = val;
+            }
+            document.getElementById('pos-modal').style.display = 'none';
+            save();
+        }
+
+        function openNote(type, id) {
+            currentNoteObj = { type, id };
+            let item = db[type].find(x => x.id === id);
+            if(!item) return;
+            document.getElementById('note-input').value = item.note || "";
+            const histCont = document.getElementById('history-container');
+            histCont.innerHTML = (item.history && item.history.length > 0) 
+                ? [...item.history].reverse().map(h => `
+                    <div class="history-line">
+                        <div class="text-[8px] font-black text-amber-500 uppercase">${h.date}</div>
+                        <div class="text-[10px] font-bold text-slate-600 dark:text-slate-400">${h.action}</div>
+                    </div>
+                `).join('')
+                : `<div class="text-[10px] text-slate-400 italic">Henüz hareket kaydı yok.</div>`;
+            document.getElementById('note-modal').style.display = 'flex';
+        }
+
+        function closeNoteModal() { document.getElementById('note-modal').style.display = 'none'; }
+        function saveNote() {
+            if(isReadOnly) return;
+            let item = db[currentNoteObj.type].find(x => x.id === currentNoteObj.id);
+            if(item) {
+                item.note = document.getElementById('note-input').value;
+                if(!item.history) item.history = [];
+                item.history.push({ date: new Date().toLocaleString('tr-TR'), action: `Not güncellendi.` });
+                save(); closeNoteModal();
+            }
+        }
+
+        function setDateRange(type) {
+            const now = new Date();
+            let start, end;
+            if (type === 'thisMonth') {
+                start = new Date(now.getFullYear(), now.getMonth(), 1);
+                end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+            } else if (type === 'lastMonth') {
+                start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                end = new Date(now.getFullYear(), now.getMonth(), 0);
+            }
+            document.getElementById('history-start').value = start.toISOString().split('T')[0];
+            document.getElementById('history-end').value = end.toISOString().split('T')[0];
+            renderHistoryTable();
+        }
+
+        function renderHistoryTable() {
+            const start = document.getElementById('history-start').value;
+            const end = document.getElementById('history-end').value;
+            const body = document.getElementById('history-table-body');
+            if(!archiveData) {
+                body.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-rose-500 font-bold uppercase">Ayarlardan bir dosya açın!</td></tr>';
+                return;
+            }
+            const sortedDays = Object.keys(archiveData).sort((a,b) => new Date(a.split('.').reverse().join('-')) - new Date(b.split('.').reverse().join('-')));
+            let html = "", lastNet = 0;
+            sortedDays.forEach((day, index) => {
+                const dayDate = new Date(day.split('.').reverse().join('-'));
+                if ((start && dayDate < new Date(start)) || (end && dayDate > new Date(end))) {
+                    lastNet = calculateNetForArchive(archiveData[day]); return;
+                }
+                const dayDb = archiveData[day];
+                const currentNet = calculateNetForArchive(dayDb);
+                const dailyProfit = index === 0 ? 0 : currentNet - lastNet;
+                html += `<tr><td>${day}</td><td class="text-right">₺${currentNet.toLocaleString()}</td><td class="text-right">${dayDb.kasa.length}</td><td class="text-right ${dailyProfit>=0?'text-emerald-500':'text-rose-500'}">₺${dailyProfit.toLocaleString()}</td><td class="text-[8px] italic">${dayDb.gider.length} Gider</td></tr>`;
+                lastNet = currentNet;
+            });
+            body.innerHTML = html || '<tr><td colspan="5" class="text-center py-10">Veri bulunamadı.</td></tr>';
+        }
+
+        function calculate() {
+            if(!isAuthenticated) return;
+            const getTotals = (arr, isKasa = false) => {
+                let totals = {}; Object.keys(db.rates).forEach(c => totals[c] = 0);
+                let tryEq = 0;
+                arr.forEach(i => {
+                    const val = isKasa ? (i.v1 + i.v2 + i.ana) : i.val;
+                    totals[i.curr] = (totals[i.curr] || 0) + val;
+                    tryEq += (val * (db.rates[i.curr] || 1));
+                });
+                return { breakdown: totals, tryEq };
+            };
+            const dk = getTotals(db.kasa, true), da = getTotals(db.alacak), dborc = getTotals(db.borc), dg = getTotals(db.gider);
+            const netMevcut = (dk.tryEq + da.tryEq) - (dborc.tryEq + dg.tryEq);
+            document.getElementById('sum-kasa').innerText = `₺${dk.tryEq.toLocaleString()}`;
+            document.getElementById('sum-alacak-analiz').innerText = `₺${da.tryEq.toLocaleString()}`;
+            document.getElementById('sum-borc-analiz').innerText = `₺${dborc.tryEq.toLocaleString()}`;
+            document.getElementById('sum-gider-analiz').innerText = `₺${dg.tryEq.toLocaleString()}`;
+            document.getElementById('sum-net-kazanc').innerText = `₺${netMevcut.toLocaleString()}`;
+
+            const riskRatio = dborc.tryEq > 0 ? Math.min(((dk.tryEq + da.tryEq) / dborc.tryEq) * 100, 100) : 100;
+            document.getElementById('risk-bar').style.width = `${riskRatio}%`;
+            document.getElementById('risk-percent').innerText = `${Math.round(riskRatio)}%`;
+            
+            const activeTab = document.querySelector('.tab-content.active').id;
+            const netValEl = document.getElementById('net-val');
+            if(activeTab === 'kasa-tab') netValEl.innerText = `₺${dk.tryEq.toLocaleString()}`;
+            else if(activeTab === 'cari-tab') netValEl.innerText = `₺${(da.tryEq - dborc.tryEq).toLocaleString()}`;
+            else netValEl.innerText = `₺${netMevcut.toLocaleString()}`;
+
+            updateAllSegmentedBars(dk, da, dborc, dg);
+            renderEkstre();
+            updateBreakdown('breakdown-kasa', dk.breakdown, 'bg-amber-500/20 text-amber-500 border border-amber-500/20');
+        }
+
+        function updateAllSegmentedBars(dk, da, dborc, dg) {
+            renderSegmentedBar('fin-segmented-bar', 'fin-legend', [
+                { label: 'Kasa', val: dk.tryEq, color: '#f59e0b' }, { label: 'Alacak', val: da.tryEq, color: '#22c55e' },
+                { label: 'Borç', val: dborc.tryEq, color: '#ef4444' }, { label: 'Gider', val: dg.tryEq, color: '#64748b' }
+            ]);
+        }
+
+        function renderSegmentedBar(barId, legendId, data) {
+            const barCont = document.getElementById(barId), legCont = document.getElementById(legendId);
+            barCont.innerHTML = ""; legCont.innerHTML = "";
+            const total = data.reduce((s, item) => s + item.val, 0);
+            if (total === 0) return;
+            data.forEach(item => {
+                if (item.val > 0) {
+                    const percent = (item.val / total) * 100;
+                    const seg = document.createElement('div');
+                    seg.style.width = `${percent}%`; seg.style.backgroundColor = item.color;
+                    barCont.appendChild(seg);
+                    legCont.innerHTML += `<div class="flex items-center gap-1.5"><div class="w-2 h-2 rounded-full" style="background:${item.color}"></div><span class="text-[9px] font-bold text-slate-500 uppercase">${item.label} %${Math.round(percent)}</span></div>`;
+                }
+            });
+        }
+
+        function updateBreakdown(id, data, cls) {
+            const container = document.getElementById(id);
+            if(container) container.innerHTML = Object.keys(data).filter(c => data[c] > 0).map(c => `<span class="badge ${cls}">${data[c].toLocaleString()} ${c}</span>`).join('');
+        }
+
+        function addCategory() { const n = document.getElementById('new-cat-name').value.toUpperCase().trim(); if (n && !db.categories[n]) { db.categories[n] = []; save(); } }
+        function addUnitToCategory() { const cat = document.getElementById('cat-select-for-unit').value, unit = document.getElementById('new-unit-code').value.toUpperCase().trim(); if (cat && unit) { if (!db.categories[cat].includes(unit)) db.categories[cat].push(unit); if (!db.rates[unit]) db.rates[unit] = 1; save(); } }
+        function addGiderCat() { const n = document.getElementById('new-gider-cat').value.toUpperCase().trim(); if(n && !db.giderRehber.includes(n)) { db.giderRehber.push(n); save(); } }
+
+        function render() {
+            if(!isAuthenticated) return;
+            document.getElementById('kasa-body').innerHTML = db.kasa.map(i => `<tr class="hover:bg-slate-50/50 transition-colors"><td class="p-4">${renderCurrSelect('kasa', i.id, i.curr)}</td><td class="p-4 text-right" onclick="openPos('kasa', ${i.id}, 'v1')">${i.v1.toLocaleString()}</td><td class="p-4 text-right" onclick="openPos('kasa', ${i.id}, 'v2')">${i.v2.toLocaleString()}</td><td class="p-4 text-right text-amber-500 font-extrabold" onclick="openPos('kasa', ${i.id}, 'ana')">${i.ana.toLocaleString()}</td><td class="p-4 text-right font-black text-amber-500">${(i.v1+i.v2+i.ana).toLocaleString()}</td><td class="p-4 text-center"><button onclick="openNote('kasa', ${i.id})">📝</button> <button onclick="remove('kasa', ${i.id})" class="${isReadOnly?'hidden':''}">✕</button></td></tr>`).join('');
+            ['alacak', 'borc'].forEach(type => { document.getElementById(`${type}-body`).innerHTML = db[type].map(i => `<tr class="transition-colors"><td class="p-5">${renderCariSelect(type, i.id, i.name)}</td><td class="p-5 text-right font-extrabold text-amber-500" onclick="openPos('${type}', ${i.id}, 'val')">${i.val.toLocaleString()}</td><td class="p-5 text-right">${renderCurrSelect(type, i.id, i.curr)}</td><td class="text-center"><button onclick="openNote('${type}', ${i.id})">📝</button> <button onclick="remove('${type}', ${i.id})" class="${isReadOnly?'hidden':''}">✕</button></td></tr>`).join(''); });
+            document.getElementById('gider-body').innerHTML = db.gider.map(i => `<tr class="transition-colors"><td class="p-5"><select onchange="update('gider', ${i.id}, 'name', this.value)" ${isReadOnly?'disabled':''}>${db.giderRehber.map(gn => `<option ${i.name===gn?'selected':''}>${gn}</option>`).join('')}</select></td><td class="p-5 text-right font-extrabold" onclick="openPos('gider', ${i.id}, 'val')">${i.val.toLocaleString()}</td><td class="p-5 text-right">${renderCurrSelect('gider', i.id, i.curr)}</td><td class="text-center"><button onclick="openNote('gider', ${i.id})">📝</button> <button onclick="remove('gider', ${i.id})" class="${isReadOnly?'hidden':''}">✕</button></td></tr>`).join('');
+            document.getElementById('cat-select-for-unit').innerHTML = Object.keys(db.categories).map(c => `<option value="${c}">${c}</option>`).join('');
+            document.getElementById('rate-management-list').innerHTML = Object.keys(db.categories).map(cat => `<div class="space-y-3"><div class="flex justify-between border-b pb-2"><span class="text-[10px] font-black text-amber-500">${cat}</span></div>${db.categories[cat].map(unit => `<div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-white/5 rounded-2xl"><span>${unit}</span><div class="flex gap-3"><input type="number" step="0.01" ${unit==='TRY'||isReadOnly?'disabled':''} class="text-right font-black w-24" value="${db.rates[unit]||1}" onchange="db.rates['${unit}']=parseFloat(this.value); save();"><button onclick="removeUnit('${cat}', '${unit}')" class="${isReadOnly?'hidden':''}">✕</button></div></div>`).join('')}</div>`).join('');
+            document.getElementById('cari-list-display').innerHTML = db.cariRehber.map(n => `<span class="bg-slate-100 dark:bg-white/5 px-4 py-2 rounded-xl text-[10px] font-bold">${n} <button onclick="deleteCari('${n}')" class="${isReadOnly?'hidden':''}">×</button></span>`).join('');
+            const es = document.getElementById('ekstre-select'), curVal = es.value;
+            es.innerHTML = `<option value="">👤 Rehberden Seç...</option>` + db.cariRehber.map(n => `<option value="${n}" ${n===curVal?'selected':''}>${n}</option>`).join('');
+            applyDarkMode();
+        }
+
+        function renderCurrSelect(t, id, curr) { return `<select onchange="update('${t}', ${id}, 'curr', this.value)" ${isReadOnly?'disabled':''}>${Object.keys(db.rates).map(c => `<option ${curr===c?'selected':''}>${c}</option>`).join('')}</select>`; }
+        function renderCariSelect(t, id, name) { return `<select onchange="update('${t}', ${id}, 'name', this.value)" ${isReadOnly?'disabled':''}>${db.cariRehber.map(n => `<option ${name===n?'selected':''}>${n}</option>`).join('')}</select>`; }
+        function update(t, id, f, v) { if(isReadOnly) return; let item = db[t].find(x => x.id === id); if(item) { item[f] = (f === 'val') ? parseFloat(v) : v; save(); } }
+        function addRow(t) { if(isReadOnly) return; const id = Date.now(); if(t === 'kasa') db.kasa.push({id, v1:0, v2:0, ana:0, curr: 'TRY', note: "", history: []}); else db[t].push({id, name: "", val: 0, curr: 'TRY', note: "", history: []}); save(); }
+        function remove(t, id) { if(isReadOnly) return; if(confirm('Silsin mi?')) { db[t] = db[t].filter(x => x.id !== id); save(); } }
+        function saveCariCard() { const n = document.getElementById('new-cari-name').value.toUpperCase().trim(); if(n && !db.cariRehber.includes(n)) { db.cariRehber.push(n); save(); } }
+        function renderEkstre() {
+            const name = document.getElementById('ekstre-select').value;
+            if(!name) { document.getElementById('ekstre-sonuc').classList.add('hidden'); return; }
+            document.getElementById('ekstre-sonuc').classList.remove('hidden');
+            const a = db.alacak.filter(i => i.name === name).reduce((s, i) => s + (i.val * db.rates[i.curr]), 0);
+            const b = db.borc.filter(i => i.name === name).reduce((s, i) => s + (i.val * db.rates[i.curr]), 0);
+            document.getElementById('ekstre-alacak').innerText = `₺${a.toLocaleString()}`;
+            document.getElementById('ekstre-borc').innerText = `₺${b.toLocaleString()}`;
+            document.getElementById('ekstre-net').innerText = `₺${(a-b).toLocaleString()}`;
+        }
+
+        function exportData() { 
+            const ws = XLSX.utils.aoa_to_sheet([["PaNeLX Rapor"], ["Kasa Toplamı", calculateNetForArchive(db)]]);
+            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Finans");
+            XLSX.writeFile(wb, `PaNeLX_${new Date().toLocaleDateString()}.xlsx`);
+        }
+
+        function switchTab(t) { 
+            if(!checkAuth()) return;
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active')); 
+            document.getElementById(t + '-tab').classList.add('active'); 
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active')); 
+            document.getElementById('btn-' + t).classList.add('nav-active'); 
+            calculate(); 
+        }
+
+        window.onload = () => { 
+            applyDarkMode(); 
+            checkAuth(); // Açılışta PIN sor
+        };
+    </script>
+</body>
+</html>
