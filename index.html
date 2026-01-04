@@ -90,6 +90,7 @@
             <button class="btn-round" onclick="closeModal()" style="background:var(--bg); color:var(--text)"><i class="fas fa-times"></i></button>
         </div>
         <input type="hidden" id="edit-id">
+        
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px">
             <div><label class="label-style">GÜNCEL ALIŞ FİYATI</label><input type="number" id="edit-buy-price" class="input-box" step="0.0001"></div>
             <div><label class="label-style">GÜNCEL SATIŞ FİYATI</label><input type="number" id="edit-sell-price" class="input-box" step="0.0001"></div>
@@ -99,6 +100,8 @@
             <div><label class="label-style">SATIŞ MARJI (+)</label><input type="number" id="edit-sell-margin" class="input-box" step="0.0001"></div>
         </div>
         
+        <div><label class="label-style">BAYRAK KODU / IKON</label><input type="text" id="edit-flag" class="input-box" placeholder="us, eu, gold, btc"></div>
+
         <div style="display:flex; align-items:center; gap:10px; margin: 10px 0; background: var(--bg); padding:10px; border-radius:8px">
             <label class="switch"><input type="checkbox" id="edit-auto-sync"><span class="slider"></span></label>
             <label for="edit-auto-sync" style="font-size:12px; font-weight:bold">Oto-Mod Aktif</label>
@@ -411,16 +414,24 @@
 
     function addNewCurrency() {
         const name = document.getElementById('new-name').value.toUpperCase().trim();
+        const flagVal = (document.getElementById('new-flag').value || 'tr').toLowerCase();
         if(!name) return alert("Sembol girin!");
         const newItem = {
-            id: Date.now(), name: name, category: document.getElementById('new-api-cat').value,
-            flag: (document.getElementById('new-flag').value || 'tr').toLowerCase(),
-            buy: 0, sell: 0, buyMargin: parseFloat(document.getElementById('new-buy-margin').value) || 0,
+            id: Date.now(), 
+            name: name, 
+            category: document.getElementById('new-api-cat').value,
+            flag: flagVal,
+            buy: 0, 
+            sell: 0, 
+            buyMargin: parseFloat(document.getElementById('new-buy-margin').value) || 0,
             sellMargin: parseFloat(document.getElementById('new-sell-margin').value) || 0,
-            autoSync: true, order: currencies.length
+            autoSync: true, 
+            order: currencies.length
         };
-        currencies.push(newItem); saveToFirebase();
+        currencies.push(newItem); 
+        saveToFirebase();
         document.getElementById('new-name').value = '';
+        document.getElementById('new-flag').value = '';
     }
 
     function render() {
@@ -430,7 +441,7 @@
             let iconUrl = c.flag.length === 2 ? `https://flagcdn.com/w80/${c.flag}.png` : (c.flag === 'gold' ? GOLD_ICON : (c.flag === 'btc' ? CRYPTO_ICON : DEFAULT_ICON));
             list.innerHTML += `
                 <div class="currency-card" data-id="${c.id}" onclick="openUpdateModal(${c.id})">
-                    <div class="drag-handle"><i class="fas fa-grip-vertical"></i></div>
+                    <div class="drag-handle" onclick="event.stopPropagation()"><i class="fas fa-grip-vertical"></i></div>
                     <div class="lock-indicator">${c.autoSync ? '<i class="fas fa-sync-alt fa-spin"></i>' : '<i class="fas fa-lock"></i>'}</div>
                     <div class="flag-box"><img src="${iconUrl}" class="flag-anim" onerror="this.src='${DEFAULT_ICON}'"></div>
                     <div class="currency-meta"><b>${c.name}</b><span style="font-size:9px">${c.category.toUpperCase()}</span></div>
@@ -456,6 +467,7 @@
         document.getElementById('edit-sell-price').value = c.sell;
         document.getElementById('edit-buy-margin').value = c.buyMargin;
         document.getElementById('edit-sell-margin').value = c.sellMargin;
+        document.getElementById('edit-flag').value = c.flag || '';
         document.getElementById('edit-auto-sync').checked = c.autoSync;
         document.getElementById('update-modal').style.display = 'flex';
     }
@@ -463,13 +475,16 @@
     function saveManualUpdate() {
         const id = parseInt(document.getElementById('edit-id').value);
         currencies = currencies.map(c => c.id === id ? {
-            ...c, buy: parseFloat(document.getElementById('edit-buy-price').value),
+            ...c, 
+            buy: parseFloat(document.getElementById('edit-buy-price').value),
             sell: parseFloat(document.getElementById('edit-sell-price').value),
             buyMargin: parseFloat(document.getElementById('edit-buy-margin').value),
             sellMargin: parseFloat(document.getElementById('edit-sell-margin').value),
+            flag: document.getElementById('edit-flag').value.toLowerCase().trim(),
             autoSync: document.getElementById('edit-auto-sync').checked
         } : c);
-        saveToFirebase(); closeModal();
+        saveToFirebase(); 
+        closeModal();
     }
 
     function deleteCurrency() {
@@ -511,3 +526,4 @@
 </script>
 </body>
 </html>
+
