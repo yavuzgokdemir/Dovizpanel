@@ -165,7 +165,7 @@
     function getIcon(item) {
         const name = (item.name || "").toUpperCase();
         if (name.includes("ALTIN") || name.includes("GOLD") || item.category === "altin") {
-            return "https://cdn-icons-png.flaticon.com/512/2489/2489756.png"; 
+            return "https://cdn-icons-png.flaticon.com/512/2499/2489756.png"; 
         }
         const flagCode = item.flag ? item.flag.toLowerCase() : 'un';
         return `https://flagcdn.com/w320/${flagCode}.png`;
@@ -361,7 +361,7 @@
                 list.innerHTML = goldData.map(item => {
                     const buy = Math.floor(parseFloat(item.buy)).toLocaleString('tr-TR');
                     const sell = Math.floor(parseFloat(item.sell)).toLocaleString('tr-TR');
-                    return `<div class="gold-row-item" id="grow-${item.id}"><div class="gold-product-name">${item.name}</div><div class="gold-price-group"><div class="gold-price-wrapper"><div class="gold-label">ALIŞ</div><div class="gold-buy-val">${buy}</div></div><div class="gold-trend-box">▲</div><div class="gold-price-wrapper"><div class="gold-label">SATIŞ</div><div class="gold-sell-val">${sell}</div></div></div></div>`;
+                    return `<div class="gold-row-item" id="grow-${item.id}"><div class="gold-product-name">${item.name}</div><div class="gold-price-group"><div class="gold-price-wrapper"><div class="gold-label"></div><div class="gold-buy-val">${buy}</div></div><div class="gold-trend-box">▲</div><div class="gold-price-wrapper"><div class="gold-label"></div><div class="gold-sell-val">${sell}</div></div></div></div>`;
                 }).join('');
             }
         });
