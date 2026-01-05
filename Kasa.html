@@ -25,7 +25,7 @@
             font-family: 'Inter', sans-serif; 
             background-color: #f8fafc; 
             color: #1e293b;
-            transition: all 0.3s Birim; 
+            transition: all 0.3s ease; 
         }
 
         .dark-mode { 
@@ -115,6 +115,20 @@
         .excel-table td { padding: 8px; border: 1px solid #e2e8f0; font-weight: 700; }
         .dark-mode .excel-table th { background: #1e293b; color: #94a3b8; border-color: #334155; }
         .dark-mode .excel-table td { border-color: #334155; }
+
+        /* YENİ USD ANİMASYONU VE RENK DEĞİŞİMİ */
+        @keyframes usd-flow {
+            0% { color: #22c55e; }
+            50% { color: #f59e0b; }
+            100% { color: #22c55e; }
+        }
+        .usd-badge {
+            font-size: 9px;
+            font-weight: 800;
+            display: block;
+            animation: usd-flow 3s infinite ease-in-out;
+            opacity: 0.8;
+        }
     </style>
 </head>
 <body class="pb-28">
@@ -174,6 +188,7 @@
                 <div id="top-status-card" class="bg-slate-900 text-white px-4 py-2 rounded-2xl border border-slate-700 min-w-[150px]">
                     <span id="bar-label" class="text-[8px] font-extrabold text-amber-500 uppercase block leading-none mb-1 tracking-widest">SİSTEM AKTİF</span>
                     <span id="net-val" class="text-xs font-black leading-none block">₺0,00</span>
+                    <span id="net-val-usd" class="usd-badge mt-1">$0.00</span>
                 </div>
             </div>
             <div class="flex gap-4 items-center">
@@ -222,13 +237,46 @@
                 </div>
                 <table class="w-full text-xs font-bold"><tbody id="borc-body" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody></table>
             </div>
+            
             <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-100">
-                <h3 class="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-4">👤 Kişi Ekstresi</h3>
-                <select id="ekstre-select" onchange="renderEkstre()" class="w-full mb-5 bg-slate-50 p-4 rounded-2xl font-bold text-xs"></select>
-                <div id="ekstre-sonuc" class="hidden space-y-3">
-                    <div class="flex justify-between p-4 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 text-emerald-600"><span class="text-[10px] font-bold">ALACAK</span><span id="ekstre-alacak" class="text-xs font-black">₺0,00</span></div>
-                    <div class="flex justify-between p-4 bg-rose-500/10 rounded-2xl border border-rose-500/20 text-rose-600"><span class="text-[10px] font-bold">BORÇ</span><span id="ekstre-borc" class="text-xs font-black">₺0,00</span></div>
-                    <div id="ekstre-net-bg" class="flex justify-between p-5 rounded-2xl text-white shadow-lg"><span class="text-[11px] font-black uppercase tracking-widest">NET DURUM</span><span id="ekstre-net" class="text-base font-black underline decoration-2">₺0,00</span></div>
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="text-lg">👤</span>
+                    <h3 class="text-[11px] font-black text-slate-400 uppercase tracking-widest">Kişi Ekstresi</h3>
+                </div>
+                <select id="ekstre-select" onchange="renderEkstre()" class="w-full mb-5 bg-slate-50 p-4 rounded-2xl font-bold text-xs border border-slate-100 shadow-inner"></select>
+                
+                <div id="ekstre-sonuc" class="hidden space-y-4 animate-fadeIn">
+                    <div class="bg-slate-50 dark:bg-white/5 rounded-2xl p-4 border border-slate-100 dark:border-white/10">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">İşlem Hareketleri</span>
+                            <span class="text-[8px] px-2 py-1 bg-amber-500/10 text-amber-600 rounded-lg font-bold">ANLIK VERİ</span>
+                        </div>
+                        <div class="space-y-2 max-h-48 overflow-y-auto pr-1 custom-scrollbar" id="ekstre-detay-body">
+                            </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="p-4 bg-emerald-500/5 rounded-2xl border border-emerald-500/10">
+                            <span class="text-[8px] font-black text-emerald-500 uppercase block mb-1">Toplam Alacak</span>
+                            <span id="ekstre-alacak" class="text-sm font-black text-emerald-600">₺0,00</span>
+                        </div>
+                        <div class="p-4 bg-rose-500/5 rounded-2xl border border-rose-500/10">
+                            <span class="text-[8px] font-black text-rose-500 uppercase block mb-1">Toplam Borç</span>
+                            <span id="ekstre-borc" class="text-sm font-black text-rose-600">₺0,00</span>
+                        </div>
+                    </div>
+
+                    <div id="ekstre-net-bg" class="relative overflow-hidden p-6 rounded-[2rem] shadow-xl transition-all duration-500">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -mr-12 -mt-12 blur-2xl"></div>
+                        <div class="flex justify-between items-center relative z-10">
+                            <div>
+                                <span class="text-[10px] font-black text-white/70 uppercase tracking-widest block mb-1">GÜNCEL NET DURUM</span>
+                                <span id="ekstre-net" class="text-2xl font-black text-white block leading-none">₺0,00</span>
+                                <span id="ekstre-net-usd" class="text-[10px] font-bold text-white/80 mt-1 block tracking-wider">$0.00</span>
+                            </div>
+                            <div id="ekstre-icon" class="text-4xl">💎</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -244,69 +292,78 @@
 
         <div id="analiz-tab" class="tab-content space-y-5">
             <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-100">
-                <h3 class="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Finansal Analiz & Risk</h3>
+                <h3 class="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6 text-center">📊 Finansal Analiz & Risk</h3>
                 
-                <div class="mb-8 space-y-2">
-                    <div class="flex justify-between items-center">
-                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Risk Oranı (Güvenlik Skoru)</span>
-                        <span id="risk-percent" class="text-[10px] font-black text-amber-500">0%</span>
+                <div class="mb-8 space-y-3">
+                    <div class="flex justify-between items-end">
+                        <div>
+                            <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest block">SİSTEM SKORU</span>
+                            <span id="risk-status" class="text-[10px] font-bold uppercase tracking-tighter">HESAPLANIYOR...</span>
+                        </div>
+                        <span id="risk-percent" class="text-2xl font-black text-amber-500">0%</span>
                     </div>
-                    <div class="w-full bg-slate-100 dark:bg-white/5 h-3 rounded-full overflow-hidden flex border border-slate-200 dark:border-white/5">
-                        <div id="risk-bar" class="h-full transition-all duration-1000" style="width: 0%"></div>
+                    <div class="w-full bg-slate-100 dark:bg-white/5 h-4 rounded-full overflow-hidden flex border border-slate-200 dark:border-white/5 shadow-inner">
+                        <div id="risk-bar" class="h-full transition-all duration-1000 shadow-[0_0_15px_rgba(245,158,11,0.5)]" style="width: 0%; background: var(--accent);"></div>
                     </div>
-                    <p class="text-[8px] text-slate-400 italic">Formül: (Eldeki + Alacak) / Borç</p>
+                    <p class="text-[8px] text-slate-400 italic text-center">Skor Algoritması: (Nakit + Alacak) / (Borç + Gider) katsayısına dayanır.</p>
                 </div>
 
                 <div class="grid grid-cols-1 gap-6 mb-8">
                     <div class="space-y-3">
-                        <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Portföy Dağılımı</p>
-                        <div id="fin-segmented-bar" class="segmented-bar-container"></div>
-                        <div id="fin-legend" class="flex flex-wrap gap-x-4 gap-y-2"></div>
+                        <div class="flex justify-between items-center"><p class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Varlık Dağılımı</p></div>
+                        <div id="fin-segmented-bar" class="segmented-bar-container h-4 shadow-sm"></div>
+                        <div id="fin-legend" class="flex flex-wrap gap-x-4 gap-y-2 justify-center"></div>
                     </div>
                     <div class="space-y-3">
-                        <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Döviz Kırılımı (Kasa)</p>
-                        <div id="curr-segmented-bar" class="segmented-bar-container"></div>
-                        <div id="curr-legend" class="flex flex-wrap gap-x-4 gap-y-2"></div>
+                        <div class="flex justify-between items-center"><p class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Döviz Yoğunluğu (Kasa)</p></div>
+                        <div id="curr-segmented-bar" class="segmented-bar-container h-4 shadow-sm"></div>
+                        <div id="curr-legend" class="flex flex-wrap gap-x-4 gap-y-2 justify-center"></div>
                     </div>
                 </div>
 
-                <div class="bg-slate-50 dark:bg-white/5 p-4 rounded-2xl mb-6">
-                    <h4 class="text-[9px] font-black text-slate-400 uppercase mb-3 text-center">Harcama Dağılımı (Gider Çeşitleri)</h4>
-                    <div id="expense-segmented-bar" class="w-full h-6 rounded-lg overflow-hidden flex shadow-inner bg-slate-200 dark:bg-slate-800">
-                        </div>
-                    <div id="expense-legend" class="flex flex-wrap gap-2 mt-3 justify-center">
-                        </div>
+                <div class="grid grid-cols-2 gap-3 mb-6">
+                    <div class="bg-slate-900 p-4 rounded-3xl border border-slate-700 shadow-lg">
+                        <span class="text-[8px] font-black text-amber-500 uppercase block mb-1">💰 Nakit</span>
+                        <span id="sum-kasa" class="text-base font-black text-white">₺0,00</span>
+                        <span id="sum-kasa-usd" class="usd-badge">$0.00</span>
+                    </div>
+                    <div class="bg-emerald-900/10 p-4 rounded-3xl border border-emerald-500/20 shadow-sm">
+                        <span class="text-[8px] font-black text-emerald-500 uppercase block mb-1">📈 Alacak</span>
+                        <span id="sum-alacak-analiz" class="text-base font-black text-emerald-600 dark:text-emerald-400">₺0,00</span>
+                        <span id="sum-alacak-usd" class="usd-badge">$0.00</span>
+                    </div>
+                    <div class="bg-rose-900/10 p-4 rounded-3xl border border-rose-500/20 shadow-sm">
+                        <span class="text-[8px] font-black text-rose-500 uppercase block mb-1">📉 Borç</span>
+                        <span id="sum-borc-analiz" class="text-base font-black text-rose-600 dark:text-rose-400">₺0,00</span>
+                        <span id="sum-borc-usd" class="usd-badge">$0.00</span>
+                    </div>
+                    <div class="bg-slate-100 dark:bg-white/5 p-4 rounded-3xl border border-slate-200 dark:border-white/5 shadow-sm">
+                        <span class="text-[8px] font-black text-slate-500 uppercase block mb-1">💸 Gider</span>
+                        <span id="sum-gider-analiz" class="text-base font-black text-slate-600 dark:text-slate-300">₺0,00</span>
+                        <span id="sum-gider-usd" class="usd-badge">$0.00</span>
+                    </div>
                 </div>
 
-                <div class="space-y-4">
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="bg-slate-900 p-4 rounded-2xl border border-slate-700">
-                            <span class="text-[8px] font-black text-amber-500 uppercase block mb-1">💰 Nakit</span>
-                            <span id="sum-kasa" class="text-sm font-black text-white">₺0,00</span>
-                        </div>
-                        <div class="bg-emerald-900/10 p-4 rounded-2xl border border-emerald-500/20">
-                            <span class="text-[8px] font-black text-emerald-500 uppercase block mb-1">📈 Alacak</span>
-                            <span id="sum-alacak-analiz" class="text-sm font-black text-emerald-600 dark:text-emerald-400">₺0,00</span>
-                        </div>
-                        <div class="bg-rose-900/10 p-4 rounded-2xl border border-rose-500/20">
-                            <span class="text-[8px] font-black text-rose-500 uppercase block mb-1">📉 Borç</span>
-                            <span id="sum-borc-analiz" class="text-sm font-black text-rose-600 dark:text-rose-400">₺0,00</span>
-                        </div>
-                        <div class="bg-amber-900/10 p-4 rounded-2xl border border-amber-500/20">
-                            <span class="text-[8px] font-black text-amber-500 uppercase block mb-1">💸 Gider</span>
-                            <span id="sum-gider-analiz" class="text-sm font-black text-amber-600 dark:text-amber-400">₺0,00</span>
-                        </div>
+                <div id="net-kazanc-bg" class="bg-slate-900 p-6 rounded-[2.5rem] border border-amber-500/30 flex justify-between items-center shadow-2xl relative overflow-hidden mb-8">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-3xl -mr-16 -mt-16"></div>
+                    <div class="relative z-10">
+                        <span class="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-1 block">🏆 NET PORTFÖY</span>
+                        <span id="sum-net-kazanc" class="text-2xl font-black text-white block">₺0,00</span>
+                        <span id="sum-net-usd" class="usd-badge">$0.00</span>
                     </div>
-
-                    <div id="net-kazanc-bg" class="bg-slate-900 p-5 rounded-[1.5rem] border border-amber-500/30 flex justify-between items-center shadow-xl">
-                        <div>
-                            <span class="text-[9px] font-black text-amber-500 uppercase tracking-widest mb-1 block">🏆 NET PORTFÖY</span>
-                            <span id="sum-net-kazanc" class="text-xl font-black text-white block">₺0,00</span>
-                        </div>
-                        <div class="text-3xl connected-x">🦎</div>
-                    </div>
-                    <div id="breakdown-kasa" class="flex flex-wrap gap-2 pt-2"></div>
+                    <div class="text-4xl connected-x relative z-10">🦎</div>
                 </div>
+
+                <div class="bg-indigo-900/10 p-5 rounded-[2rem] border border-indigo-500/20">
+                    <div class="flex justify-between items-center mb-4">
+                        <h4 class="text-[10px] font-black text-indigo-500 uppercase tracking-widest">☁️ Cloud Snapshots</h4>
+                        <button onclick="takeCloudSnapshot()" class="bg-indigo-600 text-white px-3 py-1.5 rounded-xl text-[8px] font-black hover:bg-indigo-500 transition shadow-md">ANLIK GÖRÜNTÜ AL</button>
+                    </div>
+                    <div id="cloud-snapshot-list" class="space-y-2 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
+                        <div class="text-[9px] text-slate-400 italic text-center py-4">Firebase bağlantısı kurulmaya hazır.</div>
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -509,46 +566,34 @@
         // YENİ KASA (OTOMATİK DEVİR VE VERİ KAYBI ENGELLEME)
         function save() { 
             if(isReadOnly) return; 
-            
-            // Mevcut durumu LocalStorage'a kaydet
             localStorage.setItem('finans_v21', JSON.stringify(db)); 
-
-            // Akıllı Arşivleme: O günün tarihini anahtar (key) kullanarak yerel arşive ekler
             const todayKey = new Date().toLocaleDateString('tr-TR');
             const months = ["OCAK", "SUBAT", "MART", "NISAN", "MAYIS", "HAZIRAN", "TEMMUZ", "AGUSTOS", "EYLUL", "EKIM", "KASIM", "ARALIK"];
             const fileName = `archive_${months[new Date().getMonth()]}_${new Date().getFullYear()}`;
-            
             let monthlyLocalArchive = JSON.parse(localStorage.getItem(fileName)) || {};
             monthlyLocalArchive[todayKey] = JSON.parse(JSON.stringify(db));
             localStorage.setItem(fileName, JSON.stringify(monthlyLocalArchive));
-
             calculate(); 
             render(); 
         }
 
-        // TEK DOSYA, TAM HAFIZA: "DOSYAYI KAYDET" (BACKUP)
         function backupMonth() {
             const months_short = ["OCAK", "SUBAT", "MART", "NISAN", "MAYIS", "HAZIRAN", "TEMMUZ", "AGUSTOS", "EYLUL", "EKIM", "KASIM", "ARALIK"];
             const now = new Date();
             const yearShort = now.getFullYear().toString().slice(-2);
             const customFileName = `${months_short[now.getMonth()]}${yearShort}.json`;
             const storageKey = `archive_${months_short[now.getMonth()]}_${now.getFullYear()}`;
-
             let fullMonthlyArchive = JSON.parse(localStorage.getItem(storageKey)) || {};
             const todayKey = now.toLocaleDateString('tr-TR');
             fullMonthlyArchive[todayKey] = JSON.parse(JSON.stringify(db));
-
             const blob = new Blob([JSON.stringify(fullMonthlyArchive, null, 2)], {type: "application/json"});
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
             a.download = customFileName;
             a.click();
-            
-            alert(customFileName + " (Ay Arşivi + Bugünün Verileri) kaydedildi!");
         }
 
-        // AKILLI YÜKLEME: BİR DOSYA AÇILDIĞINDA TÜM GÜNLERİ GÖRÜR
         function loadArchive(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -563,9 +608,7 @@
                         archiveData = { "Yüklenen Gün": parsed };
                         renderArchivePanel(file.name);
                     }
-                } catch (err) {
-                    alert("Hata: Geçersiz dosya formatı.");
-                }
+                } catch (err) { alert("Hata: Geçersiz dosya formatı."); }
             };
             reader.readAsText(file);
         }
@@ -575,22 +618,13 @@
             document.getElementById('archive-panel').classList.remove('hidden');
             document.getElementById('readonly-banner').style.display = 'block';
             document.getElementById('archive-info').innerText = "📂 " + fileName;
-            
             const daySelect = document.getElementById('archive-days-select');
             const compList = document.getElementById('comparison-list');
             daySelect.innerHTML = '<option value="">BİR GÜN SEÇİN...</option>';
             compList.innerHTML = '';
-
-            Object.keys(archiveData).sort((a,b) => {
-                const dateA = a.split('.').reverse().join('');
-                const dateB = b.split('.').reverse().join('');
-                return dateB - dateA;
-            }).forEach(day => {
+            Object.keys(archiveData).sort((a,b) => b.split('.').reverse().join('') - a.split('.').reverse().join('')).forEach(day => {
                 const option = document.createElement('option');
-                option.value = day; 
-                option.innerText = day; 
-                daySelect.appendChild(option);
-                
+                option.value = day; option.innerText = day; daySelect.appendChild(option);
                 const dayNet = calculateNetForArchive(archiveData[day]);
                 const item = document.createElement('div');
                 item.className = "flex justify-between items-center p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-white/5";
@@ -604,19 +638,16 @@
             const selectedDay = document.getElementById('archive-days-select').value;
             if(!selectedDay) return;
             db = JSON.parse(JSON.stringify(archiveData[selectedDay]));
-            calculate(); 
-            render();
+            calculate(); render();
         }
 
         function exitArchiveMode() {
-            isReadOnly = false; 
-            archiveData = null;
+            isReadOnly = false; archiveData = null;
             document.getElementById('archive-panel').classList.add('hidden');
             document.getElementById('readonly-banner').style.display = 'none';
             document.querySelectorAll('#add-kasa-btn, #add-alacak-btn, #add-borc-btn, #add-gider-btn').forEach(b => b.classList.remove('hidden'));
             db = JSON.parse(localStorage.getItem('finans_v21'));
-            calculate(); 
-            render();
+            calculate(); render();
         }
 
         function calculateNetForArchive(tempDb) {
@@ -639,27 +670,19 @@
 
         function openPos(type, id, field) { 
             if(isReadOnly) return;
-            currentPos = { type, id, field }; 
-            posValue = ""; 
+            currentPos = { type, id, field }; posValue = ""; 
             document.getElementById('pos-display').innerText = "0"; 
             document.getElementById('pos-modal').style.display = 'flex'; 
         }
-        
         function posPress(v) { posValue += v.toString(); document.getElementById('pos-display').innerText = posValue; }
         function posClear() { posValue = ""; document.getElementById('pos-display').innerText = "0"; }
-        
         function posConfirm() {
             const val = parseFloat(posValue) || 0;
             let item = db[currentPos.type].find(x => x.id === currentPos.id);
             if(item) {
                 if(!item.history) item.history = [];
                 const oldVal = item[currentPos.field] || 0;
-                if(oldVal !== val) {
-                    item.history.push({
-                        date: new Date().toLocaleString('tr-TR'),
-                        action: `${currentPos.field.toUpperCase()} Değişti: ${oldVal} -> ${val}`
-                    });
-                }
+                if(oldVal !== val) { item.history.push({ date: new Date().toLocaleString('tr-TR'), action: `${currentPos.field.toUpperCase()} Değişti: ${oldVal} -> ${val}` }); }
                 item[currentPos.field] = val;
             }
             document.getElementById('pos-modal').style.display = 'none';
@@ -673,41 +696,262 @@
             document.getElementById('note-input').value = item.note || "";
             const histCont = document.getElementById('history-container');
             histCont.innerHTML = (item.history && item.history.length > 0) 
-                ? [...item.history].reverse().map(h => `
-                    <div class="history-line">
-                        <div class="text-[8px] font-black text-amber-500 uppercase">${h.date}</div>
-                        <div class="text-[10px] font-bold text-slate-600 dark:text-slate-400">${h.action}</div>
-                    </div>
-                `).join('')
+                ? [...item.history].reverse().map(h => `<div class="history-line"><div class="text-[8px] font-black text-amber-500 uppercase">${h.date}</div><div class="text-[10px] font-bold text-slate-600 dark:text-slate-400">${h.action}</div></div>`).join('')
                 : `<div class="text-[10px] text-slate-400 italic">Henüz hareket kaydı yok.</div>`;
             document.getElementById('note-modal').style.display = 'flex';
         }
-
         function closeNoteModal() { document.getElementById('note-modal').style.display = 'none'; }
         function saveNote() {
             if(isReadOnly) return;
             let item = db[currentNoteObj.type].find(x => x.id === currentNoteObj.id);
-            if(item) {
-                item.note = document.getElementById('note-input').value;
-                if(!item.history) item.history = [];
-                item.history.push({ date: new Date().toLocaleString('tr-TR'), action: `Not güncellendi.` });
-                save(); closeNoteModal();
-            }
+            if(item) { item.note = document.getElementById('note-input').value; if(!item.history) item.history = []; item.history.push({ date: new Date().toLocaleString('tr-TR'), action: `Not güncellendi.` }); save(); closeNoteModal(); }
         }
 
-        function setDateRange(type) {
-            const now = new Date();
-            let start, end;
-            if (type === 'thisMonth') {
-                start = new Date(now.getFullYear(), now.getMonth(), 1);
-                end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-            } else if (type === 'lastMonth') {
-                start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-                end = new Date(now.getFullYear(), now.getMonth(), 0);
+        // ANALİZ VE HESAPLAMA (GÜNCELLENDİ)
+        function calculate() {
+            if(!isAuthenticated) return;
+            
+            const usdRate = db.rates.USD || 1;
+
+            const getTotals = (arr, isKasa = false) => {
+                let totals = {}; Object.keys(db.rates).forEach(c => totals[c] = 0);
+                let tryEq = 0;
+                arr.forEach(i => {
+                    const val = isKasa ? (i.v1 + i.v2 + i.ana) : i.val;
+                    totals[i.curr] = (totals[i.curr] || 0) + val;
+                    tryEq += (val * (db.rates[i.curr] || 1));
+                });
+                return { breakdown: totals, tryEq };
+            };
+
+            const dk = getTotals(db.kasa, true), da = getTotals(db.alacak), dborc = getTotals(db.borc), dg = getTotals(db.gider);
+            const netMevcut = (dk.tryEq + da.tryEq) - (dborc.tryEq + dg.tryEq);
+
+            // 2x2 Grid Güncelleme + USD
+            document.getElementById('sum-kasa').innerText = `₺${dk.tryEq.toLocaleString('tr-TR')}`;
+            document.getElementById('sum-kasa-usd').innerText = `$${(dk.tryEq / usdRate).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+            
+            document.getElementById('sum-alacak-analiz').innerText = `₺${da.tryEq.toLocaleString('tr-TR')}`;
+            document.getElementById('sum-alacak-usd').innerText = `$${(da.tryEq / usdRate).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+            
+            document.getElementById('sum-borc-analiz').innerText = `₺${dborc.tryEq.toLocaleString('tr-TR')}`;
+            document.getElementById('sum-borc-usd').innerText = `$${(dborc.tryEq / usdRate).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+            
+            document.getElementById('sum-gider-analiz').innerText = `₺${dg.tryEq.toLocaleString('tr-TR')}`;
+            document.getElementById('sum-gider-usd').innerText = `$${(dg.tryEq / usdRate).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+            
+            document.getElementById('sum-net-kazanc').innerText = `₺${netMevcut.toLocaleString('tr-TR')}`;
+            document.getElementById('sum-net-usd').innerText = `$${(netMevcut / usdRate).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+
+            // --- RİSK BARI ---
+            const liabilities = dborc.tryEq + dg.tryEq;
+            const assets = dk.tryEq + da.tryEq;
+            let riskScore = 0;
+            let statusText = "HESAPLANIYOR";
+            let barColor = "#94a3b8";
+
+            if (assets > 0) {
+                if (liabilities === 0) riskScore = 100;
+                else {
+                    const ratio = assets / liabilities;
+                    riskScore = Math.min((ratio / 4) * 100, 100);
+                }
+            } else {
+                riskScore = liabilities > 0 ? 0 : 50; 
             }
-            document.getElementById('history-start').value = start.toISOString().split('T')[0];
-            document.getElementById('history-end').value = end.toISOString().split('T')[0];
-            renderHistoryTable();
+
+            if (riskScore >= 80) { statusText = "GÜVENLİ"; barColor = "#22c55e"; }
+            else if (riskScore >= 50) { statusText = "STABİL"; barColor = "#f59e0b"; }
+            else if (riskScore >= 25) { statusText = "RİSKLİ"; barColor = "#f97316"; }
+            else { statusText = "KRİTİK"; barColor = "#ef4444"; }
+
+            const riskBar = document.getElementById('risk-bar');
+            riskBar.style.width = `${riskScore}%`;
+            riskBar.style.backgroundColor = barColor;
+            riskBar.style.boxShadow = `0 0 15px ${barColor}66`;
+
+            document.getElementById('risk-percent').innerText = `${Math.round(riskScore)}%`;
+            document.getElementById('risk-percent').style.color = barColor;
+            document.getElementById('risk-status').innerText = statusText;
+            document.getElementById('risk-status').style.color = barColor;
+
+            // Segmented Bars
+            renderSegmentedBar('fin-segmented-bar', 'fin-legend', [
+                { label: 'Kasa', val: dk.tryEq, color: '#f59e0b' },
+                { label: 'Alacak', val: da.tryEq, color: '#22c55e' },
+                { label: 'Borç', val: dborc.tryEq, color: '#ef4444' },
+                { label: 'Gider', val: dg.tryEq, color: '#64748b' }
+            ]);
+
+            const currData = Object.keys(dk.breakdown).map(c => ({
+                label: c,
+                val: dk.breakdown[c] * db.rates[c],
+                color: c === 'TRY' ? '#6366f1' : (c === 'USD' ? '#22c55e' : '#f59e0b')
+            })).filter(x => x.val > 0);
+            renderSegmentedBar('curr-segmented-bar', 'curr-legend', currData);
+
+            // Header Update
+            const activeTab = document.querySelector('.tab-content.active').id;
+            const netValEl = document.getElementById('net-val');
+            const netValUsdEl = document.getElementById('net-val-usd');
+            let currentDisplayTry = 0;
+            if(activeTab === 'kasa-tab') currentDisplayTry = dk.tryEq;
+            else if(activeTab === 'cari-tab') currentDisplayTry = (da.tryEq - dborc.tryEq);
+            else currentDisplayTry = netMevcut;
+            
+            netValEl.innerText = `₺${currentDisplayTry.toLocaleString()}`;
+            netValUsdEl.innerText = `$${(currentDisplayTry / usdRate).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+
+            renderEkstre();
+        }
+
+        function renderSegmentedBar(barId, legendId, data) {
+            const barCont = document.getElementById(barId), legCont = document.getElementById(legendId);
+            if(!barCont || !legCont) return;
+            barCont.innerHTML = ""; legCont.innerHTML = "";
+            const total = data.reduce((s, item) => s + item.val, 0);
+            if (total === 0) {
+                barCont.innerHTML = `<div class="w-full bg-slate-100 dark:bg-white/5 h-full"></div>`;
+                return;
+            }
+            data.forEach(item => {
+                if (item.val > 0) {
+                    const percent = (item.val / total) * 100;
+                    const seg = document.createElement('div');
+                    seg.style.width = `${percent}%`; seg.style.backgroundColor = item.color;
+                    seg.className = "h-full transition-all duration-500";
+                    barCont.appendChild(seg);
+                    legCont.innerHTML += `<div class="flex items-center gap-1.5"><div class="w-2 h-2 rounded-full" style="background:${item.color}"></div><span class="text-[8px] font-black text-slate-500 uppercase">${item.label} %${Math.round(percent)}</span></div>`;
+                }
+            });
+        }
+
+        function takeCloudSnapshot() {
+            const list = document.getElementById('cloud-snapshot-list');
+            const now = new Date().toLocaleString('tr-TR');
+            const net = document.getElementById('sum-net-kazanc').innerText;
+            const entry = document.createElement('div');
+            entry.className = "flex justify-between items-center p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-white/5 shadow-sm animate-pulse";
+            entry.innerHTML = `<div><span class="text-[8px] font-black text-indigo-500 block">SNAPSHOT @ ${now}</span><span class="text-[10px] font-bold text-slate-600 dark:text-slate-300">Portföy Durumu Kaydedildi</span></div><span class="text-[10px] font-black text-slate-800 dark:text-white">${net}</span>`;
+            setTimeout(() => entry.classList.remove('animate-pulse'), 1000);
+            if(list.innerText.includes("bağlantısı kurulmaya hazır")) list.innerHTML = "";
+            list.prepend(entry);
+            alert("Firebase Snapshot: " + now + " itibariyle buluta gönderildi (Simüle edildi).");
+        }
+
+        function addCategory() { const n = document.getElementById('new-cat-name').value.toUpperCase().trim(); if (n && !db.categories[n]) { db.categories[n] = []; save(); } }
+        function addUnitToCategory() { const cat = document.getElementById('cat-select-for-unit').value, unit = document.getElementById('new-unit-code').value.toUpperCase().trim(); if (cat && unit) { if (!db.categories[cat].includes(unit)) db.categories[cat].push(unit); if (!db.rates[unit]) db.rates[unit] = 1; save(); } }
+        function addGiderCat() { const n = document.getElementById('new-gider-cat').value.toUpperCase().trim(); if(n && !db.giderRehber.includes(n)) { db.giderRehber.push(n); save(); } }
+
+        function render() {
+            if(!isAuthenticated) return;
+            const usdRate = db.rates.USD || 1;
+
+            document.getElementById('kasa-body').innerHTML = db.kasa.map(i => {
+                const totalTry = (i.v1+i.v2+i.ana) * (db.rates[i.curr] || 1);
+                return `<tr class="hover:bg-slate-50/50 transition-colors"><td class="p-4">${renderCurrSelect('kasa', i.id, i.curr)}</td><td class="p-4 text-right" onclick="openPos('kasa', ${i.id}, 'v1')">${i.v1.toLocaleString()}</td><td class="p-4 text-right" onclick="openPos('kasa', ${i.id}, 'v2')">${i.v2.toLocaleString()}</td><td class="p-4 text-right text-amber-500 font-extrabold" onclick="openPos('kasa', ${i.id}, 'ana')">${i.ana.toLocaleString()}</td><td class="p-4 text-right font-black text-amber-500">${(i.v1+i.v2+i.ana).toLocaleString()}<span class="usd-badge">$${(totalTry/usdRate).toFixed(2)}</span></td><td class="p-4 text-center"><button onclick="openNote('kasa', ${i.id})">📝</button> <button onclick="remove('kasa', ${i.id})" class="${isReadOnly?'hidden':''}">✕</button></td></tr>`
+            }).join('');
+
+            ['alacak', 'borc'].forEach(type => { 
+                document.getElementById(`${type}-body`).innerHTML = db[type].map(i => {
+                    const totalTry = i.val * (db.rates[i.curr] || 1);
+                    return `<tr class="transition-colors"><td class="p-5">${renderCariSelect(type, i.id, i.name)}</td><td class="p-5 text-right font-extrabold text-amber-500" onclick="openPos('${type}', ${i.id}, 'val')">${i.val.toLocaleString()}<span class="usd-badge">$${(totalTry/usdRate).toFixed(2)}</span></td><td class="p-5 text-right">${renderCurrSelect(type, i.id, i.curr)}</td><td class="text-center"><button onclick="openNote('${type}', ${i.id})">📝</button> <button onclick="remove('${type}', ${i.id})" class="${isReadOnly?'hidden':''}">✕</button></td></tr>`
+                }).join(''); 
+            });
+
+            document.getElementById('gider-body').innerHTML = db.gider.map(i => {
+                const totalTry = i.val * (db.rates[i.curr] || 1);
+                return `<tr class="transition-colors"><td class="p-5"><select onchange="update('gider', ${i.id}, 'name', this.value)" ${isReadOnly?'disabled':''}>${db.giderRehber.map(gn => `<option ${i.name===gn?'selected':''}>${gn}</option>`).join('')}</select></td><td class="p-5 text-right font-extrabold" onclick="openPos('gider', ${i.id}, 'val')">${i.val.toLocaleString()}<span class="usd-badge">$${(totalTry/usdRate).toFixed(2)}</span></td><td class="p-5 text-right">${renderCurrSelect('gider', i.id, i.curr)}</td><td class="text-center"><button onclick="openNote('gider', ${i.id})">📝</button> <button onclick="remove('gider', ${i.id})" class="${isReadOnly?'hidden':''}">✕</button></td></tr>`
+            }).join('');
+
+            document.getElementById('cat-select-for-unit').innerHTML = Object.keys(db.categories).map(c => `<option value="${c}">${c}</option>`).join('');
+            document.getElementById('rate-management-list').innerHTML = Object.keys(db.categories).map(cat => `<div class="space-y-3"><div class="flex justify-between border-b pb-2"><span class="text-[10px] font-black text-amber-500">${cat}</span></div>${db.categories[cat].map(unit => `<div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-white/5 rounded-2xl"><span>${unit}</span><div class="flex gap-3"><input type="number" step="0.01" ${unit==='TRY'||isReadOnly?'disabled':''} class="text-right font-black w-24 bg-transparent outline-none" value="${db.rates[unit]||1}" onchange="db.rates['${unit}']=parseFloat(this.value); save();"><button onclick="removeUnit('${cat}', '${unit}')" class="${isReadOnly?'hidden':''}">✕</button></div></div>`).join('')}</div>`).join('');
+            document.getElementById('cari-list-display').innerHTML = db.cariRehber.map(n => `<span class="bg-slate-100 dark:bg-white/5 px-4 py-2 rounded-xl text-[10px] font-bold">${n} <button onclick="deleteCari('${n}')" class="${isReadOnly?'hidden':''}">×</button></span>`).join('');
+            const es = document.getElementById('ekstre-select'), curVal = es.value;
+            es.innerHTML = `<option value="">👤 Rehberden Seç...</option>` + db.cariRehber.map(n => `<option value="${n}" ${n===curVal?'selected':''}>${n}</option>`).join('');
+        }
+
+        function renderCurrSelect(t, id, curr) { return `<select onchange="update('${t}', ${id}, 'curr', this.value)" ${isReadOnly?'disabled':''}>${Object.keys(db.rates).map(c => `<option ${curr===c?'selected':''}>${c}</option>`).join('')}</select>`; }
+        function renderCariSelect(t, id, name) { return `<select onchange="update('${t}', ${id}, 'name', this.value)" ${isReadOnly?'disabled':''}>${db.cariRehber.map(n => `<option ${name===n?'selected':''}>${n}</option>`).join('')}</select>`; }
+        function update(t, id, f, v) { if(isReadOnly) return; let item = db[t].find(x => x.id === id); if(item) { item[f] = (f === 'val') ? parseFloat(v) : v; save(); } }
+        function addRow(t) { if(isReadOnly) return; const id = Date.now(); if(t === 'kasa') db.kasa.push({id, v1:0, v2:0, ana:0, curr: 'TRY', note: "", history: []}); else db[t].push({id, name: "", val: 0, curr: 'TRY', note: "", history: []}); save(); }
+        function remove(t, id) { if(isReadOnly) return; if(confirm('Silsin mi?')) { db[t] = db[t].filter(x => x.id !== id); save(); } }
+        function saveCariCard() { const n = document.getElementById('new-cari-name').value.toUpperCase().trim(); if(n && !db.cariRehber.includes(n)) { db.cariRehber.push(n); save(); } }
+        
+        // --- DÜZENLENEN EKSTRE FONKSİYONU ---
+        function renderEkstre() {
+            const name = document.getElementById('ekstre-select').value;
+            const usdRate = db.rates.USD || 33.5;
+            const resDiv = document.getElementById('ekstre-sonuc');
+            const detayBody = document.getElementById('ekstre-detay-body');
+            
+            // Eğer seçim yoksa bölümü gizle
+            if(!name || name === "") { 
+                resDiv.classList.add('hidden'); 
+                if(detayBody) detayBody.innerHTML = "";
+                return; 
+            }
+            
+            resDiv.classList.remove('hidden');
+            if(detayBody) detayBody.innerHTML = ""; 
+
+            // Verileri Filtrele
+            const alacaklar = db.alacak.filter(i => i.name === name);
+            const borclar = db.borc.filter(i => i.name === name);
+            
+            let aTotalTRY = 0;
+            let bTotalTRY = 0;
+
+            const allMoves = [
+                ...alacaklar.map(i => ({...i, type: 'ALACAK', color: 'text-emerald-500', sign: '+'})),
+                ...borclar.map(i => ({...i, type: 'BORÇ', color: 'text-rose-500', sign: '-'}))
+            ];
+
+            if(allMoves.length === 0) {
+                detayBody.innerHTML = `<div class="text-[10px] text-slate-400 italic text-center py-4">Bu kişiye ait hareket kaydı bulunamadı.</div>`;
+            } else {
+                allMoves.forEach(m => {
+                    const currentRate = db.rates[m.curr] || 1;
+                    const tryEquivalent = (m.val * currentRate);
+                    
+                    if(m.type === 'ALACAK') aTotalTRY += tryEquivalent;
+                    else bTotalTRY += tryEquivalent;
+
+                    detayBody.innerHTML += `
+                        <div class="flex justify-between items-center p-2 bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/5 mb-2">
+                            <div>
+                                <span class="text-[8px] font-black ${m.color} uppercase block">${m.type}</span>
+                                <span class="text-[10px] font-bold text-slate-600 dark:text-slate-300">${m.sign}${m.val.toLocaleString('tr-TR')} ${m.curr}</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-[10px] font-black text-slate-800 dark:text-white">₺${tryEquivalent.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2})}</span>
+                            </div>
+                        </div>`;
+                });
+            }
+
+            const netTRY = aTotalTRY - bTotalTRY;
+
+            // Arayüz Değerlerini Güncelle
+            document.getElementById('ekstre-alacak').innerText = `₺${aTotalTRY.toLocaleString('tr-TR', {minimumFractionDigits:2})}`;
+            document.getElementById('ekstre-borc').innerText = `₺${bTotalTRY.toLocaleString('tr-TR', {minimumFractionDigits:2})}`;
+            document.getElementById('ekstre-net').innerText = `₺${Math.abs(netTRY).toLocaleString('tr-TR', {minimumFractionDigits:2})}`;
+            document.getElementById('ekstre-net-usd').innerText = `$${(Math.abs(netTRY) / usdRate).toLocaleString('en-US', {minimumFractionDigits:2})}`;
+            
+            const bg = document.getElementById('ekstre-net-bg');
+            const icon = document.getElementById('ekstre-icon');
+            
+            // Görsel Durum Güncellemesi
+            if(netTRY > 0) {
+                bg.className = "relative overflow-hidden p-6 rounded-[2rem] shadow-xl bg-gradient-to-br from-emerald-500 to-emerald-700 transition-all duration-500";
+                icon.innerText = "📈";
+            } else if(netTRY < 0) {
+                bg.className = "relative overflow-hidden p-6 rounded-[2rem] shadow-xl bg-gradient-to-br from-rose-500 to-rose-700 transition-all duration-500";
+                icon.innerText = "📉";
+            } else {
+                bg.className = "relative overflow-hidden p-6 rounded-[2rem] shadow-xl bg-slate-800 transition-all duration-500";
+                icon.innerText = "⚖️";
+            }
         }
 
         function renderHistoryTable() {
@@ -722,9 +966,7 @@
             let html = "", lastNet = 0;
             sortedDays.forEach((day, index) => {
                 const dayDate = new Date(day.split('.').reverse().join('-'));
-                if ((start && dayDate < new Date(start)) || (end && dayDate > new Date(end))) {
-                    lastNet = calculateNetForArchive(archiveData[day]); return;
-                }
+                if ((start && dayDate < new Date(start)) || (end && dayDate > new Date(end))) { lastNet = calculateNetForArchive(archiveData[day]); return; }
                 const dayDb = archiveData[day];
                 const currentNet = calculateNetForArchive(dayDb);
                 const dailyProfit = index === 0 ? 0 : currentNet - lastNet;
@@ -734,101 +976,14 @@
             body.innerHTML = html || '<tr><td colspan="5" class="text-center py-10">Veri bulunamadı.</td></tr>';
         }
 
-        function calculate() {
-            if(!isAuthenticated) return;
-            const getTotals = (arr, isKasa = false) => {
-                let totals = {}; Object.keys(db.rates).forEach(c => totals[c] = 0);
-                let tryEq = 0;
-                arr.forEach(i => {
-                    const val = isKasa ? (i.v1 + i.v2 + i.ana) : i.val;
-                    totals[i.curr] = (totals[i.curr] || 0) + val;
-                    tryEq += (val * (db.rates[i.curr] || 1));
-                });
-                return { breakdown: totals, tryEq };
-            };
-            const dk = getTotals(db.kasa, true), da = getTotals(db.alacak), dborc = getTotals(db.borc), dg = getTotals(db.gider);
-            const netMevcut = (dk.tryEq + da.tryEq) - (dborc.tryEq + dg.tryEq);
-            document.getElementById('sum-kasa').innerText = `₺${dk.tryEq.toLocaleString()}`;
-            document.getElementById('sum-alacak-analiz').innerText = `₺${da.tryEq.toLocaleString()}`;
-            document.getElementById('sum-borc-analiz').innerText = `₺${dborc.tryEq.toLocaleString()}`;
-            document.getElementById('sum-gider-analiz').innerText = `₺${dg.tryEq.toLocaleString()}`;
-            document.getElementById('sum-net-kazanc').innerText = `₺${netMevcut.toLocaleString()}`;
-
-            const riskRatio = dborc.tryEq > 0 ? Math.min(((dk.tryEq + da.tryEq) / dborc.tryEq) * 100, 100) : 100;
-            document.getElementById('risk-bar').style.width = `${riskRatio}%`;
-            document.getElementById('risk-percent').innerText = `${Math.round(riskRatio)}%`;
-            
-            const activeTab = document.querySelector('.tab-content.active').id;
-            const netValEl = document.getElementById('net-val');
-            if(activeTab === 'kasa-tab') netValEl.innerText = `₺${dk.tryEq.toLocaleString()}`;
-            else if(activeTab === 'cari-tab') netValEl.innerText = `₺${(da.tryEq - dborc.tryEq).toLocaleString()}`;
-            else netValEl.innerText = `₺${netMevcut.toLocaleString()}`;
-
-            updateAllSegmentedBars(dk, da, dborc, dg);
-            renderEkstre();
-            updateBreakdown('breakdown-kasa', dk.breakdown, 'bg-amber-500/20 text-amber-500 border border-amber-500/20');
-        }
-
-        function updateAllSegmentedBars(dk, da, dborc, dg) {
-            renderSegmentedBar('fin-segmented-bar', 'fin-legend', [
-                { label: 'Kasa', val: dk.tryEq, color: '#f59e0b' }, { label: 'Alacak', val: da.tryEq, color: '#22c55e' },
-                { label: 'Borç', val: dborc.tryEq, color: '#ef4444' }, { label: 'Gider', val: dg.tryEq, color: '#64748b' }
-            ]);
-        }
-
-        function renderSegmentedBar(barId, legendId, data) {
-            const barCont = document.getElementById(barId), legCont = document.getElementById(legendId);
-            barCont.innerHTML = ""; legCont.innerHTML = "";
-            const total = data.reduce((s, item) => s + item.val, 0);
-            if (total === 0) return;
-            data.forEach(item => {
-                if (item.val > 0) {
-                    const percent = (item.val / total) * 100;
-                    const seg = document.createElement('div');
-                    seg.style.width = `${percent}%`; seg.style.backgroundColor = item.color;
-                    barCont.appendChild(seg);
-                    legCont.innerHTML += `<div class="flex items-center gap-1.5"><div class="w-2 h-2 rounded-full" style="background:${item.color}"></div><span class="text-[9px] font-bold text-slate-500 uppercase">${item.label} %${Math.round(percent)}</span></div>`;
-                }
-            });
-        }
-
-        function updateBreakdown(id, data, cls) {
-            const container = document.getElementById(id);
-            if(container) container.innerHTML = Object.keys(data).filter(c => data[c] > 0).map(c => `<span class="badge ${cls}">${data[c].toLocaleString()} ${c}</span>`).join('');
-        }
-
-        function addCategory() { const n = document.getElementById('new-cat-name').value.toUpperCase().trim(); if (n && !db.categories[n]) { db.categories[n] = []; save(); } }
-        function addUnitToCategory() { const cat = document.getElementById('cat-select-for-unit').value, unit = document.getElementById('new-unit-code').value.toUpperCase().trim(); if (cat && unit) { if (!db.categories[cat].includes(unit)) db.categories[cat].push(unit); if (!db.rates[unit]) db.rates[unit] = 1; save(); } }
-        function addGiderCat() { const n = document.getElementById('new-gider-cat').value.toUpperCase().trim(); if(n && !db.giderRehber.includes(n)) { db.giderRehber.push(n); save(); } }
-
-        function render() {
-            if(!isAuthenticated) return;
-            document.getElementById('kasa-body').innerHTML = db.kasa.map(i => `<tr class="hover:bg-slate-50/50 transition-colors"><td class="p-4">${renderCurrSelect('kasa', i.id, i.curr)}</td><td class="p-4 text-right" onclick="openPos('kasa', ${i.id}, 'v1')">${i.v1.toLocaleString()}</td><td class="p-4 text-right" onclick="openPos('kasa', ${i.id}, 'v2')">${i.v2.toLocaleString()}</td><td class="p-4 text-right text-amber-500 font-extrabold" onclick="openPos('kasa', ${i.id}, 'ana')">${i.ana.toLocaleString()}</td><td class="p-4 text-right font-black text-amber-500">${(i.v1+i.v2+i.ana).toLocaleString()}</td><td class="p-4 text-center"><button onclick="openNote('kasa', ${i.id})">📝</button> <button onclick="remove('kasa', ${i.id})" class="${isReadOnly?'hidden':''}">✕</button></td></tr>`).join('');
-            ['alacak', 'borc'].forEach(type => { document.getElementById(`${type}-body`).innerHTML = db[type].map(i => `<tr class="transition-colors"><td class="p-5">${renderCariSelect(type, i.id, i.name)}</td><td class="p-5 text-right font-extrabold text-amber-500" onclick="openPos('${type}', ${i.id}, 'val')">${i.val.toLocaleString()}</td><td class="p-5 text-right">${renderCurrSelect(type, i.id, i.curr)}</td><td class="text-center"><button onclick="openNote('${type}', ${i.id})">📝</button> <button onclick="remove('${type}', ${i.id})" class="${isReadOnly?'hidden':''}">✕</button></td></tr>`).join(''); });
-            document.getElementById('gider-body').innerHTML = db.gider.map(i => `<tr class="transition-colors"><td class="p-5"><select onchange="update('gider', ${i.id}, 'name', this.value)" ${isReadOnly?'disabled':''}>${db.giderRehber.map(gn => `<option ${i.name===gn?'selected':''}>${gn}</option>`).join('')}</select></td><td class="p-5 text-right font-extrabold" onclick="openPos('gider', ${i.id}, 'val')">${i.val.toLocaleString()}</td><td class="p-5 text-right">${renderCurrSelect('gider', i.id, i.curr)}</td><td class="text-center"><button onclick="openNote('gider', ${i.id})">📝</button> <button onclick="remove('gider', ${i.id})" class="${isReadOnly?'hidden':''}">✕</button></td></tr>`).join('');
-            document.getElementById('cat-select-for-unit').innerHTML = Object.keys(db.categories).map(c => `<option value="${c}">${c}</option>`).join('');
-            document.getElementById('rate-management-list').innerHTML = Object.keys(db.categories).map(cat => `<div class="space-y-3"><div class="flex justify-between border-b pb-2"><span class="text-[10px] font-black text-amber-500">${cat}</span></div>${db.categories[cat].map(unit => `<div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-white/5 rounded-2xl"><span>${unit}</span><div class="flex gap-3"><input type="number" step="0.01" ${unit==='TRY'||isReadOnly?'disabled':''} class="text-right font-black w-24" value="${db.rates[unit]||1}" onchange="db.rates['${unit}']=parseFloat(this.value); save();"><button onclick="removeUnit('${cat}', '${unit}')" class="${isReadOnly?'hidden':''}">✕</button></div></div>`).join('')}</div>`).join('');
-            document.getElementById('cari-list-display').innerHTML = db.cariRehber.map(n => `<span class="bg-slate-100 dark:bg-white/5 px-4 py-2 rounded-xl text-[10px] font-bold">${n} <button onclick="deleteCari('${n}')" class="${isReadOnly?'hidden':''}">×</button></span>`).join('');
-            const es = document.getElementById('ekstre-select'), curVal = es.value;
-            es.innerHTML = `<option value="">👤 Rehberden Seç...</option>` + db.cariRehber.map(n => `<option value="${n}" ${n===curVal?'selected':''}>${n}</option>`).join('');
-            applyDarkMode();
-        }
-
-        function renderCurrSelect(t, id, curr) { return `<select onchange="update('${t}', ${id}, 'curr', this.value)" ${isReadOnly?'disabled':''}>${Object.keys(db.rates).map(c => `<option ${curr===c?'selected':''}>${c}</option>`).join('')}</select>`; }
-        function renderCariSelect(t, id, name) { return `<select onchange="update('${t}', ${id}, 'name', this.value)" ${isReadOnly?'disabled':''}>${db.cariRehber.map(n => `<option ${name===n?'selected':''}>${n}</option>`).join('')}</select>`; }
-        function update(t, id, f, v) { if(isReadOnly) return; let item = db[t].find(x => x.id === id); if(item) { item[f] = (f === 'val') ? parseFloat(v) : v; save(); } }
-        function addRow(t) { if(isReadOnly) return; const id = Date.now(); if(t === 'kasa') db.kasa.push({id, v1:0, v2:0, ana:0, curr: 'TRY', note: "", history: []}); else db[t].push({id, name: "", val: 0, curr: 'TRY', note: "", history: []}); save(); }
-        function remove(t, id) { if(isReadOnly) return; if(confirm('Silsin mi?')) { db[t] = db[t].filter(x => x.id !== id); save(); } }
-        function saveCariCard() { const n = document.getElementById('new-cari-name').value.toUpperCase().trim(); if(n && !db.cariRehber.includes(n)) { db.cariRehber.push(n); save(); } }
-        function renderEkstre() {
-            const name = document.getElementById('ekstre-select').value;
-            if(!name) { document.getElementById('ekstre-sonuc').classList.add('hidden'); return; }
-            document.getElementById('ekstre-sonuc').classList.remove('hidden');
-            const a = db.alacak.filter(i => i.name === name).reduce((s, i) => s + (i.val * db.rates[i.curr]), 0);
-            const b = db.borc.filter(i => i.name === name).reduce((s, i) => s + (i.val * db.rates[i.curr]), 0);
-            document.getElementById('ekstre-alacak').innerText = `₺${a.toLocaleString()}`;
-            document.getElementById('ekstre-borc').innerText = `₺${b.toLocaleString()}`;
-            document.getElementById('ekstre-net').innerText = `₺${(a-b).toLocaleString()}`;
+        function setDateRange(type) {
+            const now = new Date();
+            let start, end;
+            if (type === 'thisMonth') { start = new Date(now.getFullYear(), now.getMonth(), 1); end = new Date(now.getFullYear(), now.getMonth() + 1, 0); }
+            else if (type === 'lastMonth') { start = new Date(now.getFullYear(), now.getMonth() - 1, 1); end = new Date(now.getFullYear(), now.getMonth(), 0); }
+            document.getElementById('history-start').value = start.toISOString().split('T')[0];
+            document.getElementById('history-end').value = end.toISOString().split('T')[0];
+            renderHistoryTable();
         }
 
         function exportData() { 
@@ -846,10 +1001,7 @@
             calculate(); 
         }
 
-        window.onload = () => { 
-            applyDarkMode(); 
-            checkAuth(); // Açılışta PIN sor
-        };
+        window.onload = () => { applyDarkMode(); checkAuth(); };
     </script>
 </body>
 </html>
