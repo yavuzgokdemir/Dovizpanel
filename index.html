@@ -289,15 +289,23 @@
         });
     }
 
+    // MODÜLER GÜNCELLEME: TV Butonuna basıldığında hem paneli açar hem de yayınları kapatır (Mod 0)
     function toggleSettingsArea() {
         const area = document.getElementById('tv-settings-container');
         const list = document.getElementById('currency-list');
+        
         if (area.style.display === 'block') {
             area.style.display = 'none';
             list.style.display = 'block';
         } else {
+            // Ayarlar açıldığında tüm modları Mod 0 (False) yap
+            document.getElementById('tv-master-switch').checked = false;
+            document.getElementById('tv-master-switch-2').checked = false;
+            saveTvSettings(); // Firebase'e gönder ve senkronize et
+            
             area.style.display = 'block';
             list.style.display = 'none';
+            addLog("Ayarlar Paneli Aktif - Yayınlar Durduruldu (Mod 0)", "WARN");
         }
     }
 
@@ -310,7 +318,6 @@
             lastUpdate: Date.now()
         };
         db.ref('terminal_data/tv_settings').set(settings);
-        addLog("TV Ayarları Güncellendi", "INFO");
     }
 
     function updateTvButtonState(m1, m2) {
@@ -322,8 +329,6 @@
         b1.style.background = m1 ? 'var(--success)' : '#ccc';
         b2.style.background = m2 ? 'var(--success)' : '#ccc';
     }
-
-    // --- MEVCUT DİĞER FONKSİYONLARIN KORUNMUŞ HALİ ---
 
     function roundToTen(value) { return Math.round(value * 100) / 100; }
 
@@ -485,4 +490,3 @@
 </script>
 </body>
 </html>
-
