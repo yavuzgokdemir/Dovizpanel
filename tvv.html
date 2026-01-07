@@ -2,12 +2,10 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dynamic Dashboard Engine v3.6 - Elite Smart TV Edition</title>
-    <meta name="theme-color" content="#000000">
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;600;700;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Dashboard Engine v3.2</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;600;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
 
@@ -16,84 +14,100 @@
             --primary: #007bff;
             --success: #00c853;
             --danger: #ff5252;
-            --gold: #FFD700;
-            --gold-bright: #FFE44D;
-            --fx-up: #00ff66;
-            --fx-down: #ff3333;
-            --eko-turkuaz: #0087b3;
-            --eko-dark: #121516;
-            --eko-gray: #2d2f30;
+            --bg-dark: #0f1011;
+            --glass: rgba(255, 255, 255, 0.1);
+            --border: rgba(255, 255, 255, 0.2);
+            --cnbc-green: #008f39;
+            --cnbc-red: #c40000;
+            --cnbc-blue: #004a99;
         }
 
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
             background: #000; color: #fff;
             font-family: 'Inter', sans-serif;
-            overflow: hidden;
-            font-size: 1.1vw;
-            -webkit-font-smoothing: antialiased;
+            overflow: hidden; transition: background 0.8s ease;
         }
 
-        .engine-container { 
-            height: 100%; width: 100%; display: flex; justify-content: center; align-items: center; 
-            position: relative; z-index: 1; box-sizing: border-box;
-            will-change: transform;
+        .engine-container {
+            height: 100%; width: 100%;
+            display: flex; justify-content: center; align-items: center;
+            position: relative; z-index: 1;
         }
 
-        #bg-canvas, #gold-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+        /* Standby Özel Stilleri */
+        #bg-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+        
+        .main-card {
+            position: relative; z-index: 2; padding: 4rem;
+            background: var(--glass); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--border); border-radius: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            text-align: center; animation: fadeIn 1.5s ease-out;
+            max-width: 600px; width: 90%;
+        }
 
-        /* STANDBY MODU */
-        .main-card { position: relative; z-index: 2; padding: 4rem; background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(40px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 60px; text-align: center; max-width: 900px; width: 85%; box-shadow: 0 50px 100px rgba(0,0,0,0.9); }
-        #clock { font-size: 12rem; font-weight: 200; letter-spacing: -8px; line-height: 1; color: #fff; margin: 0; }
-        #full-date { font-size: 1.8rem; font-weight: 400; color: rgba(255,255,255,0.5); letter-spacing: 2px; margin-bottom: 30px; text-transform: uppercase; }
-        #greeting { font-weight: 900; letter-spacing: 15px; color: var(--primary); margin-bottom: 20px; font-size: 2rem; text-transform: uppercase; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* MOD 4 & 5 FX STYLE */
-        .fx-wrapper { width: 100%; height: 100%; display: flex; flex-direction: column; padding: 2vh 2vw; gap: 2vh; box-sizing: border-box; }
-        .fx-top-section { display: flex; gap: 1.5vw; height: 45vh; }
-        .fx-card-big { flex: 1; background: linear-gradient(180deg, #111 0%, #050505 100%); border: 1px solid #333; border-radius: 2.5vh; padding: 3vh; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
-        .fx-header { display: flex; align-items: center; gap: 1.5vw; height: 25%; }
-        .fx-icon-big { height: 80%; aspect-ratio: 4/3; border-radius: 0.8vh; object-fit: cover; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-        .fx-symbol-big { font-size: 4.8vw; font-weight: 900; letter-spacing: -2px; }
-        .fx-price-area { display: flex; height: 65%; gap: 1.5vw; align-items: center; }
-        .fx-sub-box { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: center; background: rgba(255,255,255,0.02); border-radius: 1.5vh; border: 1px solid rgba(255,255,255,0.05); }
-        .fx-val-big { font-family: 'JetBrains Mono', monospace; font-size: 7.2vw; text-align: center; font-weight: 700; letter-spacing: -4px; }
-        .fx-bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5vw; height: 43vh; }
-        .fx-row { display: flex; align-items: center; justify-content: space-between; padding: 0 2vw; background: #0c0c0c; border: 1px solid #222; border-radius: 1.5vh; transition: all 0.5s ease; }
-        .fx-icon-small { width: 4.5vw; height: 3.2vw; border-radius: 0.5vh; object-fit: cover; }
-        .fx-symbol-small { font-size: 3vw; font-weight: 700; }
-        .fx-val-small { font-family: 'JetBrains Mono', monospace; font-size: 4vw; flex: 1; text-align: right; }
+        #clock {
+            font-size: 6rem; font-weight: 200; letter-spacing: -2px;
+            background: linear-gradient(to bottom, #fff, #94a3b8);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
 
-        /* MOD 6 ELITE GOLD */
-        .gold-panel-wrapper { width: 100%; height: 100%; display: flex; flex-direction: column; padding: 3vh 3vw; box-sizing: border-box; background: radial-gradient(circle at 50% 0%, #1a1500 0%, #000 70%); }
-        .gold-header h1 { color: var(--gold); font-size: 3.8vw; font-weight: 900; letter-spacing: 2vw; text-transform: uppercase; margin: 0 0 4vh 0; text-align: center; filter: drop-shadow(0 0 20px rgba(255,215,0,0.3)); }
-        .gold-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2vh 3vw; }
-        .gold-row-item { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.03); backdrop-filter: blur(20px); padding: 2.5vh; border-radius: 2vh; border: 1px solid rgba(212, 175, 55, 0.2); transition: transform 0.3s ease; }
-        .gold-product-name { font-size: 2vw; font-weight: 700; color: #fff; flex: 1; }
-        .gold-buy-val, .gold-sell-val { font-family: 'JetBrains Mono', monospace; font-size: 3vw; font-weight: 800; }
-        .gold-sell-val { color: var(--gold-bright); }
+        #greeting { font-size: 1.8rem; font-weight: 400; opacity: 0.9; margin-bottom: 2rem; letter-spacing: 1px; transition: opacity 0.8s ease-in-out; height: 2rem; }
+        .divider { height: 1px; width: 60px; background: rgba(255,255,255,0.3); margin: 2rem auto; }
+        #weather-info { display: flex; align-items: center; justify-content: center; gap: 15px; font-size: 1.2rem; font-weight: 400; }
+        .temp-badge { background: white; color: #0f172a; padding: 5px 15px; border-radius: 20px; font-weight: 600; }
+        .pulse { animation: pulse-animation 2s infinite; }
+        @keyframes pulse-animation { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
 
-        /* FLASH EFFECTS */
-        .flash-up { background-color: rgba(0, 255, 102, 0.15) !important; border-color: var(--fx-up) !important; transform: scale(1.02); }
-        .flash-down { background-color: rgba(255, 51, 51, 0.15) !important; border-color: var(--fx-down) !important; transform: scale(1.02); }
+        /* MOD 1: CNBC-e ÖZEL STİLLERİ */
+        .video-wrapper { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: #000; }
+        video { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.7); }
+        .branding-panel { position: absolute; bottom: 133px; left: 0; background: rgba(255, 255, 255, 0.98); padding: 10px 20px; display: flex; align-items: center; gap: 20px; border-top-right-radius: 4px; z-index: 100; }
+        .logo-img { height: 32px; }
+        .clock-box { border-left: 2px solid #ddd; padding-left: 15px; font-weight: 800; font-size: 1.3rem; color: #222; }
+        .ticker-container { position: absolute; bottom: 0; width: 100%; display: flex; flex-direction: column; }
+        .layer-indices { height: 38px; background: #ffffff; display: flex; align-items: center; overflow: hidden; border-top: 1px solid #eee; }
+        .track-indices { display: flex; animation: scroll-ticker 25s linear infinite; }
+        .index-item { padding: 0 35px; white-space: nowrap; font-weight: 700; font-size: 0.95rem; color: #111; display: flex; align-items: center; gap: 10px; border-right: 1px solid #f0f0f0; }
+        .idx-badge { padding: 2px 8px; border-radius: 3px; color: white; font-size: 0.75rem; font-weight: 900; }
+        .layer-currencies { height: 65px; background: rgba(0, 11, 26, 0.95); display: flex; overflow: hidden; backdrop-filter: blur(5px); }
+        .currency-card { flex: 1; min-width: 190px; height: 65px; display: flex; flex-direction: column; border-right: 1px solid rgba(255,255,255,0.08); overflow: hidden; }
+        .card-USD { border-bottom: 4px solid #0056b3; }
+        .card-EUR { border-bottom: 4px solid #00897b; }
+        .cur-row-wrapper { display: flex; flex-direction: column; animation: slide-up-data 7s cubic-bezier(0.85, 0, 0.15, 1) infinite; }
+        .cur-data-row { height: 65px; display: flex; flex-direction: column; justify-content: center; padding: 0 20px; color: white; box-sizing: border-box; }
+        .cur-name { font-size: 0.8rem; font-weight: 600; opacity: 0.6; text-transform: uppercase; }
+        .cur-val-box { display: flex; justify-content: space-between; align-items: center; }
+        .cur-price { font-size: 1.5rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+        .layer-news { height: 35px; background: #ffffff; display: flex; align-items: center; position: relative; overflow: hidden; }
+        .news-label { background: var(--cnbc-red); color: white; padding: 0 15px; height: 100%; display: flex; align-items: center; font-weight: 900; font-size: 0.8rem; z-index: 20; position: absolute; left: 0; }
+        .news-marquee-container { flex: 1; overflow: hidden; display: flex; align-items: center; margin-left: 125px; }
+        .news-track { display: flex; white-space: nowrap; animation: news-scroll 40s linear infinite; }
+        .news-item { font-weight: 700; font-size: 1.05rem; color: #111; padding-right: 60px; text-transform: uppercase; }
+        .status-icon { font-size: 1.1rem; }
+        .icon-up { color: #00ff88; }
+        .icon-down { color: #ff4444; }
 
-        /* EKOTURK MOD 1 */
-        .mod1-wrapper { width: 100%; height: 100%; position: relative; }
-        .layer-headline { position: absolute; bottom: 134px; width: 100%; height: 60px; background: rgba(0,0,0,0.8); border-top: 2px solid var(--eko-turkuaz); overflow: hidden; }
-        .headline-item { height: 60px; display: flex; align-items: center; padding-left: 40px; color: white; font-size: 1.8rem; font-weight: 600; }
-        .layer-currency { position: absolute; bottom: 32px; width: calc(100% - 160px); height: 75px; background: #050505; display: flex; }
-        .currency-box { flex: 1; border-right: 1px solid #222; padding: 12px; display: flex; flex-direction: column; overflow: hidden; }
-        .curr-name { font-size: 0.9rem; color: #aaa; font-weight: 800; margin-bottom: 5px; }
-        .flip-container { height: 40px; overflow: hidden; position: relative; }
-        .flip-inner { position: absolute; width: 100%; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
-        .flip-row { height: 40px; display: flex; align-items: center; justify-content: space-between; font-size: 1.6rem; font-weight: 800; }
-        .side-panel { position: absolute; right: 0; bottom: 32px; width: 160px; height: 137px; background: var(--eko-turkuaz); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        @keyframes scroll-ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        @keyframes news-scroll { from { transform: translateX(0); } to { transform: translateX(-100%); } }
+        @keyframes slide-up-data { 0%, 45% { transform: translateY(0); } 50%, 95% { transform: translateY(-65px); } 100% { transform: translateY(0); } }
+
+        /* Genel Yükleme Ekranı Stilleri (Mod 2-6 için) */
+        .info-card { text-align: center; padding: 60px; border-radius: 40px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(20px); max-width: 600px; }
+        .status-badge { background: var(--primary); padding: 8px 24px; border-radius: 100px; font-size: 0.8rem; font-weight: 900; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 30px; display: inline-block; }
+        .mode-title { font-size: 4rem; margin: 10px 0; font-weight: 900; background: linear-gradient(to bottom, #fff, #888); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .loading-bar { width: 100px; height: 4px; background: rgba(255,255,255,0.1); margin: 30px auto; border-radius: 2px; overflow: hidden; position: relative; }
+        .loading-bar::after { content: ''; position: absolute; left: -100%; width: 100%; height: 100%; background: var(--primary); animation: loading 1.5s infinite; }
+        @keyframes loading { 0% { left: -100%; } 100% { left: 100%; } }
     </style>
 </head>
 <body>
 
 <canvas id="bg-canvas"></canvas>
-<canvas id="gold-canvas"></canvas>
 <div id="dashboard-engine" class="engine-container"></div>
 
 <script>
@@ -108,201 +122,228 @@
     const db = firebase.database();
 
     let currentConfig = { master: null, screen: null };
-    let activeIntervals = [];
-    let showSell = true;
-    let animId = null;
+    let greetingState = 0;
+    let timeMessage = "";
+    let particles = [];
+    let animationId = null;
 
-    function clearEngine() {
-        activeIntervals.forEach(clearInterval);
-        activeIntervals = [];
-        if(animId) cancelAnimationFrame(animId);
-        document.getElementById('bg-canvas').style.display = "none";
-        document.getElementById('gold-canvas').style.display = "none";
-    }
+    db.ref('terminal_data').on('value', (snapshot) => {
+        const data = snapshot.val();
+        if (!data) return;
+        const master = data.tv_settings?.master || false;
+        const screen = data.tv_settings?.screen || "1";
 
-    function getIcon(item) {
-        const name = (item.name || "").toUpperCase();
-        if (item.category === "altin" || name.includes("ALTIN") || name.includes("GOLD")) {
-            return "https://cdn-icons-png.flaticon.com/512/2489/2489756.png"; 
-        }
-        const mapping = { 'USD': 'us', 'EUR': 'eu', 'GBP': 'gb', 'CHF': 'ch', 'CAD': 'ca', 'SAR': 'sa', 'JPY': 'jp', 'AUD': 'au' };
-        const code = mapping[name] || 'un';
-        return `https://flagcdn.com/w320/${code}.png`;
-    }
-
-    db.ref('terminal_data/tv_settings').on('value', snap => {
-        const data = snap.val();
-        if(!data) return;
-        if(currentConfig.master !== data.master || currentConfig.screen !== data.screen) {
-            currentConfig = { master: data.master, screen: data.screen };
+        if (currentConfig.master !== master || currentConfig.screen !== screen) {
+            currentConfig.master = master;
+            currentConfig.screen = screen;
             updateUI();
         }
     });
 
     function updateUI() {
-        clearEngine();
         const container = document.getElementById('dashboard-engine');
-        
-        if (!currentConfig.master) renderStandby(container);
-        else if (currentConfig.screen === "1") renderMod1(container);
-        else if (currentConfig.screen === "4") renderMod4(container);
-        else if (currentConfig.screen === "5") renderMod5(container);
-        else if (currentConfig.screen === "6") renderMod6(container);
+        if (!currentConfig.master) {
+            renderStandby(container);
+        } else {
+            renderScreen(container, currentConfig.screen);
+        }
     }
 
+    // --- MOD 0: STANDBY ---
     function renderStandby(container) {
-        const canvas = document.getElementById('bg-canvas');
-        canvas.style.display = "block";
-        container.innerHTML = `<div class="main-card"><div id="greeting">HOŞGELDİNİZ</div><div id="clock">00:00</div><div id="full-date">---</div><div id="temp" style="font-size:2rem; font-weight:700;">...</div></div>`;
+        document.body.style.background = "#0f172a";
+        container.innerHTML = `
+            <div class="main-card">
+                <div id="clock">00:00</div>
+                <div id="greeting"></div>
+                <div class="divider"></div>
+                <div id="weather-info">
+                    <span id="city">İSTANBUL</span>
+                    <span class="temp-badge" id="temp">--°C</span>
+                    <span id="desc" class="pulse">Yükleniyor...</span>
+                </div>
+            </div>
+        `;
+        startStandbyEngine();
+    }
+
+    // --- MOD 1: CNBC-e (ENJEKTE EDİLEN MOD) ---
+    function renderCNBCe(container) {
+        document.body.style.background = "#000";
+        container.innerHTML = `
+            <div class="video-wrapper">
+                <video id="bgVideo" autoplay muted loop playsinline><source src="video1.mp4" type="video/mp4"></video>
+            </div>
+            <div class="branding-panel">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/CNBC_logo.svg/1200px-CNBC_logo.svg.png" class="logo-img">
+                <div class="clock-box" id="liveClock">--:--:--</div>
+            </div>
+            <div class="ticker-container">
+                <div class="layer-indices"><div class="track-indices" id="yandexIndices"></div></div>
+                <div class="layer-currencies" id="firebaseCurrencies"></div>
+                <div class="layer-news">
+                    <div class="news-label">SON DAKİKA</div>
+                    <div class="news-marquee-container"><div class="news-track" id="newsTrack">Yükleniyor...</div></div>
+                </div>
+            </div>
+        `;
         
-        initParticles(canvas);
-        const clockTask = () => {
-            const now = new Date();
-            document.getElementById('clock').textContent = now.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
-            document.getElementById('full-date').textContent = now.toLocaleDateString('tr-TR', {day:'numeric', month:'long', year:'numeric', weekday:'long'});
-        };
-        clockTask();
-        activeIntervals.push(setInterval(clockTask, 1000));
+        // Veri akışlarını başlat
+        updateCNBCContent();
+        db.ref('terminal_data/currencies').off(); // Eski dinleyiciyi temizle
+        db.ref('terminal_data/currencies').on('value', (snap) => renderCNBCFirebase(snap.val()));
+        
+        setInterval(() => { 
+            const clock = document.getElementById('liveClock');
+            if(clock) clock.innerText = new Date().toLocaleTimeString('tr-TR'); 
+        }, 1000);
     }
 
-    function renderMod4(container) {
-        setupFXBase(container, "DÖVİZ PİYASASI", false);
-        db.ref('terminal_data/currencies').on('value', snap => {
-            const data = Object.values(snap.val() || {}).filter(i => i.category !== 'altin').slice(0, 8);
-            updateFXGrid(data, false);
-        });
-    }
-
-    function renderMod5(container) {
-        setupFXBase(container, "ALTIN PİYASASI", true);
-        db.ref('terminal_data/currencies').on('value', snap => {
-            const data = Object.values(snap.val() || {}).filter(i => i.category === 'altin').sort((a,b) => (a.order||0)-(b.order||0)).slice(0, 10);
-            updateFXGrid(data, true);
-        });
-    }
-
-    function setupFXBase(container, title, isGold) {
-        const canvas = document.getElementById('gold-canvas');
-        canvas.style.display = "block";
-        initGoldRain(canvas);
-        container.innerHTML = `<div class="fx-wrapper"><div class="fx-top-section" id="fx-top"></div><div class="fx-bottom-grid" id="fx-bottom"></div></div>`;
-    }
-
-    function updateFXGrid(data, isGold) {
-        const top = document.getElementById('fx-top');
-        const bottom = document.getElementById('fx-bottom');
-        if(!top || !bottom) return;
-
-        top.innerHTML = ''; bottom.innerHTML = '';
-        data.forEach((c, i) => {
-            const buy = parseFloat(c.buy).toLocaleString('tr-TR', {minimumFractionDigits: isGold ? 0 : 3});
-            const sell = parseFloat(c.sell).toLocaleString('tr-TR', {minimumFractionDigits: isGold ? 0 : 3});
-            const icon = getIcon(c);
-
-            if(i < 2) {
-                top.innerHTML += `<div class="fx-card-big" id="card-${c.id}"><div class="fx-header"><img src="${icon}" class="fx-icon-big"><span class="fx-symbol-big">${c.name}</span></div><div class="fx-price-area"><div class="fx-sub-box"><span style="color:#666; text-align:center; font-weight:800;">ALIŞ</span><span class="fx-val-big" style="color:var(--fx-down)">${buy}</span></div><div class="fx-sub-box"><span style="color:#666; text-align:center; font-weight:800;">SATIŞ</span><span class="fx-val-big" style="color:var(--fx-up)">${sell}</span></div></div></div>`;
-            } else {
-                bottom.innerHTML += `<div class="fx-row" id="card-${c.id}"><div style="display:flex; align-items:center; gap:1vw; width:30%;"><img src="${icon}" class="fx-icon-small"><span class="fx-symbol-small">${c.name}</span></div><div style="display:flex; width:65%; justify-content:space-between;"><span class="fx-val-small" style="color:var(--fx-down)">${buy}</span><span class="fx-val-small" style="color:var(--fx-up)">${sell}</span></div></div>`;
-            }
-        });
-    }
-
-    function renderMod6(container) {
-        container.innerHTML = `<div class="gold-panel-wrapper"><div class="gold-header"><h1>CANLI ALTIN PİYASASI</h1></div><div class="gold-container" id="gold-list"></div></div>`;
-        db.ref('terminal_data/currencies').on('value', snap => {
-            const data = Object.values(snap.val() || {}).filter(i => i.category === 'altin').sort((a,b) => (a.order||0)-(b.order||0));
-            const list = document.getElementById('gold-list');
-            if(list) {
-                list.innerHTML = data.map(item => `
-                    <div class="gold-row-item">
-                        <div class="gold-product-name">${item.name}</div>
-                        <div style="display:flex; gap:3vw; align-items:center;">
-                            <div class="gold-buy-val">${Math.floor(item.buy).toLocaleString('tr-TR')}</div>
-                            <div style="color:var(--fx-up); font-size:1.5vw;">▲</div>
-                            <div class="gold-sell-val">${Math.floor(item.sell).toLocaleString('tr-TR')}</div>
+    function renderCNBCFirebase(data) {
+        const container = document.getElementById('firebaseCurrencies');
+        if(!container || !data) return;
+        container.innerHTML = data.slice(0, 7).map(item => {
+            const isUp = Math.random() > 0.3;
+            const currencyKey = item.name.split(' ')[0].substring(0,3).toUpperCase();
+            return `
+                <div class="currency-card card-${currencyKey}">
+                    <div class="cur-row-wrapper">
+                        <div class="cur-data-row">
+                            <div class="cur-name">${item.name} ALIŞ</div>
+                            <div class="cur-val-box">
+                                <span class="cur-price">${item.buy.toLocaleString('tr-TR', {minimumFractionDigits: 4})}</span>
+                                <i class="fas fa-caret-${isUp?'up icon-up':'down icon-down'} status-icon"></i>
+                            </div>
                         </div>
-                    </div>`).join('');
+                        <div class="cur-data-row">
+                            <div class="cur-name">${item.name} SATIŞ</div>
+                            <div class="cur-val-box">
+                                <span class="cur-price">${item.sell.toLocaleString('tr-TR', {minimumFractionDigits: 4})}</span>
+                                <i class="fas fa-caret-${isUp?'up icon-up':'down icon-down'} status-icon"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+        }).join('');
+    }
+
+    async function updateCNBCContent() {
+        const rssUrl = 'https://www.aa.com.tr/tr/rss/default?cat=ekonomi';
+        try {
+            const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+            const data = await res.json();
+            if(data.status === 'ok') {
+                const newsHtml = data.items.map(i => `<span class="news-item">${i.title} <span style="margin:0 15px; opacity:0.3">|</span></span>`).join('');
+                const newsTrack = document.getElementById('newsTrack');
+                if(newsTrack) newsTrack.innerHTML = newsHtml + newsHtml;
             }
-        });
+            // Statik Endeksler
+            const intlIndices = [{n:"BIST 100",v:9145.2},{n:"NASDAQ",v:16340.4},{n:"DAX 40",v:18150.6},{n:"S&P 500",v:5120.1}];
+            const indicesHtml = [...intlIndices, ...intlIndices].map(idx => `
+                <div class="index-item"><span>${idx.n}</span><span>${idx.v.toLocaleString()}</span>
+                <span class="idx-badge" style="background:var(--cnbc-green)">▲ %0.45</span></div>`).join('');
+            const idxCont = document.getElementById('yandexIndices');
+            if(idxCont) idxCont.innerHTML = indicesHtml;
+        } catch (e) {}
     }
 
-    function renderMod1(container) {
-        container.innerHTML = `<div class="mod1-wrapper">
-            <div class="side-panel"><div style="font-weight:900; font-size:1.5rem;">EKOTÜRK</div><div id="m1-time" style="font-weight:700;"></div></div>
-            <div class="layer-headline" id="m1-news"></div>
-            <div class="layer-currency" id="m1-cur"></div>
-        </div>`;
-        
-        db.ref('terminal_data/currencies').on('value', snap => {
-            const data = Object.values(snap.val() || {}).slice(0, 6);
-            const curBox = document.getElementById('m1-cur');
-            if(curBox) {
-                curBox.innerHTML = data.map(c => `
-                    <div class="currency-box">
-                        <div class="curr-name">${c.name}</div>
-                        <div class="flip-container"><div class="flip-inner" id="flip-${c.id}">
-                            <div class="flip-row"><span>${parseFloat(c.buy).toFixed(3)}</span><span style="color:var(--fx-up); font-size:1rem;">▲</span></div>
-                            <div class="flip-row"><span>${parseFloat(c.sell).toFixed(3)}</span><span style="color:var(--fx-up); font-size:1rem;">▲</span></div>
-                        </div></div>
-                    </div>`).join('');
+    // --- GENEL RENDER MANTIĞI ---
+    function renderScreen(container, screenId) {
+        // Kanvası temizle
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (screenId.toString() === "3") { // CNBC-e Modu
+            renderCNBCe(container);
+        } else {
+            document.body.style.background = "#000";
+            let screenName = getScreenName(screenId);
+            container.innerHTML = `
+                <div class="info-card">
+                    <div class="status-badge" style="background:var(--success)">TV YAYINDA</div>
+                    <div class="mode-title">${screenName}</div>
+                    <p class="mode-desc"><b>Mod ${screenId}</b> Aktif Edildi.</p>
+                    <div class="loading-bar"></div>
+                </div>
+            `;
+        }
+    }
+
+    function getScreenName(id) {
+        const names = { "1": "Bloomberg", "2": "Ekotürk", "3": "CNBC-e", "4": "Genel Bilgi", "5": "Geleneksel", "6": "Modern Pro" };
+        return names[id] || "Tanımlanmayan Mod";
+    }
+
+    // Standby Motoru Fonksiyonları (Hava Durumu, Saat, Canvas)
+    function startStandbyEngine() {
+        updateClockAndGreeting();
+        initCanvas();
+        if(!animationId) animate();
+        fetchWeather();
+    }
+
+    function updateClockAndGreeting() {
+        const now = new Date();
+        const h = now.getHours();
+        const m = now.getMinutes().toString().padStart(2, '0');
+        const clockElement = document.getElementById('clock');
+        if(clockElement) clockElement.textContent = `${h}:${m}`;
+        if (h >= 5 && h < 12) timeMessage = "GÜNAYDIN";
+        else if (h >= 12 && h < 18) timeMessage = "İYİ GÜNLER";
+        else if (h >= 18 && h < 23) timeMessage = "İYİ AKŞAMLAR";
+        else timeMessage = "İYİ GECELER";
+    }
+
+    async function fetchWeather() {
+        try {
+            const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=Istanbul&units=metric&lang=tr&appid=YOUR_API_KEY`);
+            const data = await res.json();
+            const temp = document.getElementById('temp');
+            if(temp) {
+                document.getElementById('city').textContent = data.name.toUpperCase();
+                temp.textContent = Math.round(data.main.temp) + "°C";
+                document.getElementById('desc').textContent = data.weather[0].description;
             }
-        });
-
-        activeIntervals.push(setInterval(() => {
-            showSell = !showSell;
-            document.querySelectorAll('.flip-inner').forEach(el => {
-                el.style.transform = showSell ? 'translateY(-40px)' : 'translateY(0px)';
-            });
-        }, 4000));
-    }
-
-    function initParticles(canvas) {
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        let pts = Array.from({length: 50}, () => ({
-            x: Math.random()*canvas.width, y: Math.random()*canvas.height,
-            vx: (Math.random()-0.5)*0.5, vy: (Math.random()-0.5)*0.5
-        }));
-        function draw() {
-            ctx.clearRect(0,0,canvas.width,canvas.height);
-            pts.forEach(p => {
-                p.x += p.vx; p.y += p.vy;
-                if(p.x<0 || p.x>canvas.width) p.vx*=-1;
-                if(p.y<0 || p.y>canvas.height) p.vy*=-1;
-                ctx.beginPath(); ctx.arc(p.x, p.y, 2, 0, Math.PI*2);
-                ctx.fillStyle = "rgba(0,123,255,0.5)"; ctx.fill();
-            });
-            animId = requestAnimationFrame(draw);
+        } catch (e) {
+            const temp = document.getElementById('temp');
+            if(temp) { temp.textContent = "18°C"; document.getElementById('desc').textContent = "Az Bulutlu"; }
         }
-        draw();
     }
 
-    function initGoldRain(canvas) {
-        const ctx = canvas.getContext('2d');
+    function initCanvas() {
+        const canvas = document.getElementById('bg-canvas');
         canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        let drops = Array.from({length: 60}, () => ({
-            x: Math.random()*canvas.width, y: Math.random()*canvas.height,
-            s: Math.random()*2+1, sp: Math.random()*1+0.5
-        }));
-        function draw() {
-            ctx.clearRect(0,0,canvas.width,canvas.height);
-            ctx.fillStyle = "rgba(255, 215, 0, 0.2)";
-            drops.forEach(d => {
-                d.y += d.sp; if(d.y > canvas.height) d.y = -10;
-                ctx.beginPath(); ctx.arc(d.x, d.y, d.s, 0, Math.PI*2); ctx.fill();
-            });
-            animId = requestAnimationFrame(draw);
-        }
-        draw();
+        particles = [];
+        for (let i = 0; i < 100; i++) particles.push(new Particle());
     }
 
-    window.addEventListener('resize', () => {
-        const c1 = document.getElementById('bg-canvas');
-        const c2 = document.getElementById('gold-canvas');
-        if(c1) { c1.width = window.innerWidth; c1.height = window.innerHeight; }
-        if(c2) { c2.width = window.innerWidth; c2.height = window.innerHeight; }
-    });
+    class Particle {
+        constructor() {
+            const canvas = document.getElementById('bg-canvas');
+            this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height;
+            this.size = Math.random() * 2 + 0.5; this.speedX = Math.random() * 0.4 - 0.2;
+            this.speedY = Math.random() * 0.4 - 0.2; this.opacity = Math.random() * 0.5;
+        }
+        update() {
+            const canvas = document.getElementById('bg-canvas');
+            this.x += this.speedX; this.y += this.speedY;
+            if (this.x > canvas.width) this.x = 0; if (this.x < 0) this.x = canvas.width;
+            if (this.y > canvas.height) this.y = 0; if (this.y < 0) this.y = canvas.height;
+        }
+        draw(ctx) { ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); }
+    }
+
+    function animate() {
+        const canvas = document.getElementById('bg-canvas');
+        if(!canvas) return;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if(!currentConfig.master) particles.forEach(p => { p.update(); p.draw(ctx); });
+        animationId = requestAnimationFrame(animate);
+    }
+
+    window.addEventListener('resize', initCanvas);
 </script>
-
 </body>
 </html>
