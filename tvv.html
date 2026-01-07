@@ -66,7 +66,7 @@
         .layer-news { height: 35px; background: #ffffff; display: flex; align-items: center; position: relative; overflow: hidden; }
         .news-label { background: var(--cnbc-red); color: white; padding: 0 15px; height: 100%; display: flex; align-items: center; font-weight: 900; font-size: 0.8rem; z-index: 20; position: absolute; left: 0; }
         .news-marquee-container { flex: 1; overflow: hidden; display: flex; align-items: center; margin-left: 125px; }
-        .news-track { display: flex; white-space: nowrap; animation: news-scroll 40s linear infinite; }
+        .news-track { display: flex; white-space: nowrap; animation: news-scroll 90s linear infinite; }
         .news-item { font-weight: 700; font-size: 1.05rem; color: #111; padding-right: 60px; text-transform: uppercase; }
         .icon-up { color: #00ff88; } .icon-down { color: #ff4444; }
 
@@ -99,11 +99,10 @@
     const db = firebase.database();
 
     let currentConfig = { master: null, screen: null };
-    let lastRenderedMode = null; // Takip için yeni değişken
+    let lastRenderedMode = null; 
     let animationId = null;
     let particles = [];
 
-    // Ana Dinleyici
     db.ref('terminal_data/tv_settings').on('value', (snapshot) => {
         const data = snapshot.val();
         if (!data) return;
@@ -119,8 +118,6 @@
 
     function updateUI() {
         const container = document.getElementById('dashboard-engine');
-        
-        // Temizlik: Mod değişirken eski dinleyicileri kapat
         db.ref('terminal_data/currencies').off();
 
         if (!currentConfig.master) {
@@ -153,13 +150,11 @@
         if(canvas) canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
 
         if (screenId.toString() === "3") {
-            // Sadece mod değiştiyse HTML'i kur, veri güncellenince buraya dokunma
             if (lastRenderedMode !== "CNBC") {
                 lastRenderedMode = "CNBC";
                 setupCNBCHtml(container);
-                updateCNBCContent(); // RSS bir kez çekilsin
+                updateCNBCContent();
             }
-            // Fiyatlar için dinleyiciyi her durumda tazele
             db.ref('terminal_data/currencies').on('value', (snap) => renderCNBCFirebase(snap.val()));
         } else {
             lastRenderedMode = "other";
@@ -195,7 +190,6 @@
             </div>
         `;
         
-        // Saati başlat
         if(window.cnbcClock) clearInterval(window.cnbcClock);
         window.cnbcClock = setInterval(() => {
             const el = document.getElementById('liveClock');
@@ -207,24 +201,28 @@
         const container = document.getElementById('firebaseCurrencies');
         if(!container || !data) return;
         
-        // DOM yükünü azaltmak için sadece değişen içeriği basıyoruz
         const html = data.slice(0, 7).map(item => {
             const isUp = Math.random() > 0.3;
             const currencyKey = item.name.split(' ')[0].substring(0,3).toUpperCase();
+            
+            // Format Kararı: Altın kelimesi geçiyorsa tam sayı, değilse 3 hane
+            const isGold = item.name.toUpperCase().includes("ALTIN");
+            const fractionDigits = isGold ? 0 : 3;
+
             return `
                 <div class="currency-card card-${currencyKey}">
                     <div class="cur-row-wrapper">
                         <div class="cur-data-row">
                             <div class="cur-name">${item.name} ALIŞ</div>
                             <div class="cur-val-box">
-                                <span class="cur-price">${item.buy.toLocaleString('tr-TR', {minimumFractionDigits: 4})}</span>
+                                <span class="cur-price">${item.buy.toLocaleString('tr-TR', {minimumFractionDigits: fractionDigits, maximumFractionDigits: fractionDigits})}</span>
                                 <i class="fas fa-caret-${isUp?'up icon-up':'down icon-down'}"></i>
                             </div>
                         </div>
                         <div class="cur-data-row">
                             <div class="cur-name">${item.name} SATIŞ</div>
                             <div class="cur-val-box">
-                                <span class="cur-price">${item.sell.toLocaleString('tr-TR', {minimumFractionDigits: 4})}</span>
+                                <span class="cur-price">${item.sell.toLocaleString('tr-TR', {minimumFractionDigits: fractionDigits, maximumFractionDigits: fractionDigits})}</span>
                                 <i class="fas fa-caret-${isUp?'up icon-up':'down icon-down'}"></i>
                             </div>
                         </div>
@@ -258,7 +256,6 @@
         return names[id] || "Mod " + id;
     }
 
-    // Standby Yardımcıları
     function startStandbyEngine() {
         updateClockAndGreeting();
         initCanvas();
