@@ -2,11 +2,9 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Dashboard Engine v3.5 - Elite Edition</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dynamic Dashboard Engine v3.6 - Elite Smart TV Edition</title>
     <meta name="theme-color" content="#000000">
-    <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22GoldDashboard%22,%22short_name%22:%22GoldDash%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23000000%22,%22theme_color%22:%22%23000000%22,%22icons%22:[{%22src%22:%22https://cdn-icons-png.flaticon.com/512/2489/2489756.png%22,%22sizes%22:%22512x512%22,%22type%22:%22image/png%22}]} drop">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2489/2489756.png">
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;600;700;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
@@ -18,18 +16,10 @@
             --primary: #007bff;
             --success: #00c853;
             --danger: #ff5252;
-            --glass: rgba(255, 255, 255, 0.05);
-            --border: rgba(255, 255, 255, 0.1);
             --gold: #FFD700;
             --gold-bright: #FFE44D;
-            --buy-red: #FF3B30;
-            --sell-green: #4CD964;
             --fx-up: #00ff66;
             --fx-down: #ff3333;
-            --tv-safe-padding: 4vh; 
-            /* Ekoturk Colors */
-            --eko-red: #c61118;
-            --eko-green: #118c4f;
             --eko-turkuaz: #0087b3;
             --eko-dark: #121516;
             --eko-gray: #2d2f30;
@@ -39,105 +29,74 @@
             margin: 0; padding: 0; width: 100%; height: 100%;
             background: #000; color: #fff;
             font-family: 'Inter', sans-serif;
-            overflow: hidden; transition: background 0.8s ease;
+            overflow: hidden;
             font-size: 1.1vw;
+            -webkit-font-smoothing: antialiased;
         }
 
         .engine-container { 
             height: 100%; width: 100%; display: flex; justify-content: center; align-items: center; 
             position: relative; z-index: 1; box-sizing: border-box;
+            will-change: transform;
         }
+
         #bg-canvas, #gold-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
-        
-        /* STANDBY STYLES */
-        .main-card { position: relative; z-index: 2; padding: 4rem; background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(40px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 80px; text-align: center; max-width: 850px; width: 85%; box-shadow: 0 50px 100px rgba(0,0,0,0.8); animation: cardEntrance 1.5s ease-out; }
-        @keyframes cardEntrance { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        #clock { font-size: 11rem; font-weight: 200; letter-spacing: -8px; margin-bottom: 0px; line-height: 1; color: #fff; }
-        #full-date { font-size: 1.6rem; font-weight: 400; color: rgba(255,255,255,0.5); letter-spacing: 2px; margin-bottom: 30px; text-transform: uppercase; }
-        #greeting { font-weight: 900; letter-spacing: 12px; color: var(--primary); margin-bottom: 20px; font-size: 1.8rem; text-transform: uppercase; animation: glowText 3s infinite alternate; }
-        @keyframes glowText { 0% { opacity: 0.6; transform: scale(0.98); text-shadow: 0 0 10px rgba(0,123,255,0); } 100% { opacity: 1; transform: scale(1.02); text-shadow: 0 0 20px rgba(0,123,255,0.5); } }
-        .weather-container { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 25px; }
-        .temp-badge { background: rgba(255,255,255,0.08); color: #fff; padding: 12px 35px; border-radius: 40px; font-weight: 700; border: 1px solid rgba(255,255,255,0.15); font-size: 1.8rem; }
-        .weather-desc { font-size: 1.2rem; color: #aaa; text-transform: capitalize; }
 
-        /* MOD 4 & 5 STYLES */
-        .fx-wrapper { width: 100%; height: 100%; display: flex; flex-direction: column; padding: 1.5vh 1.5vw; gap: 2vh; box-sizing: border-box; }
+        /* STANDBY MODU */
+        .main-card { position: relative; z-index: 2; padding: 4rem; background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(40px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 60px; text-align: center; max-width: 900px; width: 85%; box-shadow: 0 50px 100px rgba(0,0,0,0.9); }
+        #clock { font-size: 12rem; font-weight: 200; letter-spacing: -8px; line-height: 1; color: #fff; margin: 0; }
+        #full-date { font-size: 1.8rem; font-weight: 400; color: rgba(255,255,255,0.5); letter-spacing: 2px; margin-bottom: 30px; text-transform: uppercase; }
+        #greeting { font-weight: 900; letter-spacing: 15px; color: var(--primary); margin-bottom: 20px; font-size: 2rem; text-transform: uppercase; }
+
+        /* MOD 4 & 5 FX STYLE */
+        .fx-wrapper { width: 100%; height: 100%; display: flex; flex-direction: column; padding: 2vh 2vw; gap: 2vh; box-sizing: border-box; }
         .fx-top-section { display: flex; gap: 1.5vw; height: 45vh; }
-        .fx-card-big { flex: 1; background: #111; border: 0.5vh solid #222; border-radius: 2vh; padding: 2vh; display: flex; flex-direction: column; justify-content: space-between; }
-        .fx-header { display: flex; align-items: center; gap: 1.5vw; height: 20%; }
-        .fx-icon-big { height: 100%; aspect-ratio: 3/2; border-radius: 0.5vh; object-fit: cover; }
-        .fx-symbol-big { font-size: 4.5vw; font-weight: 900; letter-spacing: -2px; line-height: 1; }
-        .fx-price-area { display: flex; height: 75%; gap: 1vw; align-items: center; }
-        .fx-sub-box { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: center; background: rgba(255,255,255,0.03); border-radius: 1vh; padding: 1vh; }
-        .fx-label { font-size: 1.1vw; color: #666; text-align: center; margin-bottom: 0.5vh; font-weight: 700; text-transform: uppercase; }
-        .fx-val-big { font-family: 'JetBrains Mono', monospace; font-size: 7vw; text-align: center; font-weight: 700; line-height: 0.9; letter-spacing: -3px; }
+        .fx-card-big { flex: 1; background: linear-gradient(180deg, #111 0%, #050505 100%); border: 1px solid #333; border-radius: 2.5vh; padding: 3vh; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+        .fx-header { display: flex; align-items: center; gap: 1.5vw; height: 25%; }
+        .fx-icon-big { height: 80%; aspect-ratio: 4/3; border-radius: 0.8vh; object-fit: cover; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .fx-symbol-big { font-size: 4.8vw; font-weight: 900; letter-spacing: -2px; }
+        .fx-price-area { display: flex; height: 65%; gap: 1.5vw; align-items: center; }
+        .fx-sub-box { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: center; background: rgba(255,255,255,0.02); border-radius: 1.5vh; border: 1px solid rgba(255,255,255,0.05); }
+        .fx-val-big { font-family: 'JetBrains Mono', monospace; font-size: 7.2vw; text-align: center; font-weight: 700; letter-spacing: -4px; }
         .fx-bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5vw; height: 43vh; }
-        .fx-row { display: flex; align-items: center; justify-content: space-between; padding: 0 1.5vw; background: #0c0c0c; border: 1px solid #222; border-radius: 1.5vh; height: 100%; }
-        .fx-icon-small { width: 4vw; height: 2.8vw; border-radius: 0.3vh; object-fit: cover; }
-        .fx-symbol-small { font-size: 2.8vw; font-weight: 700; }
-        .fx-val-small { font-family: 'JetBrains Mono', monospace; font-size: 3.8vw; flex: 1; text-align: right; }
-        .fx-trend { width: 4vw; font-size: 2.5vw; text-align: center; }
-        .fx-buy { color: var(--fx-down); }
-        .fx-sell { color: var(--fx-up); }
+        .fx-row { display: flex; align-items: center; justify-content: space-between; padding: 0 2vw; background: #0c0c0c; border: 1px solid #222; border-radius: 1.5vh; transition: all 0.5s ease; }
+        .fx-icon-small { width: 4.5vw; height: 3.2vw; border-radius: 0.5vh; object-fit: cover; }
+        .fx-symbol-small { font-size: 3vw; font-weight: 700; }
+        .fx-val-small { font-family: 'JetBrains Mono', monospace; font-size: 4vw; flex: 1; text-align: right; }
 
-        /* MOD 6 MODERN ELITE STYLING */
-        .gold-panel-wrapper { width: 100%; height: 100%; display: flex; flex-direction: column; padding: 2vh 2vw; box-sizing: border-box; background: radial-gradient(circle at top right, #1a1a1a, #000); }
-        .gold-header h1 { color: var(--gold); font-size: 3.5vw; font-weight: 900; letter-spacing: 1.5vw; text-transform: uppercase; margin: 0 0 3vh 0; filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.4)); text-align: center; }
-        .gold-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5vh 2vw; padding: 1vh; overflow: hidden; }
-        .gold-row-item { display: flex; align-items: center; justify-content: space-between; background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%); backdrop-filter: blur(15px); padding: 2vh; border-radius: 2.5vh; border: 1px solid rgba(212, 175, 55, 0.2); position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .gold-row-item::before { content: ''; position: absolute; left: 0; top: 15%; height: 70%; width: 5px; background: linear-gradient(to bottom, transparent, var(--gold), transparent); box-shadow: 0 0 15px var(--gold); border-radius: 10px; }
-        .gold-product-name { font-size: 1.8vw; font-weight: 700; color: #fff; flex: 1; margin-left: 1vw; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
-        .gold-price-group { display: flex; gap: 2vw; align-items: center; }
-        .gold-price-wrapper { text-align: right; }
-        .gold-label { font-size: 0.7vw; color: var(--gold); font-weight: 900; letter-spacing: 2px; opacity: 0.7; margin-bottom: 0.5vh; }
-        .gold-buy-val, .gold-sell-val { font-family: 'JetBrains Mono', monospace; font-size: 2.8vw; font-weight: 800; color: #fff; letter-spacing: -1px; }
-        .gold-sell-val { color: var(--gold-bright); text-shadow: 0 0 10px rgba(255,228,77,0.3); }
-        .gold-trend-box { font-size: 2vw; color: var(--fx-up); padding: 0 0.5vw; }
+        /* MOD 6 ELITE GOLD */
+        .gold-panel-wrapper { width: 100%; height: 100%; display: flex; flex-direction: column; padding: 3vh 3vw; box-sizing: border-box; background: radial-gradient(circle at 50% 0%, #1a1500 0%, #000 70%); }
+        .gold-header h1 { color: var(--gold); font-size: 3.8vw; font-weight: 900; letter-spacing: 2vw; text-transform: uppercase; margin: 0 0 4vh 0; text-align: center; filter: drop-shadow(0 0 20px rgba(255,215,0,0.3)); }
+        .gold-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2vh 3vw; }
+        .gold-row-item { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.03); backdrop-filter: blur(20px); padding: 2.5vh; border-radius: 2vh; border: 1px solid rgba(212, 175, 55, 0.2); transition: transform 0.3s ease; }
+        .gold-product-name { font-size: 2vw; font-weight: 700; color: #fff; flex: 1; }
+        .gold-buy-val, .gold-sell-val { font-family: 'JetBrains Mono', monospace; font-size: 3vw; font-weight: 800; }
+        .gold-sell-val { color: var(--gold-bright); }
 
-        /* MOD 1 - EKOTURK STYLES */
-        .mod1-wrapper { width: 100%; height: 100%; position: relative; overflow: hidden; }
-        .layer-headline { position: absolute; bottom: 134px; width: 100%; height: 60px; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(15px); overflow: hidden; border-top: 2px solid rgba(255,255,255,0.1); }
-        #headlineStack { display: flex; flex-direction: column; transition: transform 0.8s cubic-bezier(0.65, 0, 0.35, 1); height: 60px; }
-        .headline-item { min-height: 60px; height: 60px; display: flex; align-items: center; padding-left: 30px; color: white; font-size: 1.6rem; font-weight: 600; letter-spacing: 0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .layer-stocks { position: absolute; bottom: 102px; width: 100%; height: 32px; background: var(--eko-gray); display: flex; align-items: center; overflow: hidden; border-bottom: 1px solid #444; }
-        .stock-ticker { display: flex; animation: scroll 60s linear infinite; }
-        .stock-item { padding: 0 30px; display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 0.9rem; color: #ddd; border-right: 1px solid #555; white-space: nowrap; }
-        .layer-currency { position: absolute; bottom: 32px; width: calc(100% - 140px); height: 70px; background: var(--eko-dark); display: flex; }
-        .currency-box { flex: 1; border-right: 1px solid rgba(255,255,255,0.1); padding: 10px; display: flex; flex-direction: column; position: relative; }
-        .curr-name { font-size: 0.75rem; color: rgba(255,255,255,0.7); font-weight: bold; margin-bottom: 5px; z-index: 1; }
-        .flip-container { height: 35px; overflow: hidden; position: relative; z-index: 1; }
-        .flip-inner { position: absolute; width: 100%; transition: transform 0.8s ease-in-out; }
-        .flip-row { height: 35px; display: flex; align-items: center; justify-content: space-between; color: white; font-size: 1.4rem; font-weight: 700; }
-        .curr-val-wrapper { display: flex; align-items: center; gap: 4px; }
-        .trend-arrow { font-size: 0.8rem; }
-        .change-tag { font-size: 0.8rem; padding: 2px 5px; border-radius: 3px; background: rgba(0,0,0,0.3); }
-        .layer-info { position: absolute; bottom: 0; width: 100%; height: 32px; background: var(--eko-turkuaz); display: flex; align-items: center; }
-        .info-marquee { color: white; font-weight: bold; font-size: 0.9rem; width: 100%; border:none; background:transparent; }
-        .side-panel { position: absolute; right: 0; bottom: 32px; width: 140px; height: 132px; background: #004d66; border-left: 1px solid rgba(255,255,255,0.2); display: flex; flex-direction: column; align-items: center; justify-content: space-around; }
-        .logo-area { font-weight: 900; color: white; font-size: 1.2rem; text-align: center; }
-        .logo-area span { display: block; font-size: 0.6rem; font-weight: normal; letter-spacing: 2px; }
-        .time-area { text-align: center; color: white; border-top: 1px solid #006b8f; width: 100%; padding-top: 5px; }
-        .clock-small { font-size: 1.4rem; font-weight: bold; }
-        .date-small { font-size: 0.7rem; opacity: 0.8; }
-        @keyframes scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        /* FLASH EFFECTS */
+        .flash-up { background-color: rgba(0, 255, 102, 0.15) !important; border-color: var(--fx-up) !important; transform: scale(1.02); }
+        .flash-down { background-color: rgba(255, 51, 51, 0.15) !important; border-color: var(--fx-down) !important; transform: scale(1.02); }
 
-        .flash-up { background-color: rgba(76, 217, 100, 0.25) !important; transform: translateX(5px); }
-        .flash-down { background-color: rgba(255, 59, 48, 0.25) !important; transform: translateX(5px); }
+        /* EKOTURK MOD 1 */
+        .mod1-wrapper { width: 100%; height: 100%; position: relative; }
+        .layer-headline { position: absolute; bottom: 134px; width: 100%; height: 60px; background: rgba(0,0,0,0.8); border-top: 2px solid var(--eko-turkuaz); overflow: hidden; }
+        .headline-item { height: 60px; display: flex; align-items: center; padding-left: 40px; color: white; font-size: 1.8rem; font-weight: 600; }
+        .layer-currency { position: absolute; bottom: 32px; width: calc(100% - 160px); height: 75px; background: #050505; display: flex; }
+        .currency-box { flex: 1; border-right: 1px solid #222; padding: 12px; display: flex; flex-direction: column; overflow: hidden; }
+        .curr-name { font-size: 0.9rem; color: #aaa; font-weight: 800; margin-bottom: 5px; }
+        .flip-container { height: 40px; overflow: hidden; position: relative; }
+        .flip-inner { position: absolute; width: 100%; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+        .flip-row { height: 40px; display: flex; align-items: center; justify-content: space-between; font-size: 1.6rem; font-weight: 800; }
+        .side-panel { position: absolute; right: 0; bottom: 32px; width: 160px; height: 137px; background: var(--eko-turkuaz); display: flex; flex-direction: column; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
 
 <canvas id="bg-canvas"></canvas>
-<canvas id="gold-canvas" style="display:none;"></canvas>
+<canvas id="gold-canvas"></canvas>
 <div id="dashboard-engine" class="engine-container"></div>
 
 <script>
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('data:text/javascript;base64,c2VsZi5hZGRFdmVudExpc3RlbmVyKCdmZXRjaCcsIGZ1bmN0aW9uKGV2ZW50KSB7IH0pOw==');
-        });
-    }
-
     const firebaseConfig = {
         apiKey: "AIzaSyCfcppc4rGYxmAj7fTzmYMZgcyBO4s8bFI",
         databaseURL: "https://doviz-kurlari-35554-default-rtdb.europe-west1.firebasedatabase.app",
@@ -149,148 +108,141 @@
     const db = firebase.database();
 
     let currentConfig = { master: null, screen: null };
-    let standbyIntervals = []; 
     let activeIntervals = [];
-    let newsList = [];
-    let currentNewsIndex = 0;
     let showSell = true;
+    let animId = null;
 
-    function resizeCanvas() {
-        [document.getElementById('bg-canvas'), document.getElementById('gold-canvas')].forEach(c => {
-            if(c) { c.width = window.innerWidth; c.height = window.innerHeight; }
-        });
+    function clearEngine() {
+        activeIntervals.forEach(clearInterval);
+        activeIntervals = [];
+        if(animId) cancelAnimationFrame(animId);
+        document.getElementById('bg-canvas').style.display = "none";
+        document.getElementById('gold-canvas').style.display = "none";
     }
-    window.addEventListener('resize', resizeCanvas);
 
     function getIcon(item) {
         const name = (item.name || "").toUpperCase();
-        if (name.includes("ALTIN") || name.includes("GOLD") || item.category === "altin") {
-            return "https://cdn-icons-png.flaticon.com/512/2499/2489756.png"; 
+        if (item.category === "altin" || name.includes("ALTIN") || name.includes("GOLD")) {
+            return "https://cdn-icons-png.flaticon.com/512/2489/2489756.png"; 
         }
-        const flagCode = item.flag ? item.flag.toLowerCase() : 'un';
-        return `https://flagcdn.com/w320/${flagCode}.png`;
+        const mapping = { 'USD': 'us', 'EUR': 'eu', 'GBP': 'gb', 'CHF': 'ch', 'CAD': 'ca', 'SAR': 'sa', 'JPY': 'jp', 'AUD': 'au' };
+        const code = mapping[name] || 'un';
+        return `https://flagcdn.com/w320/${code}.png`;
     }
 
-    db.ref('terminal_data').on('value', (snapshot) => {
-        const data = snapshot.val();
-        if (!data) return;
-        const master = data.tv_settings?.master || false;
-        const screen = data.tv_settings?.screen || "1";
-
-        if (currentConfig.master !== master || currentConfig.screen !== screen) {
-            currentConfig.master = master;
-            currentConfig.screen = screen;
+    db.ref('terminal_data/tv_settings').on('value', snap => {
+        const data = snap.val();
+        if(!data) return;
+        if(currentConfig.master !== data.master || currentConfig.screen !== data.screen) {
+            currentConfig = { master: data.master, screen: data.screen };
             updateUI();
         }
     });
 
     function updateUI() {
+        clearEngine();
         const container = document.getElementById('dashboard-engine');
-        const bgCanvas = document.getElementById('bg-canvas');
-        const goldCanvas = document.getElementById('gold-canvas');
-        standbyIntervals.forEach(clearInterval);
-        activeIntervals.forEach(clearInterval);
-        standbyIntervals = []; activeIntervals = [];
-        bgCanvas.style.display = "none";
-        goldCanvas.style.display = "none";
-        resizeCanvas();
-
-        if (!currentConfig.master) renderStandby(container, bgCanvas);
+        
+        if (!currentConfig.master) renderStandby(container);
         else if (currentConfig.screen === "1") renderMod1(container);
-        else if (currentConfig.screen === "4") renderMod4(container, goldCanvas);
-        else if (currentConfig.screen === "5") renderMod5(container, goldCanvas);
-        else if (currentConfig.screen === "6") renderMod6(container, goldCanvas);
-        else renderGenericScreen(container, currentConfig.screen);
+        else if (currentConfig.screen === "4") renderMod4(container);
+        else if (currentConfig.screen === "5") renderMod5(container);
+        else if (currentConfig.screen === "6") renderMod6(container);
     }
 
-    function renderStandby(container, canvas) {
-        document.body.style.background = "radial-gradient(circle at center, #0a0a0a 0%, #000 100%)";
+    function renderStandby(container) {
+        const canvas = document.getElementById('bg-canvas');
         canvas.style.display = "block";
-        container.innerHTML = `<div class="main-card"><div id="greeting">HOŞGELDİNİZ</div><div id="clock">00:00</div><div id="full-date">---</div><div class="weather-container"><span class="temp-badge" id="temp">--°C</span><span class="weather-desc" id="weather-text">Hava Durumu Alınıyor</span></div><div style="margin-top:40px; font-size: 0.75rem; font-weight:700; letter-spacing: 5px; color: rgba(0, 123, 255, 0.4)">TERMINAL ONLINE</div></div>`;
-        initModernCanvas(canvas);
-        const updateTime = () => {
+        container.innerHTML = `<div class="main-card"><div id="greeting">HOŞGELDİNİZ</div><div id="clock">00:00</div><div id="full-date">---</div><div id="temp" style="font-size:2rem; font-weight:700;">...</div></div>`;
+        
+        initParticles(canvas);
+        const clockTask = () => {
             const now = new Date();
-            if(document.getElementById('clock')) document.getElementById('clock').textContent = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-            if(document.getElementById('full-date')) {
-                const opt = { day: 'numeric', month: 'long', year: 'numeric', weekday: 'long' };
-                document.getElementById('full-date').textContent = now.toLocaleDateString('tr-TR', opt);
-            }
-            let hours = now.getHours();
-            let msg = hours < 12 ? "GÜNAYDIN" : hours < 18 ? "İYİ GÜNLER" : hours < 23 ? "İYİ AKŞAMLAR" : "İYİ GECELER";
-            if(document.getElementById('greeting')) document.getElementById('greeting').textContent = msg;
+            document.getElementById('clock').textContent = now.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
+            document.getElementById('full-date').textContent = now.toLocaleDateString('tr-TR', {day:'numeric', month:'long', year:'numeric', weekday:'long'});
         };
-        updateTime(); standbyIntervals.push(setInterval(updateTime, 1000));
-        fetchWeather();
+        clockTask();
+        activeIntervals.push(setInterval(clockTask, 1000));
     }
 
-    // MOD 1: EKOTURK DESIGN
-    function renderMod1(container) {
-        document.body.style.background = "#000";
-        container.innerHTML = `
-        <div class="mod1-wrapper">
-            <div class="side-panel">
-                <div class="logo-area">EKOTÜRK <span>TÜRKİYE'NİN EKONOMİ TELEVİZYONU</span></div>
-                <div class="time-area">
-                    <div class="clock-small" id="liveTime">00:00</div>
-                    <div class="date-small" id="liveDate">...</div>
-                </div>
-            </div>
-            <div class="layer-headline"><div id="headlineStack"><div class="headline-item">YÜKLENİYOR...</div></div></div>
-            <div class="layer-stocks"><div class="stock-ticker" id="stockTicker"></div></div>
-            <div class="layer-currency" id="currencyGrid"></div>
-            <div class="layer-info"><marquee class="info-marquee" scrollamount="6" id="bottomNews">Haberler güncelleniyor...</marquee></div>
-        </div>`;
+    function renderMod4(container) {
+        setupFXBase(container, "DÖVİZ PİYASASI", false);
+        db.ref('terminal_data/currencies').on('value', snap => {
+            const data = Object.values(snap.val() || {}).filter(i => i.category !== 'altin').slice(0, 8);
+            updateFXGrid(data, false);
+        });
+    }
 
-        const updateMod1Clock = () => {
-            const now = new Date();
-            const lt = document.getElementById('liveTime');
-            const ld = document.getElementById('liveDate');
-            if(lt) lt.innerText = now.toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
-            if(ld) ld.innerText = now.toLocaleDateString('tr-TR', { day: '2-digit', month: 'long' }).toUpperCase();
-        };
-        updateMod1Clock();
-        activeIntervals.push(setInterval(updateMod1Clock, 1000));
+    function renderMod5(container) {
+        setupFXBase(container, "ALTIN PİYASASI", true);
+        db.ref('terminal_data/currencies').on('value', snap => {
+            const data = Object.values(snap.val() || {}).filter(i => i.category === 'altin').sort((a,b) => (a.order||0)-(b.order||0)).slice(0, 10);
+            updateFXGrid(data, true);
+        });
+    }
 
-        const updateEkoData = async () => {
-            const NEWS_RSS = `https://www.aa.com.tr/tr/rss/default?cat=ekonomi`;
-            try {
-                const newsRes = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(NEWS_RSS)}`);
-                const newsData = await newsRes.json();
-                if(newsData.items && newsData.items.length > 0) {
-                    newsList = newsData.items.map(i => i.title.toUpperCase());
-                    const stack = document.getElementById('headlineStack');
-                    if(stack) stack.innerHTML = newsList.map(title => `<div class="headline-item">${title}</div>`).join('');
-                    const bNews = document.getElementById('bottomNews');
-                    if(bNews) bNews.innerText = newsList.join(" +++ ");
-                }
-                const marketItems = [{n: "BIST 100", v: "9.120,00", c: "+1,20"}, {n: "S&P 500", v: "5.137,08", c: "+0,80"}, {n: "NASDAQ", v: "16.274,94", c: "+1,14"}, {n: "DAX", v: "17.735,03", c: "-0,11"}, {n: "NIKKEI", v: "39.910,82", c: "+1,90"}];
-                const ticker = document.getElementById('stockTicker');
-                if(ticker) ticker.innerHTML = [...marketItems, ...marketItems].map(s => `<div class="stock-item">${s.n} <span style="color:white">${s.v}</span> <span style="color:${s.c.includes('-') ? '#ff4d4d':'#00ff88'}">${s.c.includes('-')?'▼':'▲'} %${s.c}</span></div>`).join('');
-            } catch (e) {}
-        };
-        updateEkoData();
-        activeIntervals.push(setInterval(updateEkoData, 300000));
+    function setupFXBase(container, title, isGold) {
+        const canvas = document.getElementById('gold-canvas');
+        canvas.style.display = "block";
+        initGoldRain(canvas);
+        container.innerHTML = `<div class="fx-wrapper"><div class="fx-top-section" id="fx-top"></div><div class="fx-bottom-grid" id="fx-bottom"></div></div>`;
+    }
 
-        activeIntervals.push(setInterval(() => {
-            if(newsList.length > 0) {
-                currentNewsIndex = (currentNewsIndex + 1) % newsList.length;
-                const stack = document.getElementById('headlineStack');
-                if(stack) stack.style.transform = `translateY(-${currentNewsIndex * 60}px)`;
+    function updateFXGrid(data, isGold) {
+        const top = document.getElementById('fx-top');
+        const bottom = document.getElementById('fx-bottom');
+        if(!top || !bottom) return;
+
+        top.innerHTML = ''; bottom.innerHTML = '';
+        data.forEach((c, i) => {
+            const buy = parseFloat(c.buy).toLocaleString('tr-TR', {minimumFractionDigits: isGold ? 0 : 3});
+            const sell = parseFloat(c.sell).toLocaleString('tr-TR', {minimumFractionDigits: isGold ? 0 : 3});
+            const icon = getIcon(c);
+
+            if(i < 2) {
+                top.innerHTML += `<div class="fx-card-big" id="card-${c.id}"><div class="fx-header"><img src="${icon}" class="fx-icon-big"><span class="fx-symbol-big">${c.name}</span></div><div class="fx-price-area"><div class="fx-sub-box"><span style="color:#666; text-align:center; font-weight:800;">ALIŞ</span><span class="fx-val-big" style="color:var(--fx-down)">${buy}</span></div><div class="fx-sub-box"><span style="color:#666; text-align:center; font-weight:800;">SATIŞ</span><span class="fx-val-big" style="color:var(--fx-up)">${sell}</span></div></div></div>`;
+            } else {
+                bottom.innerHTML += `<div class="fx-row" id="card-${c.id}"><div style="display:flex; align-items:center; gap:1vw; width:30%;"><img src="${icon}" class="fx-icon-small"><span class="fx-symbol-small">${c.name}</span></div><div style="display:flex; width:65%; justify-content:space-between;"><span class="fx-val-small" style="color:var(--fx-down)">${buy}</span><span class="fx-val-small" style="color:var(--fx-up)">${sell}</span></div></div>`;
             }
-        }, 30000));
+        });
+    }
 
-        db.ref('terminal_data/currencies').on('value', (snap) => {
-            if (currentConfig.screen !== "1") return;
-            const data = Object.values(snap.val() || {}).slice(0, 5);
-            const grid = document.getElementById('currencyGrid');
-            if(grid) {
-                const colors = ['rgba(0, 77, 102, 0.6)', 'rgba(198, 17, 24, 0.4)', 'rgba(17, 140, 79, 0.4)', 'rgba(81, 45, 168, 0.4)', 'rgba(230, 81, 0, 0.4)'];
-                grid.innerHTML = data.map((item, idx) => `
-                    <div class="currency-box" style="background-color: ${colors[idx % colors.length]}">
-                        <div class="curr-name">${item.name}</div>
-                        <div class="flip-container"><div class="flip-inner" style="transform: translateY(${showSell ? '-35px' : '0px'})">
-                            <div class="flip-row"><div class="curr-val-wrapper"><span>${parseFloat(item.buy).toFixed(3)}</span><span class="trend-arrow" style="color:#00ff88">▲</span></div><span class="change-tag">%0.12</span></div>
-                            <div class="flip-row"><div class="curr-val-wrapper"><span>${parseFloat(item.sell).toFixed(3)}</span><span class="trend-arrow" style="color:#00ff88">▲</span></div><span class="change-tag">%0.12</span></div>
+    function renderMod6(container) {
+        container.innerHTML = `<div class="gold-panel-wrapper"><div class="gold-header"><h1>CANLI ALTIN PİYASASI</h1></div><div class="gold-container" id="gold-list"></div></div>`;
+        db.ref('terminal_data/currencies').on('value', snap => {
+            const data = Object.values(snap.val() || {}).filter(i => i.category === 'altin').sort((a,b) => (a.order||0)-(b.order||0));
+            const list = document.getElementById('gold-list');
+            if(list) {
+                list.innerHTML = data.map(item => `
+                    <div class="gold-row-item">
+                        <div class="gold-product-name">${item.name}</div>
+                        <div style="display:flex; gap:3vw; align-items:center;">
+                            <div class="gold-buy-val">${Math.floor(item.buy).toLocaleString('tr-TR')}</div>
+                            <div style="color:var(--fx-up); font-size:1.5vw;">▲</div>
+                            <div class="gold-sell-val">${Math.floor(item.sell).toLocaleString('tr-TR')}</div>
+                        </div>
+                    </div>`).join('');
+            }
+        });
+    }
+
+    function renderMod1(container) {
+        container.innerHTML = `<div class="mod1-wrapper">
+            <div class="side-panel"><div style="font-weight:900; font-size:1.5rem;">EKOTÜRK</div><div id="m1-time" style="font-weight:700;"></div></div>
+            <div class="layer-headline" id="m1-news"></div>
+            <div class="layer-currency" id="m1-cur"></div>
+        </div>`;
+        
+        db.ref('terminal_data/currencies').on('value', snap => {
+            const data = Object.values(snap.val() || {}).slice(0, 6);
+            const curBox = document.getElementById('m1-cur');
+            if(curBox) {
+                curBox.innerHTML = data.map(c => `
+                    <div class="currency-box">
+                        <div class="curr-name">${c.name}</div>
+                        <div class="flip-container"><div class="flip-inner" id="flip-${c.id}">
+                            <div class="flip-row"><span>${parseFloat(c.buy).toFixed(3)}</span><span style="color:var(--fx-up); font-size:1rem;">▲</span></div>
+                            <div class="flip-row"><span>${parseFloat(c.sell).toFixed(3)}</span><span style="color:var(--fx-up); font-size:1rem;">▲</span></div>
                         </div></div>
                     </div>`).join('');
             }
@@ -298,129 +250,59 @@
 
         activeIntervals.push(setInterval(() => {
             showSell = !showSell;
-            document.querySelectorAll('.flip-inner').forEach(el => el.style.transform = showSell ? 'translateY(-35px)' : 'translateY(0px)');
+            document.querySelectorAll('.flip-inner').forEach(el => {
+                el.style.transform = showSell ? 'translateY(-40px)' : 'translateY(0px)';
+            });
         }, 4000));
     }
 
-    function renderMod4(container, canvas) {
-        document.body.style.background = "#000"; canvas.style.display = "block";
-        initGoldRain(canvas);
-        container.innerHTML = `<div class="fx-wrapper"><div class="fx-top-section" id="fx-top"></div><div class="fx-bottom-grid" id="fx-bottom"></div></div>`;
-        db.ref('terminal_data/currencies').once('value', snap => {
-            const data = Object.values(snap.val() || {}).slice(0, 8);
-            const top = document.getElementById('fx-top'), bottom = document.getElementById('fx-bottom');
-            if(!top || !bottom) return;
-            data.forEach((c, i) => {
-                const icon = getIcon(c);
-                const val = parseFloat(c.buy);
-                let buy, sell;
-                if (val > 100) {
-                    buy = Math.floor(parseFloat(c.buy)).toLocaleString('tr-TR');
-                    sell = Math.floor(parseFloat(c.sell)).toLocaleString('tr-TR');
-                } else {
-                    buy = parseFloat(c.buy).toFixed(3).replace('.',',');
-                    sell = parseFloat(c.sell).toFixed(3).replace('.',',');
-                }
-                if(i < 2) top.innerHTML += `<div class="fx-card-big" id="fx-${c.name}"><div class="fx-header"><img src="${icon}" class="fx-icon-big"><span class="fx-symbol-big">${c.name}</span></div><div class="fx-price-area"><div class="fx-sub-box"><span class="fx-label">ALIŞ</span><span class="fx-val-big fx-buy">${buy}</span></div><div class="fx-sub-box"><span class="fx-label">SATIŞ</span><span class="fx-val-big fx-sell">${sell}</span></div></div></div>`;
-                else bottom.innerHTML += `<div class="fx-row" id="fx-${c.name}"><div style="display:flex; align-items:center; gap:1vw; width:25%;"><img src="${icon}" class="fx-icon-small"><span class="fx-symbol-small">${c.name}</span></div><div style="display:flex; width:70%; justify-content:space-between; align-items:center;"><span class="fx-val-small fx-buy">${buy}</span><span class="fx-trend" style="color:var(--fx-up)">▲</span><span class="fx-val-small fx-sell">${sell}</span></div></div>`;
+    function initParticles(canvas) {
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        let pts = Array.from({length: 50}, () => ({
+            x: Math.random()*canvas.width, y: Math.random()*canvas.height,
+            vx: (Math.random()-0.5)*0.5, vy: (Math.random()-0.5)*0.5
+        }));
+        function draw() {
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            pts.forEach(p => {
+                p.x += p.vx; p.y += p.vy;
+                if(p.x<0 || p.x>canvas.width) p.vx*=-1;
+                if(p.y<0 || p.y>canvas.height) p.vy*=-1;
+                ctx.beginPath(); ctx.arc(p.x, p.y, 2, 0, Math.PI*2);
+                ctx.fillStyle = "rgba(0,123,255,0.5)"; ctx.fill();
             });
-        });
-        activeIntervals.push(setInterval(fxFlashEffect, 3000));
+            animId = requestAnimationFrame(draw);
+        }
+        draw();
     }
 
-    function renderMod5(container, canvas) {
-        document.body.style.background = "#000"; canvas.style.display = "block";
-        initGoldRain(canvas);
-        container.innerHTML = `<div class="fx-wrapper"><div class="fx-top-section" id="gold-top"></div><div class="fx-bottom-grid" id="gold-bottom"></div></div>`;
-        db.ref('terminal_data/currencies').on('value', snap => {
-            if (currentConfig.screen !== "5") return;
-            const goldData = Object.values(snap.val() || {}).filter(item => item.category === 'altin').sort((a,b) => (a.order||0)-(b.order||0));
-            const top = document.getElementById('gold-top'), bottom = document.getElementById('gold-bottom');
-            if(!top || !bottom) return; top.innerHTML = ''; bottom.innerHTML = '';
-            goldData.forEach((c, i) => {
-                const icon = getIcon(c);
-                const buy = Math.floor(parseFloat(c.buy)).toLocaleString('tr-TR');
-                const sell = Math.floor(parseFloat(c.sell)).toLocaleString('tr-TR');
-                if(i < 2) top.innerHTML += `<div class="fx-card-big" id="fx-${c.name}"><div class="fx-header"><img src="${icon}" class="fx-icon-big"><span class="fx-symbol-big" style="color:var(--gold)">${c.name}</span></div><div class="fx-price-area"><div class="fx-sub-box"><span class="fx-label">ALIŞ</span><span class="fx-val-big fx-buy">${buy}</span></div><div class="fx-sub-box"><span class="fx-label">SATIŞ</span><span class="fx-val-big fx-sell">${sell}</span></div></div></div>`;
-                else if(i < 10) bottom.innerHTML += `<div class="fx-row" id="fx-${c.name}"><div style="display:flex; align-items:center; gap:1vw; width:35%;"><img src="${icon}" class="fx-icon-small"><span class="fx-symbol-small">${c.name}</span></div><div style="display:flex; width:60%; justify-content:space-between; align-items:center;"><span class="fx-val-small fx-buy">${buy}</span><span class="fx-trend" style="color:var(--fx-up)">▲</span><span class="fx-val-small fx-sell">${sell}</span></div></div>`;
+    function initGoldRain(canvas) {
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        let drops = Array.from({length: 60}, () => ({
+            x: Math.random()*canvas.width, y: Math.random()*canvas.height,
+            s: Math.random()*2+1, sp: Math.random()*1+0.5
+        }));
+        function draw() {
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            ctx.fillStyle = "rgba(255, 215, 0, 0.2)";
+            drops.forEach(d => {
+                d.y += d.sp; if(d.y > canvas.height) d.y = -10;
+                ctx.beginPath(); ctx.arc(d.x, d.y, d.s, 0, Math.PI*2); ctx.fill();
             });
-        });
-        activeIntervals.push(setInterval(fxFlashEffect, 3000));
+            animId = requestAnimationFrame(draw);
+        }
+        draw();
     }
 
-    function renderMod6(container, canvas) {
-        document.body.style.background = "#050505"; 
-        canvas.style.display = "block";
-        initGoldRain(canvas);
-        container.innerHTML = `<div class="gold-panel-wrapper"><div class="gold-header"><h1>CANLI ALTIN PİYASASI</h1></div><div class="gold-container" id="gold-price-list"></div></div>`;
-        db.ref('terminal_data/currencies').on('value', snap => {
-            if (currentConfig.screen !== "6") return;
-            const goldData = Object.values(snap.val() || {}).filter(item => item.category === 'altin').sort((a,b) => (a.order||0)-(b.order||0));
-            const list = document.getElementById('gold-price-list');
-            if(list) {
-                list.innerHTML = goldData.map(item => {
-                    const buy = Math.floor(parseFloat(item.buy)).toLocaleString('tr-TR');
-                    const sell = Math.floor(parseFloat(item.sell)).toLocaleString('tr-TR');
-                    return `<div class="gold-row-item" id="grow-${item.id}"><div class="gold-product-name">${item.name}</div><div class="gold-price-group"><div class="gold-price-wrapper"><div class="gold-label"></div><div class="gold-buy-val">${buy}</div></div><div class="gold-trend-box">▲</div><div class="gold-price-wrapper"><div class="gold-label"></div><div class="gold-sell-val">${sell}</div></div></div></div>`;
-                }).join('');
-            }
-        });
-    }
-
-    function fxFlashEffect() {
-        const rows = document.querySelectorAll('[id^="fx-"]');
-        if(rows.length === 0) return;
-        const target = rows[Math.floor(Math.random()*rows.length)];
-        const isUp = Math.random() > 0.5;
-        target.classList.add(isUp ? 'flash-up' : 'flash-down');
-        setTimeout(() => target.classList.remove('flash-up', 'flash-down'), 1000);
-    }
-
-    function renderGenericScreen(container, id) {
-        container.innerHTML = `<div class="info-card" style="text-align:center; padding:50px; background:rgba(255,255,255,0.1); border-radius:20px;"><div class="status-badge" style="color:var(--primary); font-weight:900;">TV YAYINDA</div><div class="mode-title" style="font-size:3rem;">MOD ${id}</div></div>`;
-    }
-
-    function initModernCanvas(c) {
-        const ctx = c.getContext('2d'); let p = []; c.width = window.innerWidth; c.height = window.innerHeight;
-        for(let i=0; i<70; i++) p.push({x:Math.random()*c.width, y:Math.random()*c.height, vx:(Math.random()-0.5)*0.4, vy:(Math.random()-0.5)*0.4});
-        function anim() { 
-            if(currentConfig.master) return; 
-            ctx.clearRect(0,0,c.width,c.height); 
-            p.forEach((i, idx) => { 
-                i.x+=i.vx; i.y+=i.vy; 
-                if(i.x<0||i.x>c.width) i.vx*=-1; if(i.y<0||i.y>c.height) i.vy*=-1;
-                for(let j=idx+1; j<p.length; j++) {
-                    let dx = i.x-p[j].x, dy = i.y-p[j].y, dist = Math.sqrt(dx*dx+dy*dy);
-                    if(dist < 150) {
-                        ctx.beginPath(); ctx.moveTo(i.x, i.y); ctx.lineTo(p[j].x, p[j].y);
-                        ctx.strokeStyle = `rgba(0,123,255,${0.2 * (1 - dist/150)})`;
-                        ctx.lineWidth = 0.5; ctx.stroke();
-                    }
-                }
-                ctx.beginPath(); ctx.arc(i.x,i.y,2,0,Math.PI*2); ctx.fillStyle="rgba(0,123,255,0.6)"; ctx.fill(); 
-            }); 
-            requestAnimationFrame(anim); 
-        } anim();
-    }
-
-    function initGoldRain(c) {
-        const ctx = c.getContext('2d'); let pts = []; c.width = window.innerWidth; c.height = window.innerHeight;
-        for(let i=0; i<80; i++) pts.push({x:Math.random()*c.width, y:Math.random()*c.height, s:Math.random()*3+1, sp:Math.random()*2+1});
-        function anim() { if(!["4","5","6"].includes(currentConfig.screen) || !currentConfig.master) return; ctx.clearRect(0,0,c.width,c.height); pts.forEach(p => { p.y+=p.sp; if(p.y>c.height) p.y=-10; ctx.fillStyle="#FFD700"; ctx.globalAlpha=0.3; ctx.beginPath(); ctx.arc(p.x,p.y,p.s,0,Math.PI*2); ctx.fill(); }); requestAnimationFrame(anim); } anim();
-    }
-
-    async function fetchWeather() {
-        try {
-            const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=Istanbul&units=metric&lang=tr&appid=b1369b26f6345dfa62a6321453965555`);
-            const data = await res.json();
-            if(data.main) { 
-                const tempEl = document.getElementById('temp');
-                const descEl = document.getElementById('weather-text');
-                if(tempEl) tempEl.textContent = Math.round(data.main.temp)+"°C"; 
-                if(descEl) descEl.textContent = data.weather[0].description; 
-            }
-        } catch(e) {}
-    }
+    window.addEventListener('resize', () => {
+        const c1 = document.getElementById('bg-canvas');
+        const c2 = document.getElementById('gold-canvas');
+        if(c1) { c1.width = window.innerWidth; c1.height = window.innerHeight; }
+        if(c2) { c2.width = window.innerWidth; c2.height = window.innerHeight; }
+    });
 </script>
+
 </body>
 </html>
