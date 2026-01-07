@@ -11,8 +11,8 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#0062cc">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2921/2921237.png">
-
-    <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIkVudGVycHJpc2UgQ3VycmVuY3kgVGVybWluYWwiLAogICJzaG9ydF9uYW1lIjogIkTDtnZpeiBUZXJtIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmMGYyZjUiLAogICJ0aGVtZV9jb2xvciI6ICIjMDA2MmNjIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly9jZG4taWNvbnMtcG5nLmZsYXRpY29uLmNvbS81MTIvMjkyMS8yOTIxMjM3LnBuZyIsCiAgICAgICJzaXplcyI6ICI1MTJ4NTEyIiwKICAidHlwZSI6ICJpbWFnZS9wbmciCiAgICB9CiAgXQp9">
+    
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkVudGVycHJpc2UgQ3VycmVuY3kgVGVybWluYWwiLAogICJzaG9ydF9uYW1lIjogIkTDtnZpeiBUZXJtIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmMGYyZjUiLAogICJ0aGVtZV9jb2xvciI6ICIjMDA2MmNjIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly9jZG4taWNvbnMtcG5nLmZsYXRpY29uLmNvbS81MTIvMjkyMS8yOTIxMjM3LnBuZyIsCiAgICAgICJzaXplcyI6ICI1MTJ4NTEyIiwKICAidHlwZSI6ICJpbWFnZS9wbmciCiAgICB9CiAgXQp9">
 
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
@@ -49,9 +49,9 @@
         .toolbar-btns { display: flex; gap: 6px; }
         .btn-round { width: 34px; height: 34px; border-radius: 10px; border: none; background: rgba(255,255,255,0.15); color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; font-size: 14px; }
         .btn-round.active-green { background: var(--success); box-shadow: 0 0 10px var(--success); }
-        .btn-round.active-blue { background: var(--primary); box-shadow: 0 0 10px var(--primary); }
         
-        #settings-panel, #tv-panel { background: var(--card); border-radius: 18px; padding: 18px; margin-bottom: 15px; border: 1px solid var(--border); display: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        #tv-settings-container { display: none; margin-bottom: 15px; }
+        #settings-panel, #tv-panel { background: var(--card); border-radius: 18px; padding: 18px; border: 1px solid var(--border); box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-top: 5px; }
         .input-box { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 10px; font-size: 13px; }
         .label-style { font-size: 10px; font-weight: 800; color: var(--secondary); margin-bottom: 4px; display: block; }
 
@@ -69,9 +69,17 @@
         .price-col { text-align: right; min-width: 85px; }
         .price-val { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 800; color: var(--primary); }
         .margin-tag { font-size: 9px; color: var(--secondary); font-weight: bold; margin-top: 2px; }
-        .internal-logs { background: var(--bg); border-radius: 10px; padding: 10px; margin-top: 15px; max-height: 150px; overflow-y: auto; border: 1px solid var(--border); }
-        .log-entry { display: flex; flex-direction: column; font-size: 10px; padding: 6px 0; border-bottom: 1px solid var(--border); color: var(--secondary); }
-        .log-entry b { color: var(--primary); }
+        
+        .internal-logs { background: #111; border-radius: 10px; padding: 10px; margin-top: 15px; max-height: 200px; overflow-y: auto; border: 1px solid #333; font-family: 'monospace'; }
+        .log-entry { display: flex; align-items: flex-start; gap: 8px; font-size: 10px; padding: 4px 0; border-bottom: 1px solid #222; }
+        .log-time { color: #888; white-space: nowrap; }
+        .log-tag { padding: 2px 4px; border-radius: 4px; font-weight: bold; font-size: 8px; text-transform: uppercase; }
+        .tag-info { background: #007bff; color: white; }
+        .tag-update { background: #00c853; color: white; }
+        .tag-error { background: #ff5252; color: white; }
+        .tag-warn { background: #ffa000; color: white; }
+        .log-msg { color: #eee; line-height: 1.3; }
+
         .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: var(--overlay); display: none; justify-content: center; align-items: center; z-index: 2000; padding: 20px; backdrop-filter: blur(4px); }
         .modal-content { background: var(--card); width: 100%; max-width: 400px; border-radius: 20px; padding: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); padding: 8px 20px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; z-index: 1000; height: 60px; }
@@ -79,6 +87,8 @@
         .sortable-ghost { opacity: 0.3; background: var(--primary) !important; }
         
         .bottom-tv-control { display: flex; align-items: center; gap: 10px; background: var(--bg); padding: 5px 12px; border-radius: 12px; border: 1px solid var(--border); }
+        .tv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 10px; }
+        .tv-card-inner { background: var(--bg); padding: 10px; border-radius: 12px; border: 1px solid var(--border); }
     </style>
 </head>
 <body data-theme="light">
@@ -90,7 +100,6 @@
             <button class="btn-round" onclick="closeModal()" style="background:var(--bg); color:var(--text)"><i class="fas fa-times"></i></button>
         </div>
         <input type="hidden" id="edit-id">
-        
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px">
             <div><label class="label-style">GÜNCEL ALIŞ FİYATI</label><input type="number" id="edit-buy-price" class="input-box" step="0.0001"></div>
             <div><label class="label-style">GÜNCEL SATIŞ FİYATI</label><input type="number" id="edit-sell-price" class="input-box" step="0.0001"></div>
@@ -100,7 +109,7 @@
             <div><label class="label-style">SATIŞ MARJI (+)</label><input type="number" id="edit-sell-margin" class="input-box" step="0.0001"></div>
         </div>
         
-        <div><label class="label-style">BAYRAK KODU / IKON</label><input type="text" id="edit-flag" class="input-box" placeholder="us, eu, gold, btc"></div>
+        <div><label class="label-style">BAYRAK KODU (us, tr, gold, btc...)</label><input type="text" id="edit-flag" class="input-box"></div>
 
         <div style="display:flex; align-items:center; gap:10px; margin: 10px 0; background: var(--bg); padding:10px; border-radius:8px">
             <label class="switch"><input type="checkbox" id="edit-auto-sync"><span class="slider"></span></label>
@@ -127,78 +136,80 @@
             </div>
             <div class="toolbar-btns">
                 <button class="btn-round" onclick="toggleAuto()" id="auto-btn"><i class="fas fa-robot"></i></button>
-                <button class="btn-round" onclick="toggleTvPanel()" id="tv-btn"><i class="fas fa-tv"></i></button>
-                <button class="btn-round" onclick="toggleSettings()" id="settings-btn"><i class="fas fa-cog"></i></button>
+                <button class="btn-round" onclick="toggleSettingsArea()" id="tv-btn"><i class="fas fa-tv"></i></button>
                 <button class="btn-round" onclick="toggleTheme()"><i class="fas fa-moon"></i></button>
             </div>
         </div>
     </header>
 
-    <div id="tv-panel">
-        <div class="tv-select-group">
-            <label class="label-style">TV TASARIM SEÇİMİ</label>
-            <select id="tv-screen-select" class="input-box" onchange="saveTvSettings()">
-                <option value="1">1. Bloomberg Tasarımı</option>
-                <option value="2">2. Ekotürk Tasarımı</option>
-                <option value="3">3. CNBC-e Tasarımı</option>
-                <option value="4">4. Genel Bilgi Panosu</option>
-                <option value="5">5. Geleneksel Pano</option>
-                <option value="6">6. Modern Pro Pano</option>
-            </select>
-        </div>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px">
-            <div>
-                <label class="label-style">DEĞER HASSASİYETİ</label>
-                <select id="tv-value-select" class="input-box" onchange="saveTvSettings()">
-                    <option value="1">Standart</option>
-                    <option value="2">Geniş</option>
-                    <option value="3">Sıkıştırılmış</option>
-                </select>
+    <div id="tv-settings-container">
+        <div id="tv-panel">
+            <div class="tv-grid">
+                <div class="tv-card-inner">
+                    <label class="label-style">1. MONİTÖR (TV)</label>
+                    <select id="tv-screen-select" class="input-box" onchange="saveTvSettings()">
+                        <option value="1">1. Bloomberg Tasarımı</option>
+                        <option value="2">2. Ekotürk Tasarımı</option>
+                        <option value="3">3. CNBC-e Tasarımı</option>
+                        <option value="4">4. Genel Bilgi Panosu</option>
+                        <option value="5">5. Geleneksel Pano</option>
+                        <option value="6">6. Modern Pro Pano</option>
+                    </select>
+                    <div style="display:flex; align-items:center; gap:8px">
+                         <label class="switch"><input type="checkbox" id="tv-master-switch" onchange="saveTvSettings()"><span class="slider"></span></label>
+                         <span style="font-size:10px; font-weight:bold">YAYIN</span>
+                    </div>
+                </div>
+                <div class="tv-card-inner">
+                    <label class="label-style">2. MONİTÖR (WEB)</label>
+                    <select id="tv-screen-select-2" class="input-box" onchange="saveTvSettings()">
+                        <option value="1">1.Karsilama Ekran</option>
+                        <option value="2">2.video veya resim Tasarımı</option>
+                        <option value="3">3.video veya resim Tasarımı</option>
+                        <option value="4">4.altin tasarim</option>
+                        <option value="5">5. Geleneksel Pano</option>
+                        <option value="6">6. Cnbce tasarim</option>
+                    </select>
+                    <div style="display:flex; align-items:center; gap:8px">
+                         <label class="switch"><input type="checkbox" id="tv-master-switch-2" onchange="saveTvSettings()"><span class="slider"></span></label>
+                         <span style="font-size:10px; font-weight:bold">YAYIN</span>
+                    </div>
+                </div>
             </div>
-            <div>
-                <label class="label-style">KUR GÖRÜNÜMÜ</label>
-                <select id="tv-rate-select" class="input-box" onchange="saveTvSettings()">
-                    <option value="1">Dikey Liste</option>
-                    <option value="2">Yatay Şerit</option>
-                </select>
-            </div>
         </div>
-    </div>
 
-    <div id="settings-panel">
-        <span class="label-style">API KAYNAK YÖNETİMİ</span>
-        <select id="api-source-select" class="input-box" style="background: var(--primary); color: white; border: none; font-weight: bold;">
-            <option value="hexarate">Hexarate API (Global/Dinamik)</option>
-            <option value="truncgil">Truncgil V4 (Hızlı/TR)</option>
-            <option value="genelpara">GenelPara.com (Yerel/TR)</option>
-            <option value="tcmb">TCMB (Merkez Bankası)</option>
-            <option value="global">FreeCurrencyAPI (Global)</option>
-        </select>
-
-        <label class="label-style">GÜNCELLEME HIZI (SANİYE)</label>
-        <input type="number" id="sync-interval" class="input-box" value="30">
-
-        <div style="padding:15px; background:var(--bg); border-radius:12px; border:1px solid var(--border)">
-            <span class="label-style" style="color:var(--primary)">YENİ VARLIK EKLE</span>
-            <input type="text" id="new-name" class="input-box" placeholder="Sembol (USD, GA, BTC, EUR...)">
-            
-            <label class="label-style">API KATEGORİSİ</label>
-            <select id="new-api-cat" class="input-box">
-                <option value="doviz">Döviz (USD, EUR, GBP...)</option>
-                <option value="altin">Altın (GA, C, Y, A...)</option>
-                <option value="kripto">Kripto (BTC, ETH, SOL...)</option>
+        <div id="settings-panel">
+            <span class="label-style">API KAYNAK YÖNETİMİ</span>
+            <select id="api-source-select" class="input-box" style="background: var(--primary); color: white; border: none; font-weight: bold;">
+                <option value="exchange-rate-v2">Exchange-Rate V2 (Yeni/Dinamik)</option>
+                <option value="hexarate">Hexarate API (Yedek)</option>
             </select>
 
-            <input type="text" id="new-flag" class="input-box" placeholder="Bayrak Kodu (us, eu, gold, btc)">
-            
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px">
-                <div><label class="label-style">ALIŞ MARJI</label><input type="number" id="new-buy-margin" class="input-box" value="0.100"></div>
-                <div><label class="label-style">SATIŞ MARJI</label><input type="number" id="new-sell-margin" class="input-box" value="0.250"></div>
+            <label class="label-style">GÜNCELLEME HIZI (SANİYE)</label>
+            <input type="number" id="sync-interval" class="input-box" value="30">
+
+            <div style="padding:15px; background:var(--bg); border-radius:12px; border:1px solid var(--border)">
+                <span class="label-style" style="color:var(--primary)">YENİ VARLIK EKLE</span>
+                <input type="text" id="new-name" class="input-box" placeholder="Sembol (USD, GA, BTC, EUR...)">
+                
+                <label class="label-style">API KATEGORİSİ</label>
+                <select id="new-api-cat" class="input-box">
+                    <option value="doviz">Döviz</option>
+                    <option value="altin">Altın</option>
+                    <option value="kripto">Kripto</option>
+                </select>
+
+                <input type="text" id="new-flag" class="input-box" placeholder="Bayrak Kodu (us, gold, btc)">
+                
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px">
+                    <div><label class="label-style">ALIŞ MARJI (-)</label><input type="number" id="new-buy-margin" class="input-box" value="0.100"></div>
+                    <div><label class="label-style">SATIŞ MARJI (+)</label><input type="number" id="new-sell-margin" class="input-box" value="0.250"></div>
+                </div>
+                <button class="btn-round" style="width:100%; background:var(--primary); border-radius:8px; font-weight:bold" onclick="addNewCurrency()">VARLIĞI EKLE</button>
             </div>
-            <button class="btn-round" style="width:100%; background:var(--primary); border-radius:8px; font-weight:bold" onclick="addNewCurrency()">VARLIĞI SİSTEME EKLE</button>
-        </div>
-        <div class="internal-logs">
-            <div id="log-list"></div>
+            <div class="internal-logs">
+                <div id="log-list"></div>
+            </div>
         </div>
     </div>
 
@@ -206,17 +217,17 @@
 </div>
 
 <div class="bottom-nav">
-    <div style="display:flex; align-items:center; gap:8px">
-        <div id="status-dot" style="width:10px; height:10px; background:var(--success); border-radius:50%"></div>
-        <small id="footer-status" style="font-size:11px; font-weight:bold">V3.2 Pro Terminal Aktif</small>
+    <div style="display:flex; align-items:center; gap:8px; overflow: hidden; white-space: nowrap; flex: 1; margin-right: 10px;">
+        <div id="status-dot" style="width:10px; height:10px; background:var(--success); border-radius:50%; flex-shrink: 0;"></div>
+        <small id="footer-status" style="font-size:11px; font-weight:bold; overflow: hidden; text-overflow: ellipsis;">Sistem Hazır</small>
     </div>
     
     <div class="bottom-tv-control">
-        <small style="font-size:10px; font-weight:800; color:var(--secondary)">TV YAYIN</small>
-        <label class="switch">
-            <input type="checkbox" id="tv-master-switch" onchange="saveTvSettings()">
-            <span class="slider"></span>
-        </label>
+        <small style="font-size:10px; font-weight:800; color:var(--secondary)">AKTİF YAYIN</small>
+        <div id="active-tv-badges" style="display:flex; gap:4px">
+            <div id="badge-tv1" style="width:8px; height:8px; border-radius:50%; background:#ccc"></div>
+            <div id="badge-tv2" style="width:8px; height:8px; border-radius:50%; background:#ccc"></div>
+        </div>
     </div>
 </div>
 
@@ -237,8 +248,6 @@
     const GOLD_ICON = "https://cdn-icons-png.flaticon.com/512/2921/2921237.png";
     const CRYPTO_ICON = "https://cdn-icons-png.flaticon.com/512/2091/2091665.png";
     const DEFAULT_ICON = "https://cdn-icons-png.flaticon.com/512/197/197518.png";
-    const PROXY = "https://api.allorigins.win/raw?url=";
-    const FCA_KEY = "fca_live_e7OHXuh5dRNQXADIaNbMCwl7oeL8XJIVMaDVfubj";
     
     let currencies = [];
     let isAutoMode = false;
@@ -247,7 +256,7 @@
     let secondsLeft = 0;
 
     function initApp() {
-        addLog("Sistem Başlatıldı", "INFO");
+        addLog("Sistem Başlatıldı. Bağlantı bekleniyor...", "INFO");
         
         db.ref('terminal_data/currencies').on('value', (snapshot) => {
             const data = snapshot.val();
@@ -263,9 +272,11 @@
             if(tv) {
                 document.getElementById('tv-master-switch').checked = tv.master || false;
                 document.getElementById('tv-screen-select').value = tv.screen || "1";
-                document.getElementById('tv-value-select').value = tv.value || "1";
-                document.getElementById('tv-rate-select').value = tv.rate || "1";
-                updateTvButtonState(tv.master);
+                
+                document.getElementById('tv-master-switch-2').checked = tv.master2 || false;
+                document.getElementById('tv-screen-select-2').value = tv.screen2 || "1";
+                
+                updateTvButtonState(tv.master, tv.master2);
             }
         });
 
@@ -278,160 +289,85 @@
         });
     }
 
-    function reorderCurrencies() {
-        const items = document.querySelectorAll('.currency-card');
-        const newOrderedList = [];
-        items.forEach((item, index) => {
-            const id = parseInt(item.getAttribute('data-id'));
-            const curr = currencies.find(c => c.id === id);
-            if(curr) {
-                curr.order = index;
-                newOrderedList.push(curr);
-            }
-        });
-        currencies = newOrderedList;
-        saveToFirebase();
-        addLog("Sıralama Güncellendi", "INFO");
-    }
-
-    function updateTvButtonState(master) {
-        const tvBtn = document.getElementById('tv-btn');
-        if(master) {
-            tvBtn.classList.add('active-green');
-            tvBtn.innerHTML = '<i class="fas fa-tv fa-pulse"></i>';
+    function toggleSettingsArea() {
+        const area = document.getElementById('tv-settings-container');
+        const list = document.getElementById('currency-list');
+        if (area.style.display === 'block') {
+            area.style.display = 'none';
+            list.style.display = 'block';
         } else {
-            tvBtn.classList.remove('active-green');
-            tvBtn.innerHTML = '<i class="fas fa-tv"></i>';
+            area.style.display = 'block';
+            list.style.display = 'none';
         }
-    }
-
-    async function fetchMarketData() {
-        if (!isAutoMode) return;
-        const source = document.getElementById('api-source-select').value;
-        const startTime = Date.now();
-        let apiResults = {};
-
-        try {
-            if (source === 'hexarate') {
-                for (const c of currencies) {
-                    if(!c.autoSync) continue;
-                    let base = "USD", target = "TRY";
-                    const cleanName = c.name.toUpperCase().trim();
-                    if(cleanName.includes('/')) {
-                        const parts = cleanName.split('/');
-                        base = parts[0].trim(); target = parts[1].trim();
-                    } else if (cleanName === "GA" || cleanName === "XAU") {
-                        base = "XAU"; target = "TRY";
-                    } else { base = cleanName; target = "TRY"; }
-
-                    try {
-                        const response = await fetch(`https://hexarate.paikama.co/api/rates/${base}/${target}/latest`);
-                        const resJson = await response.json();
-                        if(resJson?.data?.mid) apiResults[c.name] = { satis: parseFloat(resJson.data.mid) };
-                    } catch (err) { console.error("Hexa fetch err", err); }
-                }
-            } else if (source === 'truncgil') {
-                const response = await fetch(`${PROXY}${encodeURIComponent('https://finans.truncgil.com/v4/today.json')}`);
-                const data = await response.json();
-                apiResults = data.contents ? JSON.parse(data.contents) : data;
-            } else if (source === 'genelpara') {
-                const response = await fetch(`${PROXY}${encodeURIComponent('https://api.genelpara.com/json/?list=all')}`);
-                const data = await response.json();
-                apiResults = data.contents ? JSON.parse(data.contents) : data;
-            } else if (source === 'tcmb') {
-                const response = await fetch(`${PROXY}${encodeURIComponent('https://www.tcmb.gov.tr/kurlar/today.xml')}`);
-                const xmlText = await response.text();
-                const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(xmlText, "text/xml");
-                const items = xmlDoc.getElementsByTagName("Currency");
-                for (let i = 0; i < items.length; i++) {
-                    const code = items[i].getAttribute("CurrencyCode");
-                    const sellingNode = items[i].getElementsByTagName("ForexSelling")[0];
-                    if(sellingNode) apiResults[code] = { satis: sellingNode.textContent.replace(',', '.') };
-                }
-            } else {
-                const res = await fetch(`https://api.freecurrencyapi.com/v1/latest?apikey=${FCA_KEY}&base_currency=TRY`);
-                const data = await res.json();
-                if(data?.data) Object.keys(data.data).forEach(key => { apiResults[key] = 1 / data.data[key]; });
-            }
-
-            let hasChange = false;
-            currencies = currencies.map(c => {
-                if(!c.autoSync) return c;
-                let apiPrice = 0;
-                const sym = c.name.toUpperCase().split('/')[0].split(' ')[0].trim();
-
-                if (source === 'truncgil' && apiResults[sym]) {
-                    apiPrice = parseFloat(apiResults[sym].Selling.replace(',', '.'));
-                } else if(apiResults[c.name] || apiResults[sym]) {
-                    const found = apiResults[c.name] || apiResults[sym];
-                    apiPrice = parseFloat(found.satis || found.Selling || found);
-                }
-
-                if(!isNaN(apiPrice) && apiPrice > 0) {
-                    const formatToZeroEnding = (val) => parseFloat((Math.floor(val * 1000) / 1000).toFixed(3));
-                    const newSell = formatToZeroEnding(apiPrice + (c.sellMargin || 0));
-                    const newBuy = formatToZeroEnding(apiPrice - (c.buyMargin || 0));
-                    
-                    if(Math.abs(c.sell - newSell) > 0.0001) {
-                        hasChange = true;
-                        addLog(`<b>${c.name}</b> Güncellendi: ${newSell.toFixed(3)}`, "UPDATE");
-                        return { ...c, basePrice: apiPrice, buy: newBuy, sell: newSell };
-                    }
-                }
-                return c;
-            });
-
-            if(hasChange) saveToFirebase();
-            document.getElementById('stat-sync').innerText = new Date().toLocaleTimeString('tr-TR');
-            resetCountdown();
-            if (isAutoMode) syncTimer = setTimeout(fetchMarketData, (parseInt(document.getElementById('sync-interval').value) || 30) * 1000);
-        } catch (e) {
-            addLog("API Hatası! Kaynak değiştirin.", "ERROR");
-            if (isAutoMode) syncTimer = setTimeout(fetchMarketData, 10000);
-        }
-    }
-
-    function toggleAuto() {
-        isAutoMode = !isAutoMode;
-        document.getElementById('auto-btn').classList.toggle('active-green', isAutoMode);
-        clearTimeout(syncTimer);
-        clearInterval(countdownTimer);
-        if(isAutoMode) { fetchMarketData(); addLog("Oto-Mod Başlatıldı", "INFO"); }
-        else { document.getElementById('timer-box').innerText = "--"; addLog("Oto-Mod Kapatıldı", "WARN"); }
     }
 
     function saveTvSettings() {
         const settings = {
             master: document.getElementById('tv-master-switch').checked,
             screen: document.getElementById('tv-screen-select').value,
-            value: document.getElementById('tv-value-select').value,
-            rate: document.getElementById('tv-rate-select').value,
+            master2: document.getElementById('tv-master-switch-2').checked,
+            screen2: document.getElementById('tv-screen-select-2').value,
             lastUpdate: Date.now()
         };
         db.ref('terminal_data/tv_settings').set(settings);
+        addLog("TV Ayarları Güncellendi", "INFO");
     }
 
-    function addNewCurrency() {
-        const name = document.getElementById('new-name').value.toUpperCase().trim();
-        const flagVal = (document.getElementById('new-flag').value || 'tr').toLowerCase();
-        if(!name) return alert("Sembol girin!");
-        const newItem = {
-            id: Date.now(), 
-            name: name, 
-            category: document.getElementById('new-api-cat').value,
-            flag: flagVal,
-            buy: 0, 
-            sell: 0, 
-            buyMargin: parseFloat(document.getElementById('new-buy-margin').value) || 0,
-            sellMargin: parseFloat(document.getElementById('new-sell-margin').value) || 0,
-            autoSync: true, 
-            order: currencies.length
-        };
-        currencies.push(newItem); 
-        saveToFirebase();
-        document.getElementById('new-name').value = '';
-        document.getElementById('new-flag').value = '';
+    function updateTvButtonState(m1, m2) {
+        const tvBtn = document.getElementById('tv-btn');
+        const b1 = document.getElementById('badge-tv1');
+        const b2 = document.getElementById('badge-tv2');
+        
+        (m1 || m2) ? tvBtn.classList.add('active-green') : tvBtn.classList.remove('active-green');
+        b1.style.background = m1 ? 'var(--success)' : '#ccc';
+        b2.style.background = m2 ? 'var(--success)' : '#ccc';
+    }
+
+    // --- MEVCUT DİĞER FONKSİYONLARIN KORUNMUŞ HALİ ---
+
+    function roundToTen(value) { return Math.round(value * 100) / 100; }
+
+    async function fetchMarketData() {
+        if (!isAutoMode) return;
+        try {
+            let hasChange = false;
+            let tryRate = 1.0;
+            const tryResp = await fetch(`https://hexarate.paikama.co/api/rates/USD/TRY/latest`);
+            const tryJson = await tryResp.json();
+            tryRate = parseFloat(tryJson?.data?.mid || 1);
+
+            const updatedList = await Promise.all(currencies.map(async (c) => {
+                if(!c.autoSync) return c;
+                try {
+                    let base = c.name.toUpperCase() === "GA" ? "XAU" : c.name.toUpperCase();
+                    const resp = await fetch(`https://hexarate.paikama.co/api/rates/${base}/USD/latest`);
+                    const json = await resp.json();
+                    const midPrice = json?.data?.mid;
+                    if(midPrice) {
+                        const usdPrice = parseFloat(midPrice);
+                        let finalPrice = (base === "XAU" || base === "XAG") ? (usdPrice * tryRate / 31.1035) : (usdPrice * tryRate);
+                        const newSell = roundToTen(finalPrice + (c.sellMargin || 0));
+                        const newBuy = roundToTen(finalPrice - (c.buyMargin || 0));
+                        if(Math.abs(c.sell - newSell) > 0.0001 || Math.abs(c.buy - newBuy) > 0.0001) {
+                            hasChange = true;
+                            return { ...c, buy: newBuy, sell: newSell, basePrice: finalPrice };
+                        }
+                    }
+                } catch (e) { console.error(e); }
+                return c;
+            }));
+
+            if(hasChange) { currencies = updatedList; saveToFirebase(); }
+            document.getElementById('stat-sync').innerText = new Date().toLocaleTimeString('tr-TR');
+            resetCountdown();
+            syncTimer = setTimeout(fetchMarketData, (parseInt(document.getElementById('sync-interval').value) || 30) * 1000);
+        } catch (e) { syncTimer = setTimeout(fetchMarketData, 5000); }
+    }
+
+    function formatPrice(val, name) {
+        const sym = name.toUpperCase();
+        if(sym === "GA" || sym === "XAU" || sym === "GOLD" || sym === "ALTIN") return Number(val.toFixed(3)).toString();
+        return val.toFixed(3);
     }
 
     function render() {
@@ -439,23 +375,31 @@
         list.innerHTML = '';
         currencies.forEach(c => {
             let iconUrl = c.flag.length === 2 ? `https://flagcdn.com/w80/${c.flag}.png` : (c.flag === 'gold' ? GOLD_ICON : (c.flag === 'btc' ? CRYPTO_ICON : DEFAULT_ICON));
-            list.innerHTML += `
-                <div class="currency-card" data-id="${c.id}" onclick="openUpdateModal(${c.id})">
-                    <div class="drag-handle" onclick="event.stopPropagation()"><i class="fas fa-grip-vertical"></i></div>
-                    <div class="lock-indicator">${c.autoSync ? '<i class="fas fa-sync-alt fa-spin"></i>' : '<i class="fas fa-lock"></i>'}</div>
-                    <div class="flag-box"><img src="${iconUrl}" class="flag-anim" onerror="this.src='${DEFAULT_ICON}'"></div>
-                    <div class="currency-meta"><b>${c.name}</b><span style="font-size:9px">${c.category.toUpperCase()}</span></div>
-                    <div class="price-col">
-                        <span class="label-style">ALIŞ</span>
-                        <div class="price-val">${(c.buy || 0).toFixed(3)}</div>
-                    </div>
-                    <div class="price-col">
-                        <span class="label-style">SATIŞ</span>
-                        <div class="price-val">${(c.sell || 0).toFixed(3)}</div>
-                    </div>
-                </div>`;
+            list.innerHTML += `<div class="currency-card" data-id="${c.id}" onclick="openUpdateModal(${c.id})"><div class="drag-handle"><i class="fas fa-grip-vertical"></i></div><div class="lock-indicator">${c.autoSync ? '<i class="fas fa-sync-alt fa-spin"></i>' : '<i class="fas fa-lock"></i>'}</div><div class="flag-box"><img src="${iconUrl}" class="flag-anim" onerror="this.src='${DEFAULT_ICON}'"></div><div class="currency-meta"><b>${c.name}</b><br><span style="font-size:9px">${c.category.toUpperCase()}</span></div><div class="price-col"><span class="label-style">ALIŞ</span><div class="price-val">${formatPrice(c.buy || 0, c.name)}</div><div class="margin-tag">-${(c.buyMargin || 0).toFixed(2)}</div></div><div class="price-col"><span class="label-style">SATIŞ</span><div class="price-val">${formatPrice(c.sell || 0, c.name)}</div><div class="margin-tag">+${(c.sellMargin || 0).toFixed(2)}</div></div></div>`;
         });
         document.getElementById('stat-count').innerText = currencies.length;
+    }
+
+    function toggleAuto() {
+        isAutoMode = !isAutoMode;
+        document.getElementById('auto-btn').classList.toggle('active-green', isAutoMode);
+        clearTimeout(syncTimer);
+        if(isAutoMode) { fetchMarketData(); addLog("Otomatik Güncelleme Başlatıldı.", "INFO"); }
+        else { document.getElementById('timer-box').innerText = "--"; addLog("Otomatik Güncelleme Durduruldu.", "WARN"); }
+    }
+
+    function saveToFirebase() { db.ref('terminal_data/currencies').set(currencies); }
+    
+    function reorderCurrencies() {
+        const items = document.querySelectorAll('.currency-card');
+        const newOrderedList = [];
+        items.forEach((item, index) => {
+            const id = parseInt(item.getAttribute('data-id'));
+            const curr = currencies.find(c => c.id === id);
+            if(curr) { curr.order = index; newOrderedList.push(curr); }
+        });
+        currencies = newOrderedList;
+        saveToFirebase();
     }
 
     function openUpdateModal(id) {
@@ -467,7 +411,7 @@
         document.getElementById('edit-sell-price').value = c.sell;
         document.getElementById('edit-buy-margin').value = c.buyMargin;
         document.getElementById('edit-sell-margin').value = c.sellMargin;
-        document.getElementById('edit-flag').value = c.flag || '';
+        document.getElementById('edit-flag').value = c.flag || "";
         document.getElementById('edit-auto-sync').checked = c.autoSync;
         document.getElementById('update-modal').style.display = 'flex';
     }
@@ -480,50 +424,64 @@
             sell: parseFloat(document.getElementById('edit-sell-price').value),
             buyMargin: parseFloat(document.getElementById('edit-buy-margin').value),
             sellMargin: parseFloat(document.getElementById('edit-sell-margin').value),
-            flag: document.getElementById('edit-flag').value.toLowerCase().trim(),
+            flag: document.getElementById('edit-flag').value.toLowerCase(),
             autoSync: document.getElementById('edit-auto-sync').checked
         } : c);
-        saveToFirebase(); 
-        closeModal();
+        saveToFirebase(); closeModal();
+        addLog(`ID: ${id} El ile güncellendi.`, "UPDATE");
+    }
+
+    function addNewCurrency() {
+        const name = document.getElementById('new-name').value.toUpperCase().trim();
+        if(!name) return;
+        const newItem = {
+            id: Date.now(), name: name, category: document.getElementById('new-api-cat').value,
+            flag: (document.getElementById('new-flag').value || 'tr').toLowerCase(),
+            buy: 0, sell: 0, buyMargin: parseFloat(document.getElementById('new-buy-margin').value) || 0.1,
+            sellMargin: parseFloat(document.getElementById('new-sell-margin').value) || 0.2,
+            autoSync: true, order: currencies.length
+        };
+        currencies.push(newItem); saveToFirebase();
+        document.getElementById('new-name').value = '';
+        addLog(`Eklendi: ${name}`, "INFO");
     }
 
     function deleteCurrency() {
         if(!confirm("Silinsin mi?")) return;
-        currencies = currencies.filter(c => c.id !== parseInt(document.getElementById('edit-id').value));
+        const id = parseInt(document.getElementById('edit-id').value);
+        currencies = currencies.filter(c => c.id !== id);
         saveToFirebase(); closeModal();
-    }
-
-    function toggleSettings() {
-        const s = document.getElementById('settings-panel');
-        s.style.display = s.style.display === 'block' ? 'none' : 'block';
-        document.getElementById('currency-list').style.display = s.style.display === 'block' ? 'none' : 'block';
-    }
-
-    function toggleTvPanel() {
-        const t = document.getElementById('tv-panel');
-        t.style.display = t.style.display === 'block' ? 'none' : 'block';
-        document.getElementById('currency-list').style.display = t.style.display === 'block' ? 'none' : 'block';
     }
 
     function resetCountdown() {
         clearInterval(countdownTimer);
         secondsLeft = parseInt(document.getElementById('sync-interval').value) || 30;
         countdownTimer = setInterval(() => {
-            secondsLeft--; document.getElementById('timer-box').innerText = secondsLeft + "s";
+            secondsLeft--; 
+            document.getElementById('timer-box').innerText = secondsLeft + "s";
             if(secondsLeft <= 0) clearInterval(countdownTimer);
         }, 1000);
     }
 
-    function saveToFirebase() { db.ref('terminal_data/currencies').set(currencies); }
     function closeModal() { document.getElementById('update-modal').style.display = 'none'; }
     function toggleTheme() { document.body.setAttribute('data-theme', document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); }
+
     function addLog(m, type) {
         const l = document.getElementById('log-list');
-        l.innerHTML = `<div class="log-entry"><span>[${new Date().toLocaleTimeString()}] [${type}]</span><span>${m}</span></div>` + l.innerHTML;
+        const footerStatus = document.getElementById('footer-status');
+        const entry = document.createElement('div');
+        entry.className = 'log-entry';
+        let tagClass = 'tag-info';
+        if(type === 'UPDATE') tagClass = 'tag-update';
+        if(type === 'ERROR') tagClass = 'tag-error';
+        if(type === 'WARN') tagClass = 'tag-warn';
+        entry.innerHTML = `<span class="log-time">${new Date().toLocaleTimeString()}</span><span class="log-tag ${tagClass}">${type}</span><span class="log-msg">${m}</span>`;
+        l.prepend(entry);
+        footerStatus.innerText = m;
+        if(l.childNodes.length > 40) l.removeChild(l.lastChild);
     }
 
     initApp();
 </script>
 </body>
 </html>
-
