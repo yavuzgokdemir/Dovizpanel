@@ -1,34 +1,259 @@
-<div class="dashboard-container">
-  <header>
-    <div class="iguana-logo">🦎</div>
-    <h1>Iguana Finance <span class="live-dot"></span></h1>
-  </header>
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iguana Finance Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0a1a;
+            --card-dark: rgba(20, 20, 40, 0.7);
+            --text-light: #e0e0f0;
+            --glow-green: #39FF14;
+            --glow-blue: #00F5FF;
+            --glow-purple: #a855f7;
+            --glow-orange: #fbbf24;
+            --border-glow: 0 0 15px;
+            --shadow-intensity: 0.2;
+        }
 
-  <div class="grid-menu">
-    
-    <a href="https://yavuzgokdemir.github.io/Dovizpanel/ana1.html" class="card card-green">
-      <div class="icon">📈</div>
-      <span>Döviz Piyasası v1</span>
-      <p>Canlı kurlar ve hızlı analiz.</p>
-    </a>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+            background-image: radial-gradient(circle at top left, #1a2a3a, transparent), 
+                              radial-gradient(circle at bottom right, #2a1a3a, transparent);
+            background-size: 80% 80%;
+            background-repeat: no-repeat;
+            animation: bg-anim 30s infinite alternate linear;
+        }
 
-    <a href="https://yavuzgokdemir.github.io/Dovizpanel/ana2.html" class="card card-blue">
-      <div class="icon">📊</div>
-      <span>İstatistik Paneli</span>
-      <p>Detaylı grafikler ve veriler.</p>
-    </a>
+        @keyframes bg-anim {
+            0% { background-position: 0% 0%, 100% 100%; }
+            100% { background-position: 100% 100%, 0% 0%; }
+        }
 
-    <a href="https://yavuzgokdemir.github.io/Dovizpanel/ana3.html" class="card card-purple">
-      <div class="icon">💎</div>
-      <span>Premium Takip</span>
-      <p>Özel portföy yönetim araçları.</p>
-    </a>
+        .dashboard-container {
+            background: rgba(20, 20, 40, 0.8); /* Slightly darker glassmorphism */
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(70, 70, 100, 0.3);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), var(--border-glow) var(--glow-blue);
+            max-width: 900px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
 
-    <a href="https://yavuzgokdemir.github.io/Dovizpanel/ana3.html" class="card card-orange">
-      <div class="icon">⚙️</div>
-      <span>Sistem Ayarları</span>
-      <p>Kişiselleştirilebilir bildirimler.</p>
-    </a>
+        header {
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
 
-  </div>
-</div>
+        .iguana-logo {
+            font-size: 3em;
+            line-height: 1;
+            filter: drop-shadow(0 0 8px var(--glow-green));
+            animation: pulse-glow 2s infinite alternate;
+        }
+
+        @keyframes pulse-glow {
+            0% { transform: scale(1); filter: drop-shadow(0 0 8px var(--glow-green)); }
+            100% { transform: scale(1.05); filter: drop-shadow(0 0 15px var(--glow-green)); }
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.8em;
+            color: var(--text-light);
+            text-shadow: 0 0 15px var(--glow-blue);
+            letter-spacing: 2px;
+            margin: 0;
+            position: relative;
+        }
+
+        h1 .live-dot {
+            position: absolute;
+            top: 5px;
+            right: -25px;
+            width: 12px;
+            height: 12px;
+            background-color: var(--glow-green);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--glow-green);
+            animation: live-blink 1.5s infinite ease-out;
+        }
+
+        @keyframes live-blink {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.8); }
+        }
+
+        .grid-menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+        }
+
+        .card {
+            background: var(--card-dark);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(70, 70, 100, 0.2);
+            border-radius: 15px;
+            padding: 25px;
+            text-decoration: none;
+            color: var(--text-light);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, var(--shadow-intensity));
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 15px;
+            padding: 1px; /* This creates the border effect */
+            background: linear-gradient(45deg, transparent, transparent); /* Default transparent */
+            -webkit-mask: 
+                linear-gradient(#fff 0 0) content-box, 
+                linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .card.card-green:hover::before { background: linear-gradient(45deg, var(--glow-green), var(--glow-blue)); }
+        .card.card-blue:hover::before { background: linear-gradient(45deg, var(--glow-blue), var(--glow-purple)); }
+        .card.card-purple:hover::before { background: linear-gradient(45deg, var(--glow-purple), var(--glow-orange)); }
+        .card.card-orange:hover::before { background: linear-gradient(45deg, var(--glow-orange), var(--glow-green)); }
+
+
+        .card:hover {
+            transform: translateY(-10px) scale(1.03);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+            z-index: 10;
+        }
+        .card.card-green:hover { box-shadow: 0 15px 40px rgba(0,0,0,0.6), var(--border-glow) var(--glow-green); }
+        .card.card-blue:hover { box-shadow: 0 15px 40px rgba(0,0,0,0.6), var(--border-glow) var(--glow-blue); }
+        .card.card-purple:hover { box-shadow: 0 15px 40px rgba(0,0,0,0.6), var(--border-glow) var(--glow-purple); }
+        .card.card-orange:hover { box-shadow: 0 15px 40px rgba(0,0,0,0.6), var(--border-glow) var(--glow-orange); }
+
+
+        .card .icon {
+            font-size: 3.5em;
+            margin-bottom: 15px;
+            line-height: 1;
+            filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.4));
+        }
+
+        .card.card-green .icon { color: var(--glow-green); }
+        .card.card-blue .icon { color: var(--glow-blue); }
+        .card.card-purple .icon { color: var(--glow-purple); }
+        .card.card-orange .icon { color: var(--glow-orange); }
+
+        .card span {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3em;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .card p {
+            font-size: 0.9em;
+            opacity: 0.8;
+            line-height: 1.4;
+            margin: 0;
+            color: var(--text-light);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 25px;
+                width: 95%;
+            }
+            h1 {
+                font-size: 2em;
+            }
+            .iguana-logo {
+                font-size: 2.5em;
+            }
+            .grid-menu {
+                grid-template-columns: 1fr;
+            }
+            .card {
+                padding: 20px;
+            }
+            .card .icon {
+                font-size: 3em;
+            }
+            .card span {
+                font-size: 1.1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <header>
+            <div class="iguana-logo">🦎</div>
+            <h1>Iguana Finance<span class="live-dot"></span></h1>
+        </header>
+
+        <div class="grid-menu">
+            <a href="https://yavuzgokdemir.github.io/Dovizpanel/ana1.html" class="card card-green">
+                <div class="icon">📈</div>
+                <span>Döviz Piyasası v1</span>
+                <p>Canlı kurlar ve hızlı analiz.</p>
+            </a>
+
+            <a href="https://yavuzgokdemir.github.io/Dovizpanel/ana2.html" class="card card-blue">
+                <div class="icon">📊</div>
+                <span>İstatistik Paneli</span>
+                <p>Detaylı grafikler ve veriler.</p>
+            </a>
+
+            <a href="https://yavuzgokdemir.github.io/Dovizpanel/ana3.html" class="card card-purple">
+                <div class="icon">💎</div>
+                <span>Premium Takip</span>
+                <p>Özel portföy yönetim araçları.</p>
+            </a>
+
+            <a href="https://yavuzgokdemir.github.io/Dovizpanel/ana3.html" class="card card-orange">
+                <div class="icon">⚙️</div>
+                <span>Sistem Ayarları</span>
+                <p>Kişiselleştirilebilir bildirimler.</p>
+            </a>
+        </div>
+    </div>
+</body>
+</html>
