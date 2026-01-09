@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Engine v4.0 - Full Horizontal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;600;700;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+
+    <style>
+        :root {
+            --primary: #007bff; --success: #00c853; --danger: #ff5252;
+            --bg-dark: #0f1011; --glass: rgba(255, 255, 255, 0.1);
+            --border: rgba(255, 255, 255, 0.2); --cnbc-green: #008f39;
+            --cnbc-red: #c40000; --cnbc-blue: #004a99;
+            --gold-m5: #FFD700; --buy-red-m5: #FF3B30; --sell-green-m5: #4CD964;
+            --mod6-card: #111111;
+        }
+
+        body, html {
+            margin: 0; padding: 0; width: 100vw; height: 100vh;
+            background: #000; color: #fff; font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+
+        canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+        .engine-container { height: 100%; width: 100%; display: flex; justify-content: center; align-items: center; position: relative; z-index: 1; }
+
+        /* STANDBY - MOD 0 */
+        .main-card {
+            position: relative; z-index: 2; padding: 4rem;
+            background: var(--glass); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--border); border-radius: 40px; text-align: center; 
+            animation: fadeIn 1.2s ease-out; width: 80%;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        #clock { font-size: 8vw; font-weight: 200; letter-spacing: -2px; line-height: 1; margin: 0; background: linear-gradient(to bottom, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        #greeting { font-size: 2vw; font-weight: 700; letter-spacing: 5px; margin-top: 10px; opacity: 0.9; }
+        .divider { height: 1px; width: 80px; background: rgba(255,255,255,0.3); margin: 2rem auto; }
+        #weather-info { display: flex; align-items: center; justify-content: center; gap: 20px; font-size: 1.8vw; opacity: 0.8; }
+        .temp-badge { background: white; color: #000; padding: 5px 15px; border-radius: 12px; font-weight: 900; }
+
+        /* MOD-LAYOUTS */
+        .mod-wrapper { height: 100vh; width: 100vw; display: flex; flex-direction: column; padding: 1.5vh; gap: 1.5vh; box-sizing: border-box; background: #000; position: absolute; top: 0; left: 0; }
+        
+        /* Mod 2 & 4 & 6: Özel Sütun Yapısı (1fr 1fr 3fr) */
+        .grid-3-col { display: grid; grid-template-columns: 1fr 1fr 3fr; grid-template-rows: repeat(3, 1fr); gap: 1.5vh; height: 97vh; width: 97vw; margin: auto; }
+
+        .card-modern { background: var(--mod6-card); border: 1px solid #222; border-radius: 15px; padding: 2vh; display: flex; flex-direction: column; justify-content: center; transition: all 0.4s ease; }
+        .val-modern { font-family: 'JetBrains Mono'; font-weight: 700; letter-spacing: -1px; }
+
+        /* CNBC */
+        .video-wrapper { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+        video { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.5); }
+        .branding-panel { position: absolute; bottom: 133px; left: 0; background: #fff; padding: 10px 30px; border-top-right-radius: 4px; z-index: 100; color: #000; font-weight: 900; font-size: 2vw; }
+        .ticker-container { position: absolute; bottom: 0; width: 100%; }
+        .layer-indices { height: 38px; background: #fff; display: flex; align-items: center; overflow: hidden; }
+        .layer-currencies { height: 65px; background: rgba(0, 11, 26, 0.95); display: flex; overflow: hidden; }
+        .layer-news { height: 35px; background: #fff; display: flex; align-items: center; overflow: hidden; }
+        .news-track { display: flex; white-space: nowrap; animation: news-scroll 80s linear infinite; color: #000; font-weight: 700; padding-left: 20px; }
+
+        /* FLASH EFFECTS */
+        .flash-up { background-color: rgba(0, 200, 83, 0.3) !important; transform: scale(1.01); }
+        .flash-down { background-color: rgba(255, 82, 82, 0.3) !important; transform: scale(0.99); }
+
+        @keyframes news-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        @keyframes scroll-ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        @keyframes slide-up-data { 0%, 45% { transform: translateY(0); } 50%, 95% { transform: translateY(-65px); } 100% { transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+<canvas id="main-canvas"></canvas>
+<div id="dashboard-engine" class="engine-container"></div>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyCfcppc4rGYxmAj7fTzmYMZgcyBO4s8bFI",
+        databaseURL: "https://doviz-kurlari-35554-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "doviz-kurlari-35554",
+        appId: "1:822410580056:web:40d02d7729d7cf72aafa2d"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let state = { master: null, screen: null, prevPrices: {}, particles: [], animationId: null };
+
+    db.ref('terminal_data/tv_settings').on('value', snap => {
+        const data = snap.val();
+        if (!data) return;
+        if (state.master !== data.master || state.screen !== data.screen) {
+            state.master = data.master;
+            state.screen = data.screen;
+            initRoute();
+        }
+    });
+
+    function initRoute() {
+        const container = document.getElementById('dashboard-engine');
+        db.ref('terminal_data/currencies').off();
+        if(state.animationId) cancelAnimationFrame(state.animationId);
+        if(window.marketInterval) clearInterval(window.marketInterval);
+        if(window.clockInterval) clearInterval(window.clockInterval);
+
+        if (!state.master) {
+            renderStandby(container);
+        } else {
+            renderActiveScreen(container, state.screen.toString());
+        }
+    }
+
+    function renderStandby(container) {
+        document.body.style.background = "#020617";
+        container.innerHTML = `
+            <div class="main-card">
+                <div id="greeting">HOŞGELDİNİZ</div>
+                <div id="clock">00:00</div>
+                <div id="greeting-sub">İYİ GÜNLER</div>
+                <div class="divider"></div>
+                <div id="weather-info">
+                    <span id="city">İSTANBUL</span>
+                    <span class="temp-badge" id="temp">--°C</span>
+                </div>
+            </div>`;
+        startClock();
+        initParticles('white');
+        fetchWeather();
+    }
+
+    function renderActiveScreen(container, sid) {
+        document.body.style.background = "#000";
+        if (sid === "2" || sid === "4" || sid === "6") { 
+            setupGrid(container);
+            db.ref('terminal_data/currencies').on('value', snap => renderGridData(snap.val(), sid === "4"));
+        } else if (sid === "3") { 
+            setupLiveTicker(container);
+            db.ref('terminal_data/currencies').on('value', snap => renderTickerData(snap.val()));
+            updateLiveNews();
+            window.marketInterval = setInterval(updateLiveNews, 300000);
+        } else if (sid === "5") {
+            setupList(container);
+            db.ref('terminal_data/currencies').on('value', snap => renderListData(snap.val()));
+            initParticles('gold');
+        } else {
+            setupGrid(container);
+            db.ref('terminal_data/currencies').on('value', snap => renderGridData(snap.val(), false));
+        }
+    }
+
+    function setupGrid(container) {
+        container.innerHTML = `<div class="mod-wrapper"><div id="grid-content" class="grid-3-col"></div></div>`;
+    }
+
+    function renderGridData(data, goldOnly) {
+        const grid = document.getElementById('grid-content');
+        if(!grid || !data) return;
+        let filtered = goldOnly ? Object.values(data).filter(x => x.category === 'altin') : data.slice(0, 9);
+        
+        if (grid.innerHTML === "") {
+            grid.innerHTML = filtered.map(c => {
+                const isGold = c.name.toUpperCase().includes("ALTIN");
+                const flag = c.flag ? c.flag.toLowerCase() : 'un';
+                return `
+                <div class="card-modern" id="card-${c.name}">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1vh">
+                        <div style="display:flex; align-items:center; gap:10px">
+                            ${isGold ? '<i class="fa-solid fa-coins" style="color:gold; font-size:1.8vw"></i>' : '<img src="https://flagcdn.com/w160/'+flag+'.png" style="width:3vw; border-radius:4px">'} 
+                            <span style="font-size:1.3vw; font-weight:900; white-space:nowrap">${c.name}</span>
+                        </div>
+                        <div id="perc-${c.name}" style="font-size:0.9vw; font-weight:900;">--</div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center">
+                        <div style="text-align:left"><span class="val-modern" id="buy-${c.name}" style="font-size:2.2vw; color:var(--buy-red-m5)">--</span></div>
+                        <div style="text-align:right"><span class="val-modern" id="sell-${c.name}" style="font-size:2.2vw; color:var(--sell-green-m5)">--</span></div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+        filtered.forEach(c => {
+            const b = document.getElementById(`buy-${c.name}`), s = document.getElementById(`sell-${c.name}`), p = document.getElementById(`perc-${c.name}`), cd = document.getElementById(`card-${c.name}`);
+            if(!b) return;
+            const isG = c.name.toUpperCase().includes("ALTIN"), np = parseFloat(c.sell), op = state.prevPrices[c.name] || np;
+            b.innerText = c.buy.toLocaleString('tr-TR', {minimumFractionDigits: isG ? 0 : 3});
+            s.innerText = c.sell.toLocaleString('tr-TR', {minimumFractionDigits: isG ? 0 : 3});
+            if (np !== op) {
+                const df = ((np - op) / op) * 100;
+                p.innerHTML = df > 0 ? `<span style="color:var(--success)">▲ %${df.toFixed(2)}</span>` : `<span style="color:var(--danger)">▼ %${Math.abs(df).toFixed(2)}</span>`;
+                cd.classList.add(np > op ? 'flash-up' : 'flash-down');
+                setTimeout(() => cd.classList.remove('flash-up', 'flash-down'), 1000);
+            } else if(p.innerText === "--") { p.innerText = "•"; }
+            state.prevPrices[c.name] = np;
+        });
+    }
+
+    function setupLiveTicker(container) {
+        container.innerHTML = `<div class="video-wrapper"><video autoplay muted loop playsinline><source src="cnbce1.mp4" type="video/mp4"></video></div><div class="branding-panel" id="liveClock">00:00:00</div><div class="ticker-container"><div class="layer-indices"><div style="display:flex; animation: scroll-ticker 25s linear infinite" id="indicesTrack"></div></div><div class="layer-currencies" id="currenciesTrack"></div><div class="layer-news"><div class="news-track" id="newsTrack"></div></div></div>`;
+        window.clockInterval = setInterval(() => { const el = document.getElementById('liveClock'); if(el) el.innerText = new Date().toLocaleTimeString('tr-TR'); }, 1000);
+    }
+
+    function renderTickerData(data) {
+        const container = document.getElementById('currenciesTrack');
+        if(!container || !data) return;
+        container.innerHTML = data.slice(0, 10).map(item => {
+            const isGold = item.name.includes("ALTIN");
+            return `<div class="cur-card"><div style="display:flex; flex-direction:column; animation: slide-up-data 7s infinite"><div style="height:65px; padding:10px 20px"><small style="opacity:0.6; font-weight:700">${item.name}</small><br><span style="font-size:1.4rem; font-weight:800">${item.buy.toLocaleString('tr-TR', {minimumFractionDigits: isGold?0:3})}</span></div><div style="height:65px; padding:10px 20px"><small style="opacity:0.6; font-weight:700">${item.name}</small><br><span style="font-size:1.4rem; font-weight:800">${item.sell.toLocaleString('tr-TR', {minimumFractionDigits: isGold?0:3})}</span></div></div></div>`;
+        }).join('');
+    }
+
+    function setupList(container) {
+        container.innerHTML = `<div style="width:100%; height:100%; padding:2vh 5vw; box-sizing:border-box; z-index:2; position:relative"><div id="listContent" style="display:flex; flex-direction:column; gap:1.5vh;"></div></div>`;
+    }
+
+    function renderListData(data) {
+        const list = document.getElementById('listContent');
+        if(!list || !data) return;
+        const items = Object.values(data).filter(x => x.category === 'altin').sort((a,b) => (a.order||0) - (b.order||0)).slice(0, 6);
+        list.innerHTML = items.map(item => `
+            <div style="display:grid; grid-template-columns: 1.5fr 2fr 2fr; background:rgba(255,255,255,0.05); padding:2vh; border-radius:12px; border-left:5px solid var(--gold-m5);">
+                <span style="font-size:1.5vw; font-weight:900">${item.name}</span>
+                <div style="text-align:right"><span style="color:var(--buy-red-m5); font-family:'JetBrains Mono'; font-size:2.2vw">${item.buy.toLocaleString('tr-TR')}</span></div>
+                <div style="text-align:right"><span style="color:var(--sell-green-m5); font-family:'JetBrains Mono'; font-size:2.2vw">${item.sell.toLocaleString('tr-TR')}</span></div>
+            </div>`).join('');
+    }
+
+    async function updateLiveNews() {
+        try {
+            const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.aa.com.tr%2Ftr%2Frss%2Fdefault%3Fcat%3Dekonomi`);
+            const data = await res.json();
+            const track = document.getElementById('newsTrack');
+            if(data.status === 'ok' && track) { track.innerHTML = data.items.map(i => `<span>${i.title.toUpperCase()} <b style="margin:0 30px; opacity:0.2">•</b></span>`).join('') + data.items.map(i => `<span>${i.title.toUpperCase()} <b style="margin:0 30px; opacity:0.2">•</b></span>`).join(''); }
+            const indices = ["BIST 100", "NASDAQ", "DAX 40", "S&P 500", "BITCOIN"].map(name => { const val = (Math.random() * 10000 + 2000).toLocaleString('tr-TR'); const up = Math.random() > 0.4; return `<div class="index-item" style="padding:0 30px; white-space:nowrap; font-weight:700; color:#000; border-right:1px solid #f0f0f0;">${name} <span style="color:var(--cnbc-blue)">${val}</span> <small style="color:${up?'green':'red'}">${up?'▲':'▼'} %${(Math.random()*2).toFixed(2)}</small></div>`; }).join('');
+            const iTrack = document.getElementById('indicesTrack'); if(iTrack) iTrack.innerHTML = indices + indices;
+        } catch(e) { console.error("RSS Error"); }
+    }
+
+    function startClock() {
+        const update = () => {
+            const now = new Date(); const h = now.getHours().toString().padStart(2, '0'); const m = now.getMinutes().toString().padStart(2, '0');
+            const el = document.getElementById('clock'); if(el) el.innerText = `${h}:${m}`;
+            const sub = document.getElementById('greeting-sub');
+            if(sub) { const hr = parseInt(h); if(hr < 12) sub.innerText = "GÜNAYDIN"; else if(hr < 18) sub.innerText = "İYİ GÜNLER"; else sub.innerText = "İYİ AKŞAMLAR"; }
+        };
+        update(); window.clockInterval = setInterval(update, 10000);
+    }
+
+    async function fetchWeather() {
+        try {
+            const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=Istanbul&units=metric&lang=tr&appid=YOUR_API_KEY`);
+            const data = await res.json();
+            if(document.getElementById('temp')) document.getElementById('temp').innerText = Math.round(data.main.temp) + "°C";
+        } catch(e) { if(document.getElementById('temp')) document.getElementById('temp').innerText = "20°C"; }
+    }
+
+    function initParticles(type) {
+        const canvas = document.getElementById('main-canvas'); const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        state.particles = Array.from({length: 50}, () => ({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, s: Math.random() * 2 + 1, vx: Math.random() * 0.4 - 0.2, vy: type === 'gold' ? Math.random() * 1 + 0.5 : Math.random() * 0.4 - 0.2, o: Math.random() }));
+        function anim() {
+            ctx.clearRect(0,0,canvas.width, canvas.height);
+            state.particles.forEach(p => { p.x += p.vx; p.y += p.vy; if(p.y > canvas.height) p.y = -10; if(p.x > canvas.width) p.x = 0; ctx.fillStyle = type === 'gold' ? `rgba(255, 215, 0, ${p.o})` : `rgba(255,255,255,${p.o})`; ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, Math.PI*2); ctx.fill(); });
+            state.animationId = requestAnimationFrame(anim);
+        }
+        anim();
+    }
+</script>
+</body>
+</html>
