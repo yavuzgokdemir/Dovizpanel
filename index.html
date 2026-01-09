@@ -10,9 +10,9 @@
     <meta name="apple-mobile-web-app-title" content="Döviz Terminal">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#0062cc">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2921/2921237.png">
+    <link rel="apple-touch-icon" href="https://img.icons8.com/?size=100&id=nTH8lhDLqpDI&format=png&color=000000">
     
-    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkVudGVycHJpc2UgQ3VycmVuY3kgVGVybWluYWwiLAogICJzaG9ydF9uYW1lIjogIkTDtnZpeiBUZXJtIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmMGYyZjUiLAogICJ0aGVtZV9jb2xvciI6ICIjMDA2MmNjIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly9jZG4taWNvbnMtcG5nLmZsYXRpY29uLmNvbS81MTIvMjkyMS8yOTIxMjM3LnBuZyIsCiAgICAgICJzaXplcyI6ICI1MTJ4NTEyIiwKICAidHlwZSI6ICJpbWFnZS9wbmciCiAgICB9CiAgXQp9">
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkVudGVycHJpc2UgQ3VycmVuY3kgVGVybWluYWwiLAogICJzaG9ydF9uYW1lIjogIkTDtnZpeiBUZXJtIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmMGYyZjUiLAogICJ0aGVtZV9jb2xvciI6ICIjMDA2MmNjIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly9pbWcuaWNvbnM4LmNvbS8/c2l6ZT0xMDAmaWQ9blRIOGxhRExxcERJJmZvcm1hdD1wbmcmY29sb3I9MDAwMDAwIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJzaG9ydF9uYW1lIjogIkTDtnZpeiBUZXJtIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmMGYyZjUiLAogICJ0aGVtZV9jb2xvciI6ICIjMDA2MmNjIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly9pbWcuaWNvbnM4LmNvbS8/c2l6ZT0xMDAmaWQ9blRIOGxhRExxcERJJmZvcm1hdD1wbmcmY29sb3I9MDAwMDAwIiwKICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgInR5cGUiOiAiaW1hZ2UvcG5nIgogICAgfQogIF0KfQ==">
 
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
@@ -23,6 +23,7 @@
         :root {
             --bg: #f0f2f5; --card: #ffffff; --text: #1c1e21; --primary: #007bff;
             --secondary: #65676b; --success: #00c853; --danger: #ff5252; --border: #e4e6eb;
+            --warning: #f39c12; /* Kredi kartı için yeni renk */
             --header-gradient: linear-gradient(135deg, #0062cc 0%, #004a99 100%);
             --overlay: rgba(0,0,0,0.5);
         }
@@ -68,6 +69,12 @@
         .flag-anim { width: 100%; height: 100%; border-radius: 50%; border: 2px solid var(--primary); object-fit: cover; }
         .price-col { text-align: right; min-width: 85px; }
         .price-val { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 800; color: var(--primary); }
+        
+        /* Kredi Kartı Fiyatı Stili */
+        .cc-price-box { margin-top: 4px; padding: 2px 4px; background: rgba(243, 156, 18, 0.1); border-radius: 4px; border: 1px solid rgba(243, 156, 18, 0.2); }
+        .cc-price-val { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 800; color: var(--warning); }
+        .cc-label { font-size: 8px; font-weight: bold; color: var(--warning); display: block; text-transform: uppercase; }
+
         .margin-tag { font-size: 9px; color: var(--secondary); font-weight: bold; margin-top: 2px; }
         
         .internal-logs { background: #111; border-radius: 10px; padding: 10px; margin-top: 15px; max-height: 200px; overflow-y: auto; border: 1px solid #333; font-family: 'monospace'; }
@@ -179,6 +186,12 @@
         </div>
 
         <div id="settings-panel">
+            <div style="padding:15px; background:rgba(243, 156, 18, 0.1); border-radius:12px; border:1px solid var(--warning); margin-bottom:15px">
+                <label class="label-style" style="color:var(--warning)">KREDİ KARTI KOMİSYON (%)</label>
+                <input type="number" id="cc-commission-rate" class="input-box" value="3.5" step="0.1" onchange="updateCommissionRate()">
+                <small style="font-size:9px; color:var(--secondary)">Sadece altın kategorisindeki ürünlere otomatik eklenir.</small>
+            </div>
+
             <span class="label-style">API KAYNAK YÖNETİMİ</span>
             <select id="api-source-select" class="input-box" style="background: var(--primary); color: white; border: none; font-weight: bold;">
                 <option value="exchange-rate-v2">Exchange-Rate V2 (Yeni/Dinamik)</option>
@@ -245,7 +258,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const GOLD_ICON = "https://cdn-icons-png.flaticon.com/512/2921/2921237.png";
+    const GOLD_ICON = "https://img.icons8.com/?size=100&id=nTH8lhDLqpDI&format=png&color=000000";
     const CRYPTO_ICON = "https://cdn-icons-png.flaticon.com/512/2091/2091665.png";
     const DEFAULT_ICON = "https://cdn-icons-png.flaticon.com/512/197/197518.png";
     
@@ -254,10 +267,20 @@
     let syncTimer = null;
     let countdownTimer = null;
     let secondsLeft = 0;
+    let ccRate = 3.5; // Kredi kartı komisyon oranı varsayılan
 
     function initApp() {
         addLog("Sistem Başlatıldı. Bağlantı bekleniyor...", "INFO");
         
+        // Komisyon oranını Firebase'den yükle
+        db.ref('terminal_data/cc_rate').on('value', (snapshot) => {
+            if(snapshot.exists()) {
+                ccRate = snapshot.val();
+                document.getElementById('cc-commission-rate').value = ccRate;
+                render();
+            }
+        });
+
         db.ref('terminal_data/currencies').on('value', (snapshot) => {
             const data = snapshot.val();
             if (data) { 
@@ -272,10 +295,8 @@
             if(tv) {
                 document.getElementById('tv-master-switch').checked = tv.master || false;
                 document.getElementById('tv-screen-select').value = tv.screen || "1";
-                
                 document.getElementById('tv-master-switch-2').checked = tv.master2 || false;
                 document.getElementById('tv-screen-select-2').value = tv.screen2 || "1";
-                
                 updateTvButtonState(tv.master, tv.master2);
             }
         });
@@ -289,23 +310,26 @@
         });
     }
 
-    // MODÜLER GÜNCELLEME: TV Butonuna basıldığında hem paneli açar hem de yayınları kapatır (Mod 0)
+    // Komisyon oranını güncelleme
+    function updateCommissionRate() {
+        const newRate = parseFloat(document.getElementById('cc-commission-rate').value) || 0;
+        db.ref('terminal_data/cc_rate').set(newRate);
+        addLog(`Komisyon Oranı Güncellendi: %${newRate}`, "INFO");
+    }
+
     function toggleSettingsArea() {
         const area = document.getElementById('tv-settings-container');
         const list = document.getElementById('currency-list');
-        
         if (area.style.display === 'block') {
             area.style.display = 'none';
             list.style.display = 'block';
         } else {
-            // Ayarlar açıldığında tüm modları Mod 0 (False) yap
             document.getElementById('tv-master-switch').checked = false;
             document.getElementById('tv-master-switch-2').checked = false;
-            saveTvSettings(); // Firebase'e gönder ve senkronize et
-            
+            saveTvSettings();
             area.style.display = 'block';
             list.style.display = 'none';
-            addLog("Ayarlar Paneli Aktif - Yayınlar Durduruldu (Mod 0)", "WARN");
+            addLog("Ayarlar Paneli Aktif", "WARN");
         }
     }
 
@@ -324,7 +348,6 @@
         const tvBtn = document.getElementById('tv-btn');
         const b1 = document.getElementById('badge-tv1');
         const b2 = document.getElementById('badge-tv2');
-        
         (m1 || m2) ? tvBtn.classList.add('active-green') : tvBtn.classList.remove('active-green');
         b1.style.background = m1 ? 'var(--success)' : '#ccc';
         b2.style.background = m2 ? 'var(--success)' : '#ccc';
@@ -336,10 +359,9 @@
         if (!isAutoMode) return;
         try {
             let hasChange = false;
-            let tryRate = 1.0;
             const tryResp = await fetch(`https://hexarate.paikama.co/api/rates/USD/TRY/latest`);
             const tryJson = await tryResp.json();
-            tryRate = parseFloat(tryJson?.data?.mid || 1);
+            const tryRate = parseFloat(tryJson?.data?.mid || 1);
 
             const updatedList = await Promise.all(currencies.map(async (c) => {
                 if(!c.autoSync) return c;
@@ -351,8 +373,16 @@
                     if(midPrice) {
                         const usdPrice = parseFloat(midPrice);
                         let finalPrice = (base === "XAU" || base === "XAG") ? (usdPrice * tryRate / 31.1035) : (usdPrice * tryRate);
-                        const newSell = roundToTen(finalPrice + (c.sellMargin || 0));
-                        const newBuy = roundToTen(finalPrice - (c.buyMargin || 0));
+                        
+                        let newSell, newBuy;
+                        if(base === "XAU" || c.category === 'altin') {
+                            newSell = Math.floor(finalPrice + (c.sellMargin || 0));
+                            newBuy = Math.floor(finalPrice - (c.buyMargin || 0));
+                        } else {
+                            newSell = roundToTen(finalPrice + (c.sellMargin || 0));
+                            newBuy = roundToTen(finalPrice - (c.buyMargin || 0));
+                        }
+
                         if(Math.abs(c.sell - newSell) > 0.0001 || Math.abs(c.buy - newBuy) > 0.0001) {
                             hasChange = true;
                             return { ...c, buy: newBuy, sell: newSell, basePrice: finalPrice };
@@ -369,9 +399,8 @@
         } catch (e) { syncTimer = setTimeout(fetchMarketData, 5000); }
     }
 
-    function formatPrice(val, name) {
-        const sym = name.toUpperCase();
-        if(sym === "GA" || sym === "XAU" || sym === "GOLD" || sym === "ALTIN") return Number(val.toFixed(3)).toString();
+    function formatPrice(val, name, category) {
+        if(category === "altin") return Math.floor(val).toString();
         return val.toFixed(3);
     }
 
@@ -379,8 +408,43 @@
         const list = document.getElementById('currency-list');
         list.innerHTML = '';
         currencies.forEach(c => {
-            let iconUrl = c.flag.length === 2 ? `https://flagcdn.com/w80/${c.flag}.png` : (c.flag === 'gold' ? GOLD_ICON : (c.flag === 'btc' ? CRYPTO_ICON : DEFAULT_ICON));
-            list.innerHTML += `<div class="currency-card" data-id="${c.id}" onclick="openUpdateModal(${c.id})"><div class="drag-handle"><i class="fas fa-grip-vertical"></i></div><div class="lock-indicator">${c.autoSync ? '<i class="fas fa-sync-alt fa-spin"></i>' : '<i class="fas fa-lock"></i>'}</div><div class="flag-box"><img src="${iconUrl}" class="flag-anim" onerror="this.src='${DEFAULT_ICON}'"></div><div class="currency-meta"><b>${c.name}</b><br><span style="font-size:9px">${c.category.toUpperCase()}</span></div><div class="price-col"><span class="label-style">ALIŞ</span><div class="price-val">${formatPrice(c.buy || 0, c.name)}</div><div class="margin-tag">-${(c.buyMargin || 0).toFixed(2)}</div></div><div class="price-col"><span class="label-style">SATIŞ</span><div class="price-val">${formatPrice(c.sell || 0, c.name)}</div><div class="margin-tag">+${(c.sellMargin || 0).toFixed(2)}</div></div></div>`;
+            let iconUrl;
+            if (c.category === 'altin' || c.flag === 'gold') iconUrl = GOLD_ICON;
+            else if (c.category === 'kripto' || c.flag === 'btc') iconUrl = CRYPTO_ICON;
+            else if (c.flag.length === 2) iconUrl = `https://flagcdn.com/w80/${c.flag}.png`;
+            else iconUrl = DEFAULT_ICON;
+
+            // Kredi Kartı Fiyat Hesaplama
+            let ccHtml = "";
+            if(c.category === 'altin') {
+                const ccPrice = Math.floor(c.sell + (c.sell * (ccRate / 100)));
+                ccHtml = `
+                    <div class="cc-price-box">
+                        <span class="cc-label">K. Kartı (%${ccRate})</span>
+                        <div class="cc-price-val">${ccPrice}</div>
+                    </div>
+                `;
+            }
+
+            list.innerHTML += `
+                <div class="currency-card" data-id="${c.id}" onclick="openUpdateModal(${c.id})">
+                    <div class="drag-handle"><i class="fas fa-grip-vertical"></i></div>
+                    <div class="lock-indicator">${c.autoSync ? '<i class="fas fa-sync-alt fa-spin"></i>' : '<i class="fas fa-lock"></i>'}</div>
+                    <div class="flag-box">
+                        <img src="${iconUrl}" class="flag-anim" onerror="this.src='${DEFAULT_ICON}'">
+                    </div>
+                    <div class="currency-meta"><b>${c.name}</b><br><span style="font-size:9px">${c.category.toUpperCase()}</span></div>
+                    <div class="price-col">
+                        <span class="label-style">ALIŞ</span>
+                        <div class="price-val">${formatPrice(c.buy || 0, c.name, c.category)}</div>
+                        <div class="margin-tag">-${(c.buyMargin || 0).toFixed(2)}</div>
+                    </div>
+                    <div class="price-col">
+                        <span class="label-style">SATIŞ</span>
+                        <div class="price-val">${formatPrice(c.sell || 0, c.name, c.category)}</div>
+                        ${ccHtml}
+                    </div>
+                </div>`;
         });
         document.getElementById('stat-count').innerText = currencies.length;
     }
@@ -389,8 +453,8 @@
         isAutoMode = !isAutoMode;
         document.getElementById('auto-btn').classList.toggle('active-green', isAutoMode);
         clearTimeout(syncTimer);
-        if(isAutoMode) { fetchMarketData(); addLog("Otomatik Güncelleme Başlatıldı.", "INFO"); }
-        else { document.getElementById('timer-box').innerText = "--"; addLog("Otomatik Güncelleme Durduruldu.", "WARN"); }
+        if(isAutoMode) { fetchMarketData(); addLog("Oto-Mod Başlatıldı.", "INFO"); }
+        else { document.getElementById('timer-box').innerText = "--"; addLog("Oto-Mod Durduruldu.", "WARN"); }
     }
 
     function saveToFirebase() { db.ref('terminal_data/currencies').set(currencies); }
@@ -433,15 +497,19 @@
             autoSync: document.getElementById('edit-auto-sync').checked
         } : c);
         saveToFirebase(); closeModal();
-        addLog(`ID: ${id} El ile güncellendi.`, "UPDATE");
+        addLog(`ID: ${id} Güncellendi.`, "UPDATE");
     }
 
     function addNewCurrency() {
         const name = document.getElementById('new-name').value.toUpperCase().trim();
+        const cat = document.getElementById('new-api-cat').value;
         if(!name) return;
+        let flagInput = document.getElementById('new-flag').value.toLowerCase();
+        if(cat === 'altin' && !flagInput) flagInput = 'gold';
+
         const newItem = {
-            id: Date.now(), name: name, category: document.getElementById('new-api-cat').value,
-            flag: (document.getElementById('new-flag').value || 'tr').toLowerCase(),
+            id: Date.now(), name: name, category: cat,
+            flag: flagInput || 'tr',
             buy: 0, sell: 0, buyMargin: parseFloat(document.getElementById('new-buy-margin').value) || 0.1,
             sellMargin: parseFloat(document.getElementById('new-sell-margin').value) || 0.2,
             autoSync: true, order: currencies.length
