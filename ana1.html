@@ -1,2567 +1,560 @@
-
-
-
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-<title>DövizX POS - Vezne Sistemi</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Enterprise Currency Terminal v3.2 Pro</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-<style>
-/* ================================================= */
-/* KOYU TEMA (Dark Mode - Varsayılan) */
-/* ================================================= */
-:root {
-    --bg: #0f172a; --card: #1e293b; --input: #334155; --text: #f8fafc; --muted: #94a3b8;
-    --primary: #3b82f6; --success: #10b981; --danger: #ef4444; --accent: #f59e0b;
-    --border: rgba(255,255,255,0.1); --radius: 16px;
-    --nav-height: 70px;
-}
-
-/* ================================================= */
-/* GÜNDÜZ MODU (Day Mode - AÇIK TEMA) */
-/* ================================================= */
-.day-mode {
-    --bg: #f1f5f9; 
-    --card: #ffffff; 
-    --input: #e2e8f0; 
-    --text: #0f172a; 
-    --muted: #64748b; 
-    --primary: #3b82f6; 
-    --success: #10b981; 
-    --danger: #ef4444; 
-    --accent: #f59e0b; 
-    --border: rgba(0,0,0,0.1); 
-}
-.day-mode header { background: #ffffff; border-bottom: 1px solid var(--border); }
-.day-mode .num-btn:active { background: #cbd5e1; }
-.day-mode .pos-rate-input-display { background: #f8fafc; }
-.day-mode .nav-item { color: var(--muted); }
-.day-mode .nav-item.active { color: var(--primary); }
-.day-mode .transaction-item { background: #e2e8f0; }
-.day-mode .stat-box-action { background: var(--card); }
-.day-mode .stat-box-action:active { background: #e2e8f0; }
-
-/* ================================================= */
-/* MOBİL ODAKLI TEMEL STİL AYARLARI (KAYDIRMA GÜNCELLEMESİ) */
-/* ================================================= */
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-body { 
-    margin: 0; 
-    font-family: 'Manrope', sans-serif; 
-    background: var(--bg); 
-    color: var(--text); 
-    height: 100vh; 
-    display: flex; 
-    flex-direction: column; 
-    overflow: hidden; 
-}
-header { padding: 15px 20px; background: rgba(30, 41, 59, 0.95); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; z-index: 50; user-select: none; }
-.brand { font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
-.brand i { color: var(--success); }
-.badge-demo { background: var(--accent); color: #000; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 800; }
-
-/* Ana Görünümler Kapsayıcısı */
-#views {
-    flex: 1; 
-    overflow: hidden; 
-    position: relative;
-}
-
-/* Tüm ana içerikler (view-market, view-history vb.) */
-.main-container { 
-    overflow-y: auto; 
-    position: absolute; 
-    inset: 0; 
-    padding: 15px; 
-    padding-bottom: calc(var(--nav-height) + 20px); 
-}
-<div id="thermal-print-area" style="display:none;"></div>
-
-<style>
-@media print {
-    body > *:not(#thermal-print-area) { display: none !important; }
-    #thermal-print-area { display: block !important; width: 80mm; }
-}
-</style>
-
-.card { background: var(--card); border-radius: var(--radius); padding: 15px; margin-bottom: 15px; border: 1px solid var(--border); box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
-.pos-screen, .payment-screen {
-    position: fixed; inset: 0; background: var(--bg); z-index: 200; display: none; flex-direction: column;
-    animation: slideUp 0.3s ease-out;
-}
-.payment-screen { z-index: 300; }
-@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-.pos-screen.active, .payment-screen.active { display: flex; }
-.pos-header, .rate-modal-header { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); user-select: none; }
-.pos-body, .rate-modal-body { flex: 1; display: flex; flex-direction: column; padding: 20px; overflow-y: auto; }
-.numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; flex: 1; }
-.num-btn { 
-    background: var(--card); border: 1px solid var(--border); border-radius: 12px; font-size: 24px; font-weight: 600; 
-    color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.1s;
-    user-select: none; height: 60px;
-}
-.num-btn.action { background: var(--primary); color: white; border: none; height: auto; padding: 15px 0; }
-.num-btn.add-item { background: var(--success); color: white; } 
-.num-btn.clear-amount { background: var(--accent); color: #000; font-weight: 800; }
-.num-btn.clear-back { color: var(--danger); }
-.pos-display { background: var(--input); padding: 15px 20px; border-radius: 12px; text-align: right; margin-bottom: 15px; border: 2px solid var(--border); min-height: 70px; }
-.pos-amount { font-size: 28px; font-weight: 800; color: var(--text); display: block; }
-.pos-sub { font-size: 12px; color: var(--muted); margin-top: 5px; display: block; }
-
-/* YENİ POS DÜZENİ */
-.pos-input-area { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
-.pos-input-fields { display: flex; gap: 10px; }
-.pos-input-fields .pos-display { margin-bottom: 0; flex: 2; padding: 10px 15px; min-height: 0; }
-.pos-input-fields .pos-amount { font-size: 20px; }
-.pos-input-fields .pos-rate-input-display {
-    flex: 1; font-size: 14px; padding: 10px; height: 57px; min-width: 0;
-    padding: 10px 15px; border-radius: 12px; background: var(--input); color: var(--text); border: 1px solid var(--border);
-    font-size: 16px; font-weight: 600; text-align: right; display: flex; justify-content: space-between; align-items: center;
-    cursor: pointer; transition: background 0.2s, color 0.2s;
-}
-
-.pos-total-display {
-    background: var(--input); padding: 10px 15px; border-radius: 12px; text-align: right; 
-    font-size: 16px; font-weight: 700; color: var(--primary);
-    border: 2px solid var(--border); display: flex; justify-content: space-between;
-}
-.pos-total-display .current-total-tl { color: var(--primary); font-weight: 800; }
-.pos-total-display .overall-total-label { color: var(--muted); font-weight: 600; }
-
-/* KUR LİSTELEME GRİDİ STİLLERİ (YENİ YAPILANDIRMA) */
-.rate-grid-container { 
-    padding: 15px 0 15px 15px; /* Kaydırma çubuğu için sağdan 0, soldan boşluk */
-    background: var(--card); 
-    border-radius: var(--radius); 
-    margin-bottom: 15px; 
-    border: 1px solid var(--border);
-    overflow-x: auto; /* Yatay kaydırma için */
-    scroll-snap-type: x mandatory; /* Snap kaydırma efekti */
-    -webkit-overflow-scrolling: touch; /* iOS için yumuşak kaydırma */
-}
-/* Kaydırma çubuğunu gizle */
-.rate-grid-container::-webkit-scrollbar { display: none; }
-.rate-grid-container { -ms-overflow-style: none; scrollbar-width: none; }
-
-.rate-grid { 
-    display: flex; /* Yatay liste için flex */
-    gap: 15px; 
-    padding-bottom: 10px; /* Alttan boşluk */
-    /* min-width: 100%; KALDIRILDI */
-}
-
-.rate-page {
-    display: grid;
-    grid-template-columns: 1fr; /* Tek sütunlu dikey düzen */
-    gap: 15px;
-    flex: 0 0 calc(100% - 15px); /* Ekran genişliği kadar yer kapla (sağdaki boşluğu düş) */
-    scroll-snap-align: start; /* Kaydırmada başlangıca hizala */
-    padding-right: 15px; /* Sayfalar arası boşluk için */
-}
-
-.rate-item-responsive { 
-    width: 100%; 
-    background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 15px; display: flex; flex-direction: column; gap: 10px; 
-}
-.rate-item-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--border); padding-bottom: 8px; }
-.curr-code { font-size: 24px; font-weight: 800; line-height: 1; }
-.curr-name { font-size: 12px; color: var(--muted); }
-.rate-actions { display: flex; gap: 10px; }
-.rate-action-btn { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 10px 5px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; transition: background 0.1s; text-align: center; }
-.rate-action-btn strong { font-size: 20px; margin-top: 3px; line-height: 1.1; }
-.btn-buy { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
-.btn-sell { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
-
-/* KASA DURUMU KUTUSU */
-.stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-.stat-box { background: var(--input); padding: 10px; border-radius: 10px; text-align: center; }
-.stat-val { font-size: 14px; font-weight: 800; color: var(--text); }
-.stat-lbl { font-size: 10px; color: var(--muted); margin-top: 2px; }
-.stat-box-action { background: var(--card) !important; border: 1px solid var(--border); cursor: pointer; transition: background 0.1s, transform 0.1s; }
-.stat-box-action:active { background: var(--input) !important; transform: scale(0.98); }
-
-/* GENEL */
-.hidden { display: none !important; }
-.text-success { color: var(--success); }
-.text-danger { color: var(--danger); }
-.bottom-nav {
-    position: fixed; bottom: 0; left: 0; right: 0; height: var(--nav-height); 
-    background: var(--card); border-top: 1px solid var(--border); 
-    display: flex; justify-content: space-around; z-index: 100;
-}
-.nav-item {
-    background: none; border: none; color: var(--muted); cursor: pointer;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    font-size: 12px; font-weight: 600; transition: color 0.2s;
-    flex: 1;
-}
-.nav-item i { font-size: 20px; margin-bottom: 2px; }
-.nav-item.active { color: var(--primary); }
-
-/* POS BUTON DÜZENİ */
-.transaction-item {
-    display: flex; justify-content: space-between; align-items: center;
-    background: var(--card); padding: 10px 15px; margin-bottom: 8px;
-    border-radius: 8px; border: 1px solid var(--border);
-}
-.item-info { display: flex; gap: 15px; font-size: 14px; font-weight: 600; }
-.item-info span:first-child { font-weight: 800; min-width: 100px; }
-.remove-btn { background: var(--danger); color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 14px; cursor: pointer; }
-.pos-button-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; grid-column: span 3; }
-.pos-button-row .num-btn { height: 60px; font-size: 16px; font-weight: 800; padding: 0; }
-
-/* ÖDEME EKRANI */
-.payment-screen .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-.payment-screen .numpad .num-btn { height: 60px; font-size: 24px; }
-.payment-button-row { grid-column: span 3; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.payment-button-row .num-btn { height: 60px; font-size: 16px; font-weight: 800; padding: 0; }
-.payment-screen .numpad .clear-back { grid-column: span 1; }
-.payment-input-display { 
-    background: var(--input); padding: 15px 20px; border-radius: 12px; text-align: right; 
-    margin-bottom: 15px; border: 2px solid var(--border); min-height: 70px;
-}
-.payment-input-amount { font-size: 28px; font-weight: 800; color: var(--text); display: block; }
-
-/* TAHSİLAT VE GEÇMİŞ İŞLEM ÖZETİ STİLİ */
-.payment-info-box { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid var(--border); }
-.payment-info-box h4 { margin: 0 0 10px 0; font-size: 16px; color: var(--muted); border-bottom: 1px dashed var(--border); padding-bottom: 8px; }
-.info-row { display: flex; justify-content: space-between; font-size: 18px; font-weight: 600; margin-bottom: 8px; }
-.info-row.final { font-size: 24px; font-weight: 800; padding-top: 10px; margin-top: 10px; border-top: 2px solid var(--primary); }
-.transaction-summary-item {
-    border-bottom: 1px dashed var(--border);
-    padding: 10px 0;
-    margin-bottom: 10px;
-}
-/* YENİ TAHSİLAT ÖZETİ STİLLERİ */
-.transaction-summary-item .label {
-    color: var(--muted);
-    font-weight: 600;
-}
-.summary-value-bold {
-    font-weight: 800;
-    font-size: 16px;
-}
-.summary-tl-amount {
-    color: var(--primary);
-    font-size: 18px;
-    font-weight: 800;
-}
-
-/* YENİ FİŞ KARTI STİLİ */
-.receipt-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    margin-bottom: 15px;
-    padding: 15px;
-}
-.receipt-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    border-bottom: 1px dashed var(--border);
-    padding-bottom: 10px;
-    margin-bottom: 10px;
-}
-.receipt-meta {
-    font-size: 12px;
-    color: var(--muted);
-}
-.receipt-meta strong {
-    color: var(--text);
-    font-size: 14px;
-    display: block;
-}
-.receipt-total {
-    font-size: 22px;
-    font-weight: 800;
-    line-height: 1;
-}
-.receipt-total span {
-    display: block;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--muted);
-}
-.receipt-action-btn {
-    background: var(--primary);
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 8px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: background 0.1s;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-/* Yeni filtreleme butonları için stil */
-.filter-btn {
-    flex: 1;
-    padding: 8px 5px;
-    border-radius: 8px;
-    background: var(--input);
-    color: var(--text);
-    border: 1px solid var(--border);
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 13px;
-    transition: all 0.2s;
-}
-.filter-btn.active {
-    background: var(--primary);
-    color: white;
-    border-color: var(--primary);
-}
-
-/* ================================================= */
-/* GİRİŞ EKRANI STİLİ */
-/* ================================================= */
-#loginScreen {
-    position: fixed;
-    inset: 0;
-    z-index: 500; 
-    background: var(--bg);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    text-align: center;
-    overflow-y: auto; 
-}
-.login-card {
-    width: 100%;
-    max-width: 400px;
-    padding: 30px;
-    background: var(--card);
-    border-radius: var(--radius);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.4);
-    margin: 20px 0; 
-}
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Döviz Terminal">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0062cc">
+    <link rel="apple-touch-icon" href="https://img.icons8.com/?size=100&id=nTH8lhDLqpDI&format=png&color=000000">
     
-#vezneSelect {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 20px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    background: var(--input);
-    color: var(--text);
-    font-size: 16px;
-    appearance: none; 
-    background-image: url('data:image/svg+xml;utf8,<svg fill="var(--muted)" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-}
-#pinInput {
-    width: 100%;
-    text-align: center;
-    padding: 15px;
-    margin-bottom: 20px;
-    border-radius: 8px;
-    border: 2px solid var(--primary);
-    background: var(--input);
-    color: var(--text);
-    font-size: 30px;
-    font-weight: 800;
-    letter-spacing: 5px;
-}
-.login-button {
-    width: 100%;
-    padding: 15px;
-    background: var(--primary);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-weight: 800;
-    cursor: pointer;
-}
-/* YENİ FİŞ BUTONLARI DÜZENİ */
-.receipt-action-group {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    margin-top: 15px;
-}
-.receipt-action-group button {
-    padding: 12px;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background 0.1s;
-    font-size: 13px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-}
-.receipt-action-group .btn-print {
-    background: var(--accent);
-    color: #000;
-    border: none;
-}
-.receipt-action-group .btn-whatsapp {
-    background: var(--success);
-    color: white;
-    border: none;
-}
-.receipt-action-group .btn-close {
-    background: var(--primary);
-    color: white;
-    border: none;
-}
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkVudGVycHJpc2UgQ3VycmVuY3kgVGVybWluYWwiLAogICJzaG9ydF9uYW1lIjogIkTDtnZpeiBUZXJtIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmMGYyZjUiLAogICJ0aGVtZV9jb2xvciI6ICIjMDA2MmNjIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly9pbWcuaWNvbnM4LmNvbS8/c2l6ZT0xMDAmaWQ9blRIOGxhRExxcERJJmZvcm1hdD1wbmcmY29sb3I9MDAwMDAwIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJzaG9ydF9uYW1lIjogIkTDtnZpeiBUZXJtIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmMGYyZjUiLAogICJ0aGVtZV9jb2xvciI6ICIjMDA2MmNjIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly9pbWcuaWNvbnM4LmNvbS8/c2l6ZT0xMDAmaWQ9blRIOGxhRExxcERJJmZvcm1hdD1wbmcmY29sb3I9MDAwMDAwIiwKICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgInR5cGUiOiAiaW1hZ2UvcG5nIgogICAgfQogIF0KfQ==">
 
-/* AYARLAR INPUT STYLE */
-#currencyCodeInput, #currencyInitialBalance, #manualBuyRate, #manualSellRate, #currencyRemoveSelect, #rateCurrencySelect {
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    background: var(--input);
-    color: var(--text);
-    box-sizing: border-box;
-}
-/* YENİ AYARLAR DÜZENİ */
-.setting-row-flex {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 10px;
-}
-.setting-row-flex > * {
-    flex: 1;
-    min-width: 0;
-}
-.setting-row-flex button {
-    flex: 1;
-}
-</style>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg: #f0f2f5; --card: #ffffff; --text: #1c1e21; --primary: #007bff;
+            --secondary: #65676b; --success: #00c853; --danger: #ff5252; --border: #e4e6eb;
+            --warning: #f39c12; /* Kredi kartı için yeni renk */
+            --header-gradient: linear-gradient(135deg, #0062cc 0%, #004a99 100%);
+            --overlay: rgba(0,0,0,0.5);
+        }
+        [data-theme="dark"] {
+            --bg: #0f1011; --card: #1c1e21; --text: #e4e6eb; --secondary: #b0b3b8;
+            --border: #333537; --header-gradient: linear-gradient(135deg, #161719 0%, #25272a 100%);
+            --overlay: rgba(0,0,0,0.8);
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; display: flex; justify-content: center; transition: 0.3s; }
+        .container { width: 100%; max-width: 500px; padding: 0 12px 100px 12px; }
+        
+        .header { background: var(--header-gradient); padding: 12px 18px; border-radius: 0 0 20px 20px; margin: 0 -12px 15px -12px; color: white; box-shadow: 0 5px 15px rgba(0,0,0,0.15); position: sticky; top:0; z-index:1001; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; }
+        
+        .brand-section { display: flex; align-items: center; gap: 10px; }
+        .chameleon-icon { font-size: 24px; animation: bounce 2s infinite ease-in-out; display: inline-block; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-5px) rotate(10deg); } }
+        
+        .compact-info-row { display: flex; align-items: center; gap: 8px; font-size: 11px; background: rgba(0,0,0,0.2); padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); }
+        .header-stats { display: flex; align-items: center; gap: 6px; font-weight: 600; color: #00ff88; }
+        .countdown-box { font-family: monospace; font-weight: bold; color: white; opacity: 0.8; border-left: 1px solid rgba(255,255,255,0.2); padding-left: 8px; }
+
+        .toolbar-btns { display: flex; gap: 6px; }
+        .btn-round { width: 34px; height: 34px; border-radius: 10px; border: none; background: rgba(255,255,255,0.15); color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; font-size: 14px; }
+        .btn-round.active-green { background: var(--success); box-shadow: 0 0 10px var(--success); }
+        
+        #tv-settings-container { display: none; margin-bottom: 15px; }
+        #settings-panel, #tv-panel { background: var(--card); border-radius: 18px; padding: 18px; border: 1px solid var(--border); box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-top: 5px; }
+        .input-box { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 10px; font-size: 13px; }
+        .label-style { font-size: 10px; font-weight: 800; color: var(--secondary); margin-bottom: 4px; display: block; }
+
+        .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 22px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--success); }
+        input:checked + .slider:before { transform: translateX(22px); }
+
+        .currency-card { background: var(--card); border-radius: 15px; padding: 14px; margin-bottom: 10px; display: grid; grid-template-columns: auto auto 1fr auto auto; align-items: center; gap: 12px; border: 1px solid var(--border); cursor: pointer; transition: transform 0.1s; position: relative; }
+        .drag-handle { color: var(--secondary); cursor: grab; padding: 5px; opacity: 0.5; }
+        .flag-box { position: relative; width: 42px; height: 42px; }
+        .flag-anim { width: 100%; height: 100%; border-radius: 50%; border: 2px solid var(--primary); object-fit: cover; }
+        .price-col { text-align: right; min-width: 85px; }
+        .price-val { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 800; color: var(--primary); }
+        
+        /* Kredi Kartı Fiyatı Stili */
+        .cc-price-box { margin-top: 4px; padding: 2px 4px; background: rgba(243, 156, 18, 0.1); border-radius: 4px; border: 1px solid rgba(243, 156, 18, 0.2); }
+        .cc-price-val { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 800; color: var(--warning); }
+        .cc-label { font-size: 8px; font-weight: bold; color: var(--warning); display: block; text-transform: uppercase; }
+
+        .margin-tag { font-size: 9px; color: var(--secondary); font-weight: bold; margin-top: 2px; }
+        
+        .internal-logs { background: #111; border-radius: 10px; padding: 10px; margin-top: 15px; max-height: 200px; overflow-y: auto; border: 1px solid #333; font-family: 'monospace'; }
+        .log-entry { display: flex; align-items: flex-start; gap: 8px; font-size: 10px; padding: 4px 0; border-bottom: 1px solid #222; }
+        .log-time { color: #888; white-space: nowrap; }
+        .log-tag { padding: 2px 4px; border-radius: 4px; font-weight: bold; font-size: 8px; text-transform: uppercase; }
+        .tag-info { background: #007bff; color: white; }
+        .tag-update { background: #00c853; color: white; }
+        .tag-error { background: #ff5252; color: white; }
+        .tag-warn { background: #ffa000; color: white; }
+        .log-msg { color: #eee; line-height: 1.3; }
+
+        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: var(--overlay); display: none; justify-content: center; align-items: center; z-index: 2000; padding: 20px; backdrop-filter: blur(4px); }
+        .modal-content { background: var(--card); width: 100%; max-width: 400px; border-radius: 20px; padding: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); padding: 8px 20px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; z-index: 1000; height: 60px; }
+        .lock-indicator { position: absolute; top: 5px; left: 5px; font-size: 10px; color: var(--secondary); }
+        .sortable-ghost { opacity: 0.3; background: var(--primary) !important; }
+        
+        .bottom-tv-control { display: flex; align-items: center; gap: 10px; background: var(--bg); padding: 5px 12px; border-radius: 12px; border: 1px solid var(--border); }
+        .tv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 10px; }
+        .tv-card-inner { background: var(--bg); padding: 10px; border-radius: 12px; border: 1px solid var(--border); }
+    </style>
 </head>
-<body id="appBody" class="logged-out">
+<body data-theme="light">
 
-<div id="loginScreen">
-    <div class="login-card">
-        <div class="brand" style="justify-content:center; font-size:24px; margin-bottom:20px;">
-            <i class="ri-exchange-dollar-line"></i> DövizX Vezne Girişi
+<div class="modal-overlay" id="update-modal">
+    <div class="modal-content">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px">
+            <h3 id="edit-title" style="margin:0; font-size:16px">Dövizi Düzenle</h3>
+            <button class="btn-round" onclick="closeModal()" style="background:var(--bg); color:var(--text)"><i class="fas fa-times"></i></button>
+        </div>
+        <input type="hidden" id="edit-id">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px">
+            <div><label class="label-style">GÜNCEL ALIŞ FİYATI</label><input type="number" id="edit-buy-price" class="input-box" step="0.0001"></div>
+            <div><label class="label-style">GÜNCEL SATIŞ FİYATI</label><input type="number" id="edit-sell-price" class="input-box" step="0.0001"></div>
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px">
+            <div><label class="label-style">ALIŞ MARJI (-)</label><input type="number" id="edit-buy-margin" class="input-box" step="0.0001"></div>
+            <div><label class="label-style">SATIŞ MARJI (+)</label><input type="number" id="edit-sell-margin" class="input-box" step="0.0001"></div>
         </div>
         
-        <label style="display:block; text-align:left; margin-bottom:5px; color:var(--muted)">Vezne Seçin:</label>
-        <select id="vezneSelect"></select>
-        
-        <label style="display:block; text-align:left; margin-bottom:5px; color:var(--muted)">PIN Girin:</label>
-        <input type="password" id="pinInput" placeholder="••••" maxlength="4" readonly/>
-        
-        <div class="numpad" style="margin-top:20px;">
-            <button class="num-btn" onclick="app.loginNum(1)">1</button>
-            <button class="num-btn" onclick="app.loginNum(2)">2</button>
-            <button class="num-btn" onclick="app.loginNum(3)">3</button>
-            <button class="num-btn" onclick="app.loginNum(4)">4</button>
-            <button class="num-btn" onclick="app.loginNum(5)">5</button>
-            <button class="num-btn" onclick="app.loginNum(6)">6</button>
-            <button class="num-btn" onclick="app.loginNum(7)">7</button>
-            <button class="num-btn" onclick="app.loginNum(8)">8</button>
-            <button class="num-btn" onclick="app.loginNum(9)">9</button>
-            
-            <button class="num-btn clear-back" onclick="app.loginClear()"><i class="ri-delete-back-2-line"></i></button>
-            <button class="num-btn" onclick="app.loginNum(0)">0</button>
-            <button class="num-btn action" onclick="app.login()"><i class="ri-login-box-line"></i> GİRİŞ</button>
+        <div><label class="label-style">BAYRAK KODU (us, tr, gold, btc...)</label><input type="text" id="edit-flag" class="input-box"></div>
+
+        <div style="display:flex; align-items:center; gap:10px; margin: 10px 0; background: var(--bg); padding:10px; border-radius:8px">
+            <label class="switch"><input type="checkbox" id="edit-auto-sync"><span class="slider"></span></label>
+            <label for="edit-auto-sync" style="font-size:12px; font-weight:bold">Oto-Mod Aktif</label>
+        </div>
+
+        <div style="display:flex; gap:10px">
+            <button class="btn-round" style="flex:1; background:var(--danger); border-radius:8px; font-weight:bold" onclick="deleteCurrency()"><i class="fas fa-trash"></i> SİL</button>
+            <button class="btn-round" style="flex:3; background:var(--success); border-radius:8px; font-weight:bold" onclick="saveManualUpdate()">KAYDET</button>
         </div>
     </div>
 </div>
 
-<header>
-    <div class="brand">
-        <i class="ri-exchange-dollar-line"></i> DövizX
-        <span class="badge-demo" id="activeVezneBadge">VEZNE ?</span>
-    </div>
-    <div style="display: flex; align-items: center; gap: 15px;">
-        <button id="themeToggleBtn" onclick="app.toggleDayMode()" style="background:none; border:none; color:var(--text); font-size:20px; cursor:pointer;">
-            <i class="ri-sun-line"></i>
-        </button>
-        <div style="font-size:12px; font-weight:600; color:var(--muted)">
-            Kasa: <span id="headerTotal">0.00 ₺</span>
+<div class="container">
+    <header class="header">
+        <div class="header-top">
+            <div class="brand-section">
+                <span class="chameleon-icon">🦎</span>
+                <div class="compact-info-row">
+                    <div class="header-stats"><i class="fas fa-layer-group"></i> <span id="stat-count">0</span></div>
+                    <div class="header-stats" style="color:#00e5ff; border-left: 1px solid rgba(255,255,255,0.2); padding-left: 8px;"><i class="fas fa-clock"></i> <span id="stat-sync">--:--</span></div>
+                    <div class="countdown-box" id="timer-box">--</div>
+                </div>
+            </div>
+            <div class="toolbar-btns">
+                <button class="btn-round" onclick="toggleAuto()" id="auto-btn"><i class="fas fa-robot"></i></button>
+                <button class="btn-round" onclick="toggleSettingsArea()" id="tv-btn"><i class="fas fa-tv"></i></button>
+                <button class="btn-round" onclick="toggleTheme()"><i class="fas fa-moon"></i></button>
+            </div>
         </div>
-    </div>
-</header>
+    </header>
 
-<div id="views" class="hidden"> 
-    <div id="view-market" class="main-container">
-        <h3 style="margin: 0 0 15px 0; font-size:16px;">Vezne İşlemleri</h3>
-        
-        <div class="card hidden" id="vezne-durumu-card">
-            <h3 style="margin:0 0 10px 0; font-size:14px; text-transform:uppercase; color:var(--muted)">
-                Kasa Durumu
-            </h3>
-            <div class="stat-grid" id="balanceGrid"></div>
+    <div id="tv-settings-container">
+        <div id="tv-panel">
+            <div class="tv-grid">
+                <div class="tv-card-inner">
+                    <label class="label-style">1. MONİTÖR (TV)</label>
+                    <select id="tv-screen-select" class="input-box" onchange="saveTvSettings()">
+                        <option value="1">1. Bloomberg Tasarımı</option>
+                        <option value="2">2. Ekotürk Tasarımı</option>
+                        <option value="3">3. CNBC-e Tasarımı</option>
+                        <option value="4">4. Genel Bilgi Panosu</option>
+                        <option value="5">5. Geleneksel Pano</option>
+                        <option value="6">6. Modern Pro Pano</option>
+                    </select>
+                    <div style="display:flex; align-items:center; gap:8px">
+                         <label class="switch"><input type="checkbox" id="tv-master-switch" onchange="saveTvSettings()"><span class="slider"></span></label>
+                         <span style="font-size:10px; font-weight:bold">YAYIN</span>
+                    </div>
+                </div>
+                <div class="tv-card-inner">
+                    <label class="label-style">2. MONİTÖR (WEB)</label>
+                    <select id="tv-screen-select-2" class="input-box" onchange="saveTvSettings()">
+                        <option value="1">1.Karsilama Ekran</option>
+                        <option value="2">2.video veya resim Tasarımı</option>
+                        <option value="3">3.video veya resim Tasarımı</option>
+                        <option value="4">4.altin tasarim</option>
+                        <option value="5">5. Geleneksel Pano</option>
+                        <option value="6">6. Cnbce tasarim</option>
+                    </select>
+                    <div style="display:flex; align-items:center; gap:8px">
+                         <label class="switch"><input type="checkbox" id="tv-master-switch-2" onchange="saveTvSettings()"><span class="slider"></span></label>
+                         <span style="font-size:10px; font-weight:bold">YAYIN</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="rate-grid-container" id="rateGridContainer">
-            <div class="rate-grid" id="liveRateGrid">
-                </div>
-        </div>
-
-        <div id="settings" class="card hidden">
-            <h3 style="margin:0 0 15px 0;">⚙️ Uygulama Ayarları</h3>
-            
-            <div class="card" style="margin-bottom: 15px; border: 1px solid var(--primary); background: var(--input);">
-                <span style="font-size:12px; color:var(--muted); display:block; margin-bottom:5px;">Aktif Vezne</span>
-                <strong id="currentVezneInfo" style="font-size:18px;">Vezne ID - Vezne Adı</strong>
+        <div id="settings-panel">
+            <div style="padding:15px; background:rgba(243, 156, 18, 0.1); border-radius:12px; border:1px solid var(--warning); margin-bottom:15px">
+                <label class="label-style" style="color:var(--warning)">KREDİ KARTI KOMİSYON (%)</label>
+                <input type="number" id="cc-commission-rate" class="input-box" value="3.5" step="0.1" onchange="updateCommissionRate()">
+                <small style="font-size:9px; color:var(--secondary)">Sadece altın kategorisindeki ürünlere otomatik eklenir.</small>
             </div>
 
-            <div class="card">
-                <h4 style="margin:0 0 10px 0; font-size:16px;"><i class="ri-coin-line"></i> Para Birimi Yönetimi</h4>
-                <p style="font-size:13px; color:var(--muted);">Kasa takibinde kullanılacak yeni döviz cinslerini ekleyin veya çıkarın.</p>
-                
-                <div class="setting-row-flex" style="margin-top:10px;">
-                    <input type="text" id="currencyCodeInput" placeholder="Kodu (Örn: JPY)" maxlength="3" style="flex:1; text-transform:uppercase;"/>
-                    <input type="number" id="currencyInitialBalance" placeholder="Başlangıç Bakiye" value="0" style="flex:1;"/>
-                    <button onclick="app.manageCurrency('add')" style="flex:1.5; background:var(--success); color:white; border:none; border-radius:8px; font-weight:bold;">
-                        <i class="ri-add-line"></i> Ekle
-                    </button>
-                </div>
-                
-                <div class="setting-row-flex">
-                    <select id="currencyRemoveSelect" style="flex:2;"></select>
-                    <button onclick="app.manageCurrency('remove')" style="flex:1; background:var(--danger); color:white; border:none; border-radius:8px; font-weight:bold;">
-                        <i class="ri-delete-bin-line"></i> Çıkar
-                    </button>
-                </div>
-            </div>
+            <span class="label-style">API KAYNAK YÖNETİMİ</span>
+            <select id="api-source-select" class="input-box" style="background: var(--primary); color: white; border: none; font-weight: bold;">
+                <option value="exchange-rate-v2">Exchange-Rate V2 (Yeni/Dinamik)</option>
+                <option value="hexarate">Hexarate API (Yedek)</option>
+            </select>
 
-            <div class="card">
-                <h4 style="margin:0 0 10px 0; font-size:16px;"><i class="ri-bar-chart-box-line"></i> Manuel Kur Ayarı</h4>
-                <p style="font-size:13px; color:var(--muted);">Belirli bir para birimi için Alış/Satış kurunu manuel olarak girin.</p>
-                
-                <div class="setting-row-flex" style="margin-top:10px;">
-                    <select id="rateCurrencySelect" style="flex:1.2;"></select>
-                    <input type="number" id="manualBuyRate" placeholder="Alış Kuru (Örn: 32.15)" style="flex:1;"/>
-                    <input type="number" id="manualSellRate" placeholder="Satış Kuru (Örn: 32.55)" style="flex:1;"/>
-                </div>
-                <div class="setting-row-flex">
-                    <button onclick="app.setManualRate()" style="flex:1; background:var(--accent); color:black; border:none; border-radius:8px; font-weight:bold;">
-                        <i class="ri-edit-line"></i> Kur Güncelle
-                    </button>
-                    <button onclick="app.updateRates()" style="flex:1; background:var(--primary); color:white; border:none; border-radius:8px; font-weight:bold;">
-                        <i class="ri-refresh-line"></i> Otomatik Kurları Çek
-                    </button>
-                </div>
-                <p style="font-size:13px; margin-top:5px;">Aktif Kur Modu: <strong id="activeRateMode">Otomatik</strong></p>
-            </div>
-            
-            <div class="card">
-                <h4 style="margin:0 0 10px 0; font-size:16px;"><i class="ri-file-settings-line"></i> Çıktı ve Erişim Ayarları (Göstermelik)</h4>
-                <p style="font-size:13px; color:var(--muted);">Yazıcı, panodan kopyalama ve kullanıcı yetkileri yönetimi.</p>
-                
-                <div class="setting-row-flex" style="margin-top:10px;">
-                    <button style="background:var(--input); color:var(--text); border:1px solid var(--border);">
-                        <i class="ri-printer-line"></i> Yazıcı Ayarı
-                    </button>
-                    <button style="background:var(--input); color:var(--text); border:1px solid var(--border);">
-                         <i class="ri-clipboard-line"></i> Pano Ayarı
-                    </button>
-                    <button style="background:var(--input); color:var(--text); border:1px solid var(--border);">
-                         <i class="ri-lock-2-line"></i> Kullanıcı Yetkileri
-                    </button>
-                </div>
-            </div>
+            <label class="label-style">GÜNCELLEME HIZI (SANİYE)</label>
+            <input type="number" id="sync-interval" class="input-box" value="30">
 
-            <p style="color:var(--muted); font-size:13px; margin-top:20px;">Sistem Yönetimi</p>
-            
-            <button onclick="app.logout()" style="width:100%; padding:15px; background:var(--accent); color:black; border:none; border-radius:12px; font-weight:bold; margin-top:10px;">
-                <i class="ri-logout-box-r-line"></i> Vezne Çıkışı Yap
-            </button>
+            <div style="padding:15px; background:var(--bg); border-radius:12px; border:1px solid var(--border)">
+                <span class="label-style" style="color:var(--primary)">YENİ VARLIK EKLE</span>
+                <input type="text" id="new-name" class="input-box" placeholder="Sembol (USD, GA, BTC, EUR...)">
+                
+                <label class="label-style">API KATEGORİSİ</label>
+                <select id="new-api-cat" class="input-box">
+                    <option value="doviz">Döviz</option>
+                    <option value="altin">Altın</option>
+                    <option value="kripto">Kripto</option>
+                </select>
 
-            <button onclick="app.clearData()" style="width:100%; padding:15px; background:var(--danger); color:white; border:none; border-radius:12px; font-weight:bold; margin-top:10px;">
-                <i class="ri-close-circle-line"></i> Sistemi Sıfırla (Local Storage)
-            </button>
+                <input type="text" id="new-flag" class="input-box" placeholder="Bayrak Kodu (us, gold, btc)">
+                
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px">
+                    <div><label class="label-style">ALIŞ MARJI (-)</label><input type="number" id="new-buy-margin" class="input-box" value="0.100"></div>
+                    <div><label class="label-style">SATIŞ MARJI (+)</label><input type="number" id="new-sell-margin" class="input-box" value="0.250"></div>
+                </div>
+                <button class="btn-round" style="width:100%; background:var(--primary); border-radius:8px; font-weight:bold" onclick="addNewCurrency()">VARLIĞI EKLE</button>
+            </div>
+            <div class="internal-logs">
+                <div id="log-list"></div>
+            </div>
         </div>
     </div>
 
-    <div id="view-history" class="main-container hidden">
-        <h3 style="margin:0 0 15px 0;">Son İşlemler (Fiş Bazlı)</h3>
-        
-        <div class="card" style="padding:10px;">
-            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                <button class="filter-btn active" data-filter="today" onclick="app.filterHistory(this)">Bugün</button>
-                <button class="filter-btn" data-filter="yesterday" onclick="app.filterHistory(this)">Dün</button>
-                <button class="filter-btn" data-filter="week" onclick="app.filterHistory(this)">Bu Hafta</button>
-                <button class="filter-btn" data-filter="month" onclick="app.filterHistory(this)">Bu Ay</button>
-            </div>
+    <div id="currency-list"></div>
+</div>
 
-            <div class="stat-grid" style="grid-template-columns: repeat(3, 1fr); margin-top:5px;">
-                <div class="stat-box" style="background:var(--success); color:white;">
-                    <div class="stat-val" id="stats-buy-count">0</div>
-                    <div class="stat-lbl" style="color:white; font-size:10px;">Alım Fişi</div>
-                </div>
-                <div class="stat-box" style="background:var(--danger); color:white;">
-                    <div class="stat-val" id="stats-sell-count">0</div>
-                    <div class="stat-lbl" style="color:white; font-size:10px;">Satım Fişi</div>
-                </div>
-                <div class="stat-box" style="background:var(--primary); color:white;">
-                    <div class="stat-val" id="stats-total-count">0</div>
-                    <div class="stat-lbl" style="color:white; font-size:10px;">Toplam Fiş</div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="card" style="display:flex; gap:10px; align-items:center;">
-            <i class="ri-delete-bin-line" style="color:var(--danger); font-size:24px;"></i>
-            <input type="text" id="receiptIdToDelete" placeholder="Silinecek Fiş Numarası" style="flex:1; padding:10px; border-radius:8px; border:1px solid var(--border); background:var(--input); color:var(--text);"/>
-            <button id="deleteReceiptBtn" onclick="app.promptDeleteReceipt()" style="padding:10px 15px; background:var(--danger); color:white; border:none; border-radius:8px; font-weight:bold;">
-                Fişi Sil
-            </button>
-        </div>
-
-        <div id="historyList">
-            <div style="padding:20px; text-align:center; color:var(--muted)" id="history-placeholder">Henüz işlem yok.</div>
+<div class="bottom-nav">
+    <div style="display:flex; align-items:center; gap:8px; overflow: hidden; white-space: nowrap; flex: 1; margin-right: 10px;">
+        <div id="status-dot" style="width:10px; height:10px; background:var(--success); border-radius:50%; flex-shrink: 0;"></div>
+        <small id="footer-status" style="font-size:11px; font-weight:bold; overflow: hidden; text-overflow: ellipsis;">Sistem Hazır</small>
+    </div>
+    
+    <div class="bottom-tv-control">
+        <small style="font-size:10px; font-weight:800; color:var(--secondary)">AKTİF YAYIN</small>
+        <div id="active-tv-badges" style="display:flex; gap:4px">
+            <div id="badge-tv1" style="width:8px; height:8px; border-radius:50%; background:#ccc"></div>
+            <div id="badge-tv2" style="width:8px; height:8px; border-radius:50%; background:#ccc"></div>
         </div>
     </div>
 </div>
-
-<div id="posScreen" class="pos-screen hidden"> 
-    <div class="pos-header">
-        <button onclick="pos.close()" style="background:none; border:none; color:var(--text); font-size:16px; cursor:pointer;">Kapat</button>
-        <span id="posTitle" style="font-weight:800; font-size:16px;">İŞLEM EKLE</span>
-        <span id="posModeTitle" style="font-weight:600; font-size:14px; color:var(--primary);">Miktar Girişi</span>
-    </div>
-    <div class="pos-body">
-        
-        <div id="transactionListContainer">
-            <div style="text-align: center; color: var(--muted); padding: 5px; font-size: 13px;" id="listPlaceholder">Sepetiniz boş.</div>
-        </div>
-
-        <div class="pos-input-area">
-            <div class="pos-input-fields">
-                <div class="pos-display">
-                    <span class="pos-amount" id="displayAmount">0</span> 
-                </div>
-                
-                <div id="rateInputDisplay" class="pos-rate-input-display" onclick="pos.toggleInputMode()">
-                    <span id="rateDisplay">Kur: --</span>
-                    <i class="ri-edit-2-line"></i>
-                </div>
-            </div>
-            <div class="pos-total-display">
-                <span class="current-total-tl" id="currentTotalTL">0.00 ₺</span>
-                <span class="overall-total-label" id="displayTotal">SEPET TOPLAMI: 0.00 ₺</span>
-            </div>
-        </div>
-        
-        <div class="numpad">
-            <button class="num-btn" onclick="pos.num(1)">1</button>
-            <button class="num-btn" onclick="pos.num(2)">2</button>
-            <button class="num-btn" onclick="pos.num(3)">3</button>
-            <button class="num-btn" onclick="pos.num(4)">4</button>
-            <button class="num-btn" onclick="pos.num(5)">5</button>
-            <button class="num-btn" onclick="pos.num(6)">6</button>
-            <button class="num-btn" onclick="pos.num(7)">7</button>
-            <button class="num-btn" onclick="pos.num(8)">8</button>
-            <button class="num-btn" onclick="pos.num(9)">9</button>
-            
-            <button class="num-btn clear-amount" onclick="pos.resetAmount()">TEMİZLE</button> 
-            
-            <button class="num-btn" onclick="pos.num(0)">0</button>
-            <button class="num-btn dot" onclick="pos.dot()">,</button>
-            
-            <button class="num-btn clear-back" onclick="pos.clear()"><i class="ri-delete-back-2-line"></i></button>
-            
-            <div class="pos-button-row">
-                <button class="num-btn add-item" onclick="pos.addTransactionItem()">EKLE</button>
-                <button id="startPaymentBtn" class="num-btn action" onclick="pos.startPayment()" disabled>
-                    <i class="ri-wallet-line"></i> ÖDE
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div id="paymentScreen" class="payment-screen">
-    <div class="pos-header">
-        <button onclick="pos.unlockAndClose(true)" style="background:none; border:none; color:var(--text); font-size:16px; cursor:pointer;">Vazgeç</button>
-        <span style="font-weight:800; font-size:16px;">TAHSİLAT EKRANI</span>
-        <span id="paymentModeTitle" style="font-weight:600; font-size:14px; color:var(--accent);">Nakit Girişi</span>
-    </div>
-    <div class="pos-body">
-
-        <div class="payment-info-box">
-            <h4>İşlem Özeti (Sepet)</h4>
-            <div id="transactionSummaryList">
-                </div>
-            <div class="info-row">
-                <span id="netTransactionLabel">Net Alınacak TL:</span>
-                <span id="requiredTotalDisplay" class="text-primary">0.00 ₺</span>
-            </div>
-        </div>
-        
-        <div class="payment-input-display">
-            <span class="payment-input-amount" id="cashReceivedDisplay">0,00</span>
-        </div>
-
-        <div class="payment-info-box" style="margin-top:0; border:2px solid var(--primary)">
-            <div class="info-row">
-                <span id="paymentActionText">Müşteri Verdiği Nakit:</span>
-                <span id="cashInputTL" class="text-primary">0.00 ₺</span>
-            </div>
-            <div class="info-row final">
-                <span id="finalActionText">Para Üstü:</span>
-                <span id="changeDueDisplay" class="text-success">0.00 ₺</span>
-            </div>
-        </div>
-
-        <div class="numpad">
-            <button class="num-btn" onclick="payment.num(1)">1</button>
-            <button class="num-btn" onclick="payment.num(2)">2</button>
-            <button class="num-btn" onclick="payment.num(3)">3</button>
-            <button class="num-btn" onclick="payment.num(4)">4</button>
-            <button class="num-btn" onclick="payment.num(5)">5</button>
-            <button class="num-btn" onclick="payment.num(6)">6</button>
-            <button class="num-btn" onclick="payment.num(7)">7</button>
-            <button class="num-btn" onclick="payment.num(8)">8</button>
-            <button class="num-btn" onclick="payment.num(9)">9</button>
-            
-            <button class="num-btn dot" onclick="payment.dot()">,</button>
-            <button class="num-btn" onclick="payment.num(0)">0</button>
-            <button class="num-btn clear-back" onclick="payment.clear()"><i class="ri-delete-back-2-line"></i></button>
-            
-            <div class="payment-button-row">
-                <button class="num-btn clear-amount" onclick="payment.fullCash()">TAM NAKİT</button> 
-                <button class="num-btn action" onclick="payment.processPayment('NAKİT')"><i class="ri-money-dollar-circle-line"></i> ÖDE</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<nav class="bottom-nav">
-    <button class="nav-item active" onclick="app.switchTab('kur', this)">
-        <i class="ri-line-chart-line"></i><span>Kur</span>
-    </button>
-    <button class="nav-item" onclick="app.switchTab('history', this)">
-        <i class="ri-file-list-3-line"></i><span>Geçmiş</span>
-    </button>
-    <button class="nav-item" onclick="app.switchTab('settings', this)">
-        <i class="ri-settings-3-line"></i><span>Ayarlar</span>
-    </button>
-    <button class="nav-item" onclick="app.switchTab('market', this)">
-        <i class="ri-safe-2-line"></i><span>Kasa</span>
-    </button>
-    <button class="nav-item" onclick="app.openCart(this)">
-        <i class="ri-shopping-cart-line"></i><span id="cartItemCount">Sepet</span>
-    </button>
-</nav>
 
 <script>
-/**
- * =================================================
- * JAVASCRIPT VE POS MANTIK MODÜLLERİ
- * =================================================
- */
+    const firebaseConfig = {
+      apiKey: "AIzaSyCfcppc4rGYxmAj7fTzmYMZgcyBO4s8bFI",
+      authDomain: "doviz-kurlari-35554.firebaseapp.com",
+      databaseURL: "https://doviz-kurlari-35554-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "doviz-kurlari-35554",
+      storageBucket: "doviz-kurlari-35554.firebasestorage.app",
+      messagingSenderId: "822410580056",
+      appId: "1:822410580056:web:40d02d7729d7cf72aafa2d"
+    };
 
-/**
- * Global Uygulama Yönetimi (app)
- */
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-
-
-const app = {
-    data: {
-        balances: { TRY: 500000, USD: 10000, EUR: 5000, GBP: 2000, CHF: 1000, JPY: 500000, CAD: 1000 },
-        rates: [
-            { code: 'USD', name: 'Amerikan Doları', buy: 32.1054, sell: 32.5088, icon: '$' },
-            { code: 'EUR', name: 'Euro', buy: 34.8099, sell: 35.2012, icon: '€' },
-            { code: 'GBP', name: 'İngiliz Sterlini', buy: 40.5065, sell: 41.0090, icon: '£' },
-            { code: 'CHF', name: 'İsviçre Frangı', buy: 35.5011, sell: 36.0022, icon: '₣' },
-            { code: 'JPY', name: 'Japon Yeni', buy: 0.2105, sell: 0.2140, icon: '¥' },
-            { code: 'CAD', name: 'Kanada Doları', buy: 23.5010, sell: 24.0010, icon: '$' },
-        ],
-        transactions: [],
-        isLocked: false,
-        isDayMode: false,
-        vezneler: [
-            { id: 'VZN01', name: 'Ayşe Yılmaz', pin: '1234' },
-            { id: 'VZN02', name: 'Mehmet Kaya', pin: '4321' },
-            { id: 'VZN03', name: 'Admin', pin: '0000' }
-        ],
-        activeVezneId: null,
-        rateInputMode: 'auto', 
-        simulationDate: Date.now(), 
-        autoRateService: 'https://api.example.com/live/rates', 
-    },
+    const GOLD_ICON = "https://img.icons8.com/?size=100&id=nTH8lhDLqpDI&format=png&color=000000";
+    const CRYPTO_ICON = "https://cdn-icons-png.flaticon.com/512/2091/2091665.png";
+    const DEFAULT_ICON = "https://cdn-icons-png.flaticon.com/512/197/197518.png";
     
-    CONSTANTS: { VEZNE_ID: 'VEZNE1' }, 
+    let currencies = [];
+    let isAutoMode = false;
+    let syncTimer = null;
+    let countdownTimer = null;
+    let secondsLeft = 0;
+    let ccRate = 3.5; // Kredi kartı komisyon oranı varsayılan
 
-    init() {
-        this.loadData();
-        this.renderVezneSelect();
+    function initApp() {
+        addLog("Sistem Başlatıldı. Bağlantı bekleniyor...", "INFO");
         
-        if (this.data.activeVezneId) {
-            this.loginSuccess(this.data.activeVezneId);
-        } else {
-            this.showLoginScreen();
-        }
-    },
-    
-    initSettings() {
-        this.renderCurrencySelects();
-        document.getElementById('activeRateMode').innerText = this.data.rateInputMode === 'manual' ? 'Manuel' : 'Otomatik';
-    },
-
-    loadData() {
-        try {
-            const saved = localStorage.getItem('dovizx_data');
-            if(saved) {
-                 const loadedData = JSON.parse(saved);
-                 this.data = { ...this.data, ...loadedData };
-            }
-            
-            const theme = localStorage.getItem('dovizx_theme');
-            this.data.isDayMode = theme === 'day';
-
-            const activeVezne = localStorage.getItem('dovizx_active_vezne');
-            this.data.activeVezneId = activeVezne;
-
-        } catch (e) { console.error("Local storage okuma hatası:", e); }
-    },
-
-    saveData() {
-        try {
-            const dataToSave = { 
-                balances: this.data.balances, 
-                rates: this.data.rates,
-                transactions: this.data.transactions,
-                rateInputMode: this.data.rateInputMode,
-                // simulationDate: this.data.simulationDate // Kaldırıldı
-            };
-            localStorage.setItem('dovizx_data', JSON.stringify(dataToSave));
-            localStorage.setItem('dovizx_active_vezne', this.data.activeVezneId);
-            
-            this.renderBalances();
-            this.renderHistory(document.querySelector('.filter-btn.active'));
-            this.updateCartCount(); 
-        } catch (e) { console.error("Local storage yazma hatası:", e); }
-    },
-
-    clearData() {
-        Swal.fire({
-            title: 'Emin misiniz?', text: "Tüm kasa ve işlem geçmişi sıfırlanacaktır!", icon: 'warning',
-            showCancelButton: true, confirmButtonColor: 'var(--danger)', cancelButtonColor: 'var(--primary)',
-            confirmButtonText: 'Evet, Sıfırla!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                const themePreference = localStorage.getItem('dovizx_theme'); 
-                const vezneId = localStorage.getItem('dovizx_active_vezne');
-                localStorage.clear();
-                if(themePreference) localStorage.setItem('dovizx_theme', themePreference);
-                if(vezneId) localStorage.setItem('dovizx_active_vezne', vezneId); 
-                location.reload();
-            }
-        });
-    },
-    
-    // =================================================
-    // VEZNE GİRİŞ/ÇIKIŞ MANTIĞI
-    // =================================================
-
-    renderVezneSelect() {
-        const selectEl = document.getElementById('vezneSelect');
-        selectEl.innerHTML = this.data.vezneler.map(v => 
-            `<option value="${v.id}">${v.id} - ${v.name}</option>`
-        ).join('');
-    },
-
-    showLoginScreen() {
-        document.getElementById('loginScreen').style.display = 'flex';
-        document.getElementById('views').classList.add('hidden');
-        document.querySelector('header').classList.add('hidden');
-        document.querySelector('.bottom-nav').classList.add('hidden');
-    },
-
-    loginNum(n) {
-        const input = document.getElementById('pinInput');
-        if (input.value.length < 4) {
-            input.value += n;
-        }
-    },
-
-    loginClear() {
-        const input = document.getElementById('pinInput');
-        input.value = input.value.slice(0, -1);
-    },
-
-    login() {
-        const vezneId = document.getElementById('vezneSelect').value;
-        const pin = document.getElementById('pinInput').value;
-        const vezne = this.data.vezneler.find(v => v.id === vezneId);
-
-        if (vezne && vezne.pin === pin) {
-            this.loginSuccess(vezneId);
-        } else {
-            Swal.fire('Hata', 'Vezne ID veya PIN yanlış.', 'error');
-            document.getElementById('pinInput').value = '';
-        }
-    },
-
-    loginSuccess(vezneId) {
-        this.data.activeVezneId = vezneId;
-        const vezne = this.data.vezneler.find(v => v.id === vezneId);
-        
-        document.getElementById('activeVezneBadge').innerText = vezneId;
-        document.getElementById('currentVezneInfo').innerText = `${vezne.id} - ${vezne.name}`;
-        localStorage.setItem('dovizx_active_vezne', vezneId);
-
-        // UI'yı göster
-        document.getElementById('loginScreen').style.display = 'none';
-        document.getElementById('views').classList.remove('hidden');
-        document.querySelector('header').classList.remove('hidden');
-        document.querySelector('.bottom-nav').classList.remove('hidden');
-        
-        this.renderBalances();
-        this.renderLiveRates(); 
-        this.filterHistory(document.querySelector('.filter-btn[data-filter="today"]')); 
-        this.updateLockStatus(false);
-        this.applyTheme(this.data.isDayMode); 
-        this.switchTab('kur', document.querySelector('.bottom-nav .nav-item:nth-child(1)'));
-        this.initSettings();
-    },
-
-    logout() {
-        Swal.fire({
-            title: 'Vezne Çıkışı', text: "Oturumu kapatmak istediğinizden emin misiniz?", icon: 'question',
-            showCancelButton: true, confirmButtonColor: 'var(--danger)', cancelButtonColor: 'var(--primary)',
-            confirmButtonText: 'Evet, Çıkış Yap'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                this.data.activeVezneId = null;
-                localStorage.removeItem('dovizx_active_vezne');
-                document.getElementById('pinInput').value = ''; 
-                this.showLoginScreen();
-            }
-        });
-    },
-
-    // =================================================
-    // MEVCUT FONKSİYONLAR
-    // =================================================
-    
-    toggleDayMode() {
-        this.data.isDayMode = !this.data.isDayMode;
-        localStorage.setItem('dovizx_theme', this.data.isDayMode ? 'day' : 'dark');
-        this.applyTheme(this.data.isDayMode);
-    },
-
-    applyTheme(isDay) {
-        const body = document.getElementById('appBody');
-        const icon = document.getElementById('themeToggleBtn').querySelector('i');
-        if (isDay) {
-            body.classList.add('day-mode');
-            icon.className = 'ri-moon-line'; 
-        } else {
-            body.classList.remove('day-mode');
-            icon.className = 'ri-sun-line'; 
-        }
-    },
-
-    updateLockStatus(locked) {
-        this.data.isLocked = locked;
-        const nav = document.querySelector('.bottom-nav');
-        const actionBoxes = document.querySelectorAll('.stat-box-action');
-
-        if(locked) {
-            nav.classList.add('locked-state');
-            actionBoxes.forEach(box => box.classList.add('locked-state'));
-        } else {
-            nav.classList.remove('locked-state');
-            actionBoxes.forEach(box => box.classList.remove('locked-state'));
-        }
-    },
-
-    switchTab(tabId, el) {
-        // Sepette işlem varsa ve sepet, ayarlar, geçmiş, kasa dışı bir yere gidiliyorsa uyarı ver.
-        if (pos.transactionList.length > 0 && tabId !== 'sepet' && tabId !== 'settings' && tabId !== 'history' && tabId !== 'market') {
-            Swal.fire('Sepette İşlem Var', 'Lütfen mevcut sepetinizi tamamlayın veya sepet ikonuna tıklayarak işleme devam edin.', 'warning');
-            return;
-        }
-
-        // Tüm ana görünüm alanlarını gizle ve navigasyon butonlarının "active" durumunu sıfırla
-        document.querySelectorAll('.main-container').forEach(d => d.classList.add('hidden'));
-        document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-        if(el) el.classList.add('active');
-
-        // view-market'i her zaman görünür yap (kur, settings ve market bu div içinde)
-        document.getElementById('view-market').classList.remove('hidden');
-
-        // view-market içindeki tüm kartları gizle
-        document.getElementById('vezne-durumu-card').classList.add('hidden');
-        document.getElementById('settings').classList.add('hidden');
-        document.getElementById('rateGridContainer').classList.add('hidden');
-        
-        // view-history'i gizle
-        document.getElementById('view-history').classList.add('hidden');
-        
-        // İstenen sekmeye göre ilgili kartı göster
-        if (tabId === 'kur') {
-            document.getElementById('rateGridContainer').classList.remove('hidden');
-        } else if (tabId === 'history') {
-            // Geçmiş sekmesi ayrı bir main-container olduğu için
-            document.getElementById('view-market').classList.add('hidden');
-            document.getElementById('view-history').classList.remove('hidden');
-            this.filterHistory(document.querySelector('.filter-btn.active'));
-            
-        } else if (tabId === 'settings') {
-            document.getElementById('settings').classList.remove('hidden');
-            
-        } else if (tabId === 'market') { 
-            // Kasa Durumu
-            document.getElementById('vezne-durumu-card').classList.remove('hidden');
-        }
-    },
-    
-    openCart(el) {
-        if (pos.transactionList.length > 0) {
-            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-            el.classList.add('active');
-            pos.openCurrentTransaction(); 
-        } else {
-            Swal.fire('Sepet Boş', 'Sepetinizde devam eden bir işlem bulunmamaktadır. Kur ekranından yeni bir işlem başlatın.', 'info');
-        }
-    },
-
-    updateCartCount() {
-        const count = pos.transactionList.length;
-        const countEl = document.getElementById('cartItemCount');
-        countEl.innerHTML = count > 0 ? `Sepet (${count})` : 'Sepet';
-    },
-
-    renderBalances() {
-        const grid = document.getElementById('balanceGrid');
-        grid.innerHTML = '';
-        let html = '';
-        
-        // TRY KUTUCUĞU
-        html += `<div class="stat-box" style="background:var(--card); border:1px solid var(--success)">
-            <div class="stat-val text-success">${this.fmt(this.data.balances.TRY)}</div>
-            <div class="stat-lbl">TÜRK LİRASI (TL)</div>
-        </div>`;
-
-        // DÖVİZ KUTUCUKLARI
-        Object.keys(this.data.balances).forEach(code => {
-            if(code !== 'TRY') {
-                const isLockedClass = this.data.isLocked ? 'locked-state' : '';
-                html += `
-                    <div class="stat-box stat-box-action ${isLockedClass}" onclick="app.openCurrencyActionModal('${code}')">
-                        <div class="stat-val">${this.fmt(this.data.balances[code], 0)}</div>
-                        <div class="stat-lbl">${code} <i class="ri-arrow-right-line" style="font-size:10px;"></i></div>
-                    </div>
-                `;
-            }
-        });
-        grid.innerHTML = html;
-        document.getElementById('headerTotal').innerText = this.fmt(this.data.balances.TRY) + ' ₺';
-        this.updateLockStatus(this.data.isLocked); 
-    },
-
-    /**
-     * Kur kutularını 4'erli gruplar halinde yatayda kaydırılabilir şekilde render eder.
-     */
-    renderLiveRates() {
-        const grid = document.getElementById('liveRateGrid');
-        const allRates = this.data.rates;
-        const ratesPerGroup = 4;
-        let html = '';
-        
-        // Kurları 4'erli gruplara ayır
-        for (let i = 0; i < allRates.length; i += ratesPerGroup) {
-            const group = allRates.slice(i, i + ratesPerGroup);
-            
-            // Her grup için bir "rate-page" div'i oluştur
-            html += '<div class="rate-page">';
-            
-            group.forEach(r => {
-                html += `
-                    <div class="rate-item-responsive">
-                        <div class="rate-item-header">
-                            <div class="curr-code">${r.icon} ${r.code}</div>
-                            <div class="curr-name">${r.name}</div>
-                        </div>
-                        <div class="rate-actions">
-                            <div class="rate-action-btn btn-buy" onclick="pos.open('${r.code}', 'buy', ${r.buy}, ${r.sell});">
-                                <span style="font-size:12px; color:var(--success)">ALIŞ</span>
-                                <strong>${r.buy.toFixed(4)}</strong>
-                            </div>
-                            <div class="rate-action-btn btn-sell" onclick="pos.open('${r.code}', 'sell', ${r.buy}, ${r.sell});">
-                                <span style="font-size:12px; color:var(--danger)">SATIŞ</span>
-                                <strong>${r.sell.toFixed(4)}</strong>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            html += '</div>'; // rate-page div'ini kapat
-        }
-        
-        grid.innerHTML = html;
-    },
-    
-    getRateInfo(code) {
-        return this.data.rates.find(r => r.code === code);
-    },
-
-    openCurrencyActionModal(code) {
-        if (pos.transactionList.length > 0) {
-             Swal.fire('Sepette İşlem Var', 'Lütfen mevcut sepetinizi tamamlayın veya sepet ikonuna tıklayarak işleme devam edin.', 'warning');
-             return;
-        }
-
-        const rateInfo = this.getRateInfo(code);
-        if (!rateInfo) return; 
-
-        Swal.fire({
-            title: `${rateInfo.name} (${code}) İşlemi`,
-            html: `
-                <div style="display:flex; gap:10px; margin-top:20px;">
-                    <button class="rate-action-btn btn-buy" style="flex:1; height:60px" onclick="pos.open('${rateInfo.code}', 'buy', ${rateInfo.buy}, ${rateInfo.sell}); Swal.close();">
-                         <span style="font-size:12px; color:var(--success)">ALIŞ</span>
-                        <strong>${rateInfo.buy.toFixed(4)}</strong>
-                    </button>
-                    <button class="rate-action-btn btn-sell" style="flex:1; height:60px" onclick="pos.open('${rateInfo.code}', 'sell', ${rateInfo.buy}, ${rateInfo.sell}); Swal.close();">
-                        <span style="font-size:12px; color:var(--danger)">SATIŞ</span>
-                        <strong>${rateInfo.sell.toFixed(4)}</strong>
-                    </button>
-                </div>
-            `,
-            showConfirmButton: false,
-            showCancelButton: true,
-            cancelButtonText: 'Kapat',
-            background: 'var(--card)',
-            color: 'var(--text)',
-            customClass: { popup: 'card' }
-        });
-    },
-
-    filterHistory(el) {
-        document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-        if(el) el.classList.add('active');
-        
-        const filterType = el ? el.getAttribute('data-filter') : 'today'; 
-        
-        let targetDate = new Date(); 
-        targetDate.setHours(0, 0, 0, 0); 
-        let startDate = new Date(targetDate.getTime());
-        let endDate = new Date(targetDate.getTime());
-        endDate.setHours(23, 59, 59, 999);
-
-        switch(filterType) {
-            case 'today': 
-                break;
-            case 'yesterday': 
-                startDate.setDate(targetDate.getDate() - 1);
-                endDate.setDate(targetDate.getDate() - 1);
-                break;
-            case 'week': 
-                const day = (targetDate.getDay() + 6) % 7; 
-                startDate.setDate(targetDate.getDate() - day);
-                endDate.setMonth(targetDate.getMonth(), targetDate.getDate() - day + 6);
-                break;
-            case 'month': 
-                startDate.setDate(1);
-                endDate.setMonth(targetDate.getMonth() + 1, 0); 
-                break;
-            default:
-                break;
-        }
-
-        this.renderHistory(startDate.getTime(), endDate.getTime());
-    },
-
-    renderHistory(startTime, endTime) {
-        const list = document.getElementById('historyList');
-        const transactions = this.data.transactions;
-        const placeholder = document.getElementById('history-placeholder');
-
-        if(transactions.length === 0) {
-            if (placeholder) placeholder.style.display = 'block';
-            list.innerHTML = placeholder.outerHTML;
-            this.updateHistoryStats(0, 0);
-            return;
-        }
-
-        if (placeholder) placeholder.style.display = 'none';
-
-        let buyReceiptCount = 0;
-        let sellReceiptCount = 0;
-
-        const groupedReceipts = transactions.reduce((acc, tx) => {
-            if (startTime && tx.date < startTime) return acc;
-            if (endTime && tx.date > endTime) return acc;
-
-            if (!acc[tx.receiptId]) {
-                acc[tx.receiptId] = {
-                    receiptId: tx.receiptId,
-                    date: tx.date,
-                    paymentMethod: tx.paymentMethod,
-                    changeDue: tx.changeDue,
-                    vezneId: tx.vezneId,
-                    isCancelled: tx.isCancelled || false,
-                    cancellationReason: tx.cancellationReason || '',
-                    items: [],
-                    netTLMovement: 0,
-                };
-            }
-            if (!tx.isCancelled) {
-                acc[tx.receiptId].netTLMovement += (tx.type === 'sell' ? tx.total : -tx.total);
-            }
-            acc[tx.receiptId].items.push(tx);
-            return acc;
-        }, {});
-        
-        const sortedReceipts = Object.values(groupedReceipts).sort((a, b) => b.date - a.date);
-        
-        let html = '';
-        sortedReceipts.forEach(receipt => {
-            const isCancelled = receipt.isCancelled;
-            const netTL = receipt.netTLMovement;
-            const netAbsTL = Math.abs(netTL);
-            
-            const containsBuy = receipt.items.some(item => item.type === 'buy');
-            const containsSell = receipt.items.some(item => item.type === 'sell');
-            
-            if (!isCancelled) {
-                if (netTL < 0) buyReceiptCount++; 
-                if (netTL >= 0) sellReceiptCount++; 
-            }
-
-            const isKasaGiris = netTL >= 0; 
-            const colorClass = isKasaGiris ? 'text-success' : 'text-danger';
-            const actionText = isKasaGiris ? 'KASA GİRİŞİ' : 'KASA ÇIKIŞI';
-            const cardStyle = isCancelled ? 'opacity: 0.6; border: 2px dashed var(--danger);' : '';
-            const statusLabel = isCancelled ? '<span style="color:var(--danger); font-weight:800; margin-left:10px;">(İPTAL EDİLDİ)</span>' : '';
-
-            html += `
-                <div class="receipt-card" style="${cardStyle}">
-                    <div class="receipt-header">
-                        <div>
-                            <span class="receipt-meta">Fiş No: <strong>${receipt.receiptId}</strong>${statusLabel}</span>
-                            <span class="receipt-meta">Vezne: ${receipt.vezneId}</span>
-                            <span class="receipt-meta">${new Date(receipt.date).toLocaleString()}</span>
-                            ${isCancelled ? `<span class="receipt-meta" style="color:var(--danger)">Sebep: ${receipt.cancellationReason}</span>` : ''}
-                        </div>
-                        <div style="text-align:right;">
-                            <div class="receipt-total ${colorClass}">
-                                ${app.fmt(netAbsTL)} ₺
-                                <span>NET TL HAREKETİ</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-size:14px; font-weight:600; color:${isKasaGiris ? 'var(--success)' : 'var(--danger)'}">
-                            ${actionText}
-                        </span>
-                        <button class="receipt-action-btn" onclick="app.showReceiptDetail('${receipt.receiptId}')" style="background:${isCancelled ? 'var(--muted)' : 'var(--primary)'}">
-                            <i class="ri-eye-line"></i> Detay
-                        </button>
-                    </div>
-                </div>
-            `;
-        });
-
-        list.innerHTML = html;
-        list.prepend(placeholder);
-        
-        this.updateHistoryStats(buyReceiptCount, sellReceiptCount);
-    },
-
-    updateHistoryStats(buyCount, sellCount) {
-        document.getElementById('stats-buy-count').innerText = buyCount;
-        document.getElementById('stats-sell-count').innerText = sellCount;
-        document.getElementById('stats-total-count').innerText = buyCount + sellCount;
-    },
-
-    showReceiptDetail(receiptId) {
-        const receipt = Object.values(this.data.transactions.reduce((acc, tx) => {
-            if (tx.receiptId === receiptId) {
-                if (!acc[receiptId]) {
-                    acc[receiptId] = { items: [], netTL: 0, date: tx.date, paymentMethod: tx.paymentMethod, changeDue: tx.changeDue };
-                }
-                if (!tx.isCancelled) { 
-                    acc[receiptId].netTL += (tx.type === 'sell' ? tx.total : -tx.total); 
-                }
-                acc[receiptId].items.push(tx);
-            }
-            return acc;
-        }, {}))[0];
-
-        if (!receipt) {
-            Swal.fire('Hata', 'Fiş detayları bulunamadı.', 'error');
-            return;
-        }
-
-        const netAbsTL = Math.abs(receipt.netTL);
-        const isKasaGiris = receipt.netTL >= 0;
-
-        const itemDetailsHtml = receipt.items.map(tx => {
-            const statusStyle = tx.isCancelled ? 'text-decoration: line-through; color: var(--danger) !important;' : '';
-            return `
-            <p style="margin:5px 0; display:flex; justify-content:space-between; font-size:13px; border-bottom:1px dotted var(--border); padding-bottom:5px; ${statusStyle}">
-                <span style="font-weight:700; color:${tx.type === 'buy' ? 'var(--success)' : 'var(--danger)'}">
-                    ${tx.type.toUpperCase()} ${app.fmt(tx.amount, 2)} ${tx.code} (@${app.fmt(tx.rate, 4)})
-                    ${tx.isCancelled ? ' (İPTAL KAYDI)' : ''}
-                </span>
-                <span style="font-weight:800">${app.fmt(tx.total)} ₺</span>
-            </p>
-        `}).join('');
-
-        const htmlContent = `
-            <div style="text-align:left;">
-                <h4 style="margin:5px 0 10px 0; font-size:18px;">İşlem Kalemleri</h4>
-                <div style="max-height:200px; overflow-y:auto; padding-right:10px; margin-bottom:15px; border:1px solid var(--border); padding:10px; border-radius:8px;">
-                    ${itemDetailsHtml}
-                </div>
-
-                <div style="font-size:16px; border-top:2px solid var(--border); padding-top:10px;">
-                    <p style="margin:5px 0; display:flex; justify-content:space-between;">
-                        <span style="font-weight:600; color:var(--muted)">Net TL Tutarı (${isKasaGiris ? 'Alınan' : 'Ödenen'})</span>
-                        <span style="font-weight:800; color:${isKasaGiris ? 'var(--primary)' : 'var(--danger)'}">${app.fmt(netAbsTL)} ₺</span>
-                    </p>
-                    <p style="margin:5px 0; display:flex; justify-content:space-between;">
-                        <span style="font-weight:600; color:var(--muted)">Müşteri Verdiği Nakit</span>
-                        <span style="font-weight:800;">${app.fmt(netAbsTL + receipt.changeDue)} ₺</span>
-                    </p>
-                    <p style="margin:5px 0; display:flex; justify-content:space-between;">
-                        <span style="font-weight:600; color:var(--muted)">Para Üstü/Fark</span>
-                        <span style="font-weight:800; color:${receipt.changeDue >= 0 ? 'var(--success)' : 'var(--danger)'}">${app.fmt(Math.abs(receipt.changeDue))} ₺</span>
-                    </p>
-                </div>
-            </div>
-        `;
-
-        Swal.fire({
-            title: `Fiş Detayları (Fiş: ${receiptId})`,
-            html: htmlContent,
-            showConfirmButton: true,
-            confirmButtonText: 'Kapat',
-            background: 'var(--card)',
-            color: 'var(--text)',
-            customClass: { popup: 'card' }
-        });
-    },
-
-    promptDeleteReceipt() {
-        const receiptId = document.getElementById('receiptIdToDelete').value.trim();
-        
-        if (!receiptId) {
-            Swal.fire('Hata', 'Lütfen silinecek fiş numarasını girin.', 'warning');
-            return;
-        }
-
-        Swal.fire({
-            title: `Fişi Silme: ${receiptId}`,
-            html: `
-                <p style="text-align:left; color:var(--danger); font-weight:bold;">UYARI: Bu işlem kasayı etkileyecek ve fişin TL/Döviz hareketlerini geri alacaktır! Silinen fişler kayıtlarda 'İptal Edildi' olarak kalacaktır.</p>
-                <input type="text" id="swal-input-reason" class="swal2-input" placeholder="Silme Sebebi (Zorunlu)" style="background:var(--input); color:var(--text);">
-            `,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Evet, Fişi Sil',
-            confirmButtonColor: 'var(--danger)',
-            cancelButtonText: 'Vazgeç',
-            preConfirm: () => {
-                const reason = document.getElementById('swal-input-reason').value.trim();
-                if (!reason) {
-                    Swal.showValidationMessage('Silme sebebi belirtmek zorunludur!');
-                    return false;
-                }
-                return reason;
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                this.deleteReceipt(receiptId, result.value);
-            }
-        });
-    },
-
-    deleteReceipt(receiptId, reason) {
-        let transactionsToCancel = this.data.transactions.filter(tx => tx.receiptId === receiptId && !tx.isCancelled);
-
-        if (transactionsToCancel.length === 0) {
-            Swal.fire('Hata', `Fiş numarası **${receiptId}** bulunamadı veya zaten iptal edilmiş.`, 'error');
-            return;
-        }
-
-        let tempBalances = { ...this.data.balances };
-        let reversedTLMovement = 0;
-        let checksPassed = true;
-        let insufficientCode = '';
-        
-        // 1. Ters Kayıt Ön Kontrolü
-        transactionsToCancel.forEach(tx => {
-            if (!checksPassed) return;
-            
-            if (tx.type === 'buy') { 
-                // Alış iptali (Kasa Döviz Çıkar, TL Alır)
-                // Kasa, iptalde müşteriye verdiği TL'yi geri almalı ve müşteriden aldığı dövizi geri vermelidir.
-                // Kontrol: Müşteriye geri verilecek döviz kasada var mı?
-                if (tempBalances[tx.code] < tx.amount) { 
-                    insufficientCode = tx.code;
-                    checksPassed = false;
-                    return;
-                }
-                tempBalances[tx.code] -= tx.amount; // Kasadan döviz çıkar
-                reversedTLMovement += tx.total; // Kasaya TL girişi (iptalde)
-            } else if (tx.type === 'sell') { 
-                // Satış iptali (Kasa Döviz Alır, TL Çıkar)
-                // Kontrol: Kasa, müşteriye geri verilecek TL'yi ödeyebilir mi? (TL kontrolü daha sonra)
-                reversedTLMovement -= tx.total; // Kasadan TL çıkışı (iptalde)
-                tempBalances[tx.code] += tx.amount; // Kasaya döviz girişi
-            }
-        });
-        
-        // TL Yeterlilik Kontrolü
-        const finalTLCheck = tempBalances['TRY'] + reversedTLMovement; 
-        if (reversedTLMovement < 0 && finalTLCheck < 0) { 
-             Swal.fire('Kasa Hatası', `İptal işlemi sonrasında kasada kalacak TL miktarı negatif oluyor! (${app.fmt(Math.abs(reversedTLMovement))} ₺ TL çıkışı)`, 'error');
-             return;
-        }
-
-        if (!checksPassed) {
-             Swal.fire('Kasa Hatası', `Kasanızda yeterli ${insufficientCode} bulunmamaktadır. İptal işlemi gerçekleştirilemiyor.`, 'error');
-             return;
-        }
-
-
-        // 2. İşlemleri Kayıtlarda İptal Olarak İşaretleme ve Kasa Güncelleme
-        this.data.transactions = this.data.transactions.map(tx => {
-            if (tx.receiptId === receiptId && !tx.isCancelled) {
-                
-                // Kasa Güncellemesi (Ters Kayıt)
-                if (tx.type === 'buy') { 
-                    // Alış iptali (Kasa Müşteriye Dövizi geri verir, TL'yi geri alır)
-                    this.data.balances[tx.code] -= tx.amount;
-                    this.data.balances['TRY'] += tx.total;
-                } else if (tx.type === 'sell') { 
-                    // Satış iptali (Kasa Müşteriden Dövizi geri alır, TL'yi geri verir)
-                    this.data.balances[tx.code] += tx.amount;
-                    this.data.balances['TRY'] -= tx.total;
-                }
-                
-                // İptal Bayrağını Ekle
-                return { 
-                    ...tx, 
-                    isCancelled: true, 
-                    cancellationReason: reason, 
-                    cancellationDate: Date.now() 
-                };
-            }
-            return tx;
-        });
-
-        // Fiş genelindeki net TL hareketini hesapla (iptal edilmemiş kalemler için)
-        const netTLMovementBeforeCancel = transactionsToCancel.reduce((sum, tx) => sum + (tx.type === 'sell' ? tx.total : -tx.total), 0);
-        const changeDue = transactionsToCancel[0].changeDue;
-        
-        // Para Üstü (changeDue) hareketini de tersine çevir
-        if (netTLMovementBeforeCancel >= 0) {
-            // Fişte TL Girişi vardı (Müşteriye Para Üstü verildi) -> Para üstünü kasadan geri al (TL çıkışını tersine çevir)
-            this.data.balances['TRY'] += changeDue; 
-        } else {
-            // Fişte TL Çıkışı vardı (Vezne Para Üstü aldı) -> Para üstünü kasadan geri çıkar (TL girişini tersine çevir)
-            this.data.balances['TRY'] -= changeDue;
-        }
-
-
-        this.saveData();
-        
-        document.getElementById('receiptIdToDelete').value = '';
-        this.filterHistory(document.querySelector('.filter-btn.active')); 
-        
-        Swal.fire('Başarılı!', `Fiş **${receiptId}** iptal edildi. Kasa bakiyeleri güncellendi.`, 'success');
-    },
-
-    // =================================================
-    // YENİ FİŞ ÇIKTISI VE WHATSAPP FONKSİYONLARI
-    // =================================================
-
-    printReceipt(receiptId) {
-        Swal.fire({
-            toast: true, position: 'top-end', icon: 'info', 
-            title: `Fiş Yazdırma Denemesi`,
-            text: `Fiş No: ${receiptId} için yazdırma emri gönderiliyor...`,
-            showConfirmButton: false, timer: 2000, timerProgressBar: true
-        });
-    },
-    
-    /**
-     * Fiş dökümünü oluşturur ve WhatsApp'a yönlendirir.
-     * @param {string} receiptId - Gönderilecek fişin ID'si.
-     * @param {Array<Object>} transactionItems - İşlem kalemleri.
-     * @param {number} netTLMovement - Net TL hareketi (Pozitif: Kasa Girişi, Negatif: Kasa Çıkışı).
-     * @param {number} cashReceived - Müşteriden alınan/veznenin ödediği nakit.
-     * @param {number} changeDue - Para üstü/eksik bakiye.
-     * @param {string} paymentMethod - Ödeme metodu (Örn: NAKİT).
-     */
-    generateWhatsappLink(receiptId, transactionItems, netTLMovement, cashReceived, changeDue, paymentMethod) {
-        const dateStr = new Date().toLocaleString('tr-TR', { dateStyle: 'short', timeStyle: 'short' });
-        
-        const isKasaGiris = netTLMovement >= 0;
-        const netAbsTL = Math.abs(netTLMovement);
-        
-        let changeLabel = '';
-        if (netTLMovement >= 0) { 
-            changeLabel = changeDue >= 0 ? 'Para Üstü' : 'Eksik Kalan Bakiye';
-        } else { 
-            changeLabel = changeDue >= 0 ? 'Fazla Ödeme (Vezneye Kalan)' : 'Eksik Ödeme (Vezneye Düşen)';
-        }
-
-        let message = `*DövizX Vezne Sistemi - Fiş*\n\n`;
-        message += `*Fiş No:* ${receiptId}\n`;
-        message += `*Tarih:* ${dateStr}\n`;
-        message += `*Vezne:* ${this.data.activeVezneId}\n`;
-        message += `*Ödeme Tipi:* ${paymentMethod}\n`;
-        message += `--------------------------------\n`;
-
-        transactionItems.forEach(tx => {
-            const typeText = tx.type === 'buy' ? 'ALIŞ' : 'SATIŞ';
-            message += `*${typeText}* ${this.fmt(tx.amount, 2)} ${tx.code}\n`;
-            message += `  @ ${this.fmt(tx.rate, 4)} ₺ = ${this.fmt(tx.total)} ₺\n`;
-        });
-
-        message += `--------------------------------\n`;
-        message += `*NET TL HAREKETİ: ${this.fmt(netAbsTL)} ₺*\n`;
-        message += `(${isKasaGiris ? 'Kasa Girişi' : 'Kasa Çıkışı'})\n\n`;
-
-        message += `*Tahsilat Bilgisi:*\n`;
-        message += `*Verilen Nakit:* ${this.fmt(cashReceived)} ₺\n`;
-        message += `*${changeLabel}:* ${this.fmt(Math.abs(changeDue))} ₺\n`;
-        message += `--------------------------------\n`;
-        message += `_İyi günler dileriz._`;
-
-        return `whatsapp://send?text=${encodeURIComponent(message)}`;
-    },
-
-    sendWhatsappReceipt(receiptId) {
-        const receipt = this.data.transactions.filter(tx => tx.receiptId === receiptId);
-        if (receipt.length === 0) {
-            Swal.fire('Hata', 'Fiş bulunamadı.', 'error');
-            return;
-        }
-
-        const netTLMovement = receipt.reduce((sum, tx) => sum + (tx.type === 'sell' ? tx.total : -tx.total), 0);
-        const cashReceived = Math.abs(netTLMovement) + receipt[0].changeDue; 
-        const changeDue = receipt[0].changeDue;
-        const paymentMethod = receipt[0].paymentMethod;
-
-        Swal.fire({
-            title: 'WhatsApp Fiş Gönderimi',
-            html: `
-                <p>Fiş **${receiptId}** içeriği bir WhatsApp mesajı olarak hazırlanmıştır.</p>
-                <input type="tel" id="whatsapp-tel" class="swal2-input" placeholder="Müşteri Telefon Numarası (+90...)" style="background:var(--input); color:var(--text);">
-            `,
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: '<i class="ri-whatsapp-line"></i> Gönder',
-            confirmButtonColor: 'var(--success)',
-            cancelButtonText: 'Vazgeç',
-            preConfirm: () => {
-                const tel = document.getElementById('whatsapp-tel').value.trim();
-                if (!tel) {
-                    Swal.showValidationMessage('Telefon numarası girilmelidir!');
-                    return false;
-                }
-                return tel;
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                const tel = result.value;
-                const link = this.generateWhatsappLink(receiptId, receipt, netTLMovement, cashReceived, changeDue, paymentMethod);
-                
-                // Simülasyon: Gerçekte tarayıcıyı WhatsApp'a yönlendirir.
-                Swal.fire({
-                    toast: true, position: 'top-end', icon: 'success', 
-                    title: `Gönderim Başlatıldı: ${tel}`,
-                    text: `Fiş WhatsApp üzerinden ${tel} numarasına gönderiliyor...`,
-                    showConfirmButton: false, timer: 3000, timerProgressBar: true
-                });
-                
-                // Gerçek WhatsApp yönlendirmesi için:
-                // window.open(`${link}&phone=${tel.replace(/[^\d+]/g, '')}`, '_blank');
-            }
-        });
-    },
-
-    // =================================================
-    // YENİ AYAR MODÜLLERİ
-    // =================================================
-
-    renderCurrencySelects() {
-        const removeSelect = document.getElementById('currencyRemoveSelect');
-        const rateSelect = document.getElementById('rateCurrencySelect');
-        
-        let htmlRemove = '';
-        let htmlRate = '<option value="">--- Para Birimi Seçin ---</option>';
-        
-        Object.keys(this.data.balances).forEach(code => {
-            if (code !== 'TRY') {
-                htmlRemove += `<option value="${code}">${code} - Kasa Bakiyesi: ${this.fmt(this.data.balances[code])}</option>`;
-                htmlRate += `<option value="${code}">${code}</option>`;
+        // Komisyon oranını Firebase'den yükle
+        db.ref('terminal_data/cc_rate').on('value', (snapshot) => {
+            if(snapshot.exists()) {
+                ccRate = snapshot.val();
+                document.getElementById('cc-commission-rate').value = ccRate;
+                render();
             }
         });
 
-        removeSelect.innerHTML = htmlRemove;
-        rateSelect.innerHTML = htmlRate;
-    },
-
-    manageCurrency(action) {
-        const code = document.getElementById('currencyCodeInput').value.trim().toUpperCase();
-        const initialBalance = parseFloat(document.getElementById('currencyInitialBalance').value) || 0;
-        
-        if (action === 'add') {
-            if (code.length !== 3 || code === 'TRY') {
-                Swal.fire('Hata', 'Lütfen 3 harfli geçerli bir kod girin (TRY hariç).', 'error');
-                return;
+        db.ref('terminal_data/currencies').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) { 
+                const newData = Array.isArray(data) ? data : Object.values(data);
+                currencies = newData.sort((a,b) => (a.order || 0) - (b.order || 0));
+                render();
             }
-            if (this.data.balances.hasOwnProperty(code)) {
-                Swal.fire('Hata', `${code} zaten tanımlı.`, 'error');
-                return;
-            }
-
-            this.data.balances[code] = initialBalance;
-            
-            // Simülasyon kurları için basit bir kural
-            const isMinor = initialBalance > 100000;
-            const baseRate = isMinor ? 0.2 + Math.random() * 0.05 : 30 + Math.random() * 10;
-            const newBuy = parseFloat(baseRate.toFixed(4));
-            const newSell = parseFloat((baseRate * 1.015).toFixed(4));
-            
-            this.data.rates.push({ 
-                code, 
-                name: `${code} Döviz (Yeni)`, 
-                buy: newBuy, 
-                sell: newSell, 
-                icon: code.charAt(0) 
-            });
-
-            Swal.fire('Başarılı', `${code} para birimi ${this.fmt(initialBalance)} bakiye ile eklendi.`, 'success');
-
-        } else if (action === 'remove') {
-            const removeCode = document.getElementById('currencyRemoveSelect').value;
-            if (!removeCode || removeCode === 'TRY') {
-                Swal.fire('Hata', 'Geçerli bir döviz seçin.', 'error');
-                return;
-            }
-            
-            if (this.data.balances[removeCode] !== 0) {
-                 Swal.fire('Hata', `${removeCode} bakiyesi sıfır değil! Lütfen önce bakiyeyi sıfırlayın.`, 'error');
-                 return;
-            }
-
-            delete this.data.balances[removeCode];
-            this.data.rates = this.data.rates.filter(r => r.code !== removeCode);
-            Swal.fire('Başarılı', `${removeCode} para birimi kaldırıldı.`, 'success');
-        }
-
-        this.saveData();
-        this.renderBalances();
-        this.renderLiveRates();
-        this.renderCurrencySelects(); 
-    },
-
-    setManualRate() {
-        const code = document.getElementById('rateCurrencySelect').value;
-        const buyRate = parseFloat(document.getElementById('manualBuyRate').value);
-        const sellRate = parseFloat(document.getElementById('manualSellRate').value);
-
-        if (!code) { Swal.fire('Hata', 'Lütfen bir para birimi seçin.', 'error'); return; }
-        if (isNaN(buyRate) || isNaN(sellRate) || buyRate <= 0 || sellRate <= 0) {
-            Swal.fire('Hata', 'Alış ve Satış kurları geçerli pozitif sayılar olmalıdır.', 'error');
-            return;
-        }
-        if (buyRate > sellRate) {
-            Swal.fire('Hata', 'Alış Kuru, Satış Kurundan yüksek olamaz.', 'error');
-            return;
-        }
-
-        const rateIndex = this.data.rates.findIndex(r => r.code === code);
-        if (rateIndex !== -1) {
-            this.data.rates[rateIndex].buy = buyRate;
-            this.data.rates[rateIndex].sell = sellRate;
-            this.data.rateInputMode = 'manual'; 
-            document.getElementById('activeRateMode').innerText = 'Manuel';
-            this.saveData();
-            this.renderLiveRates();
-            Swal.fire('Başarılı', `${code} kurları manuel olarak güncellendi.`, 'success');
-        } else {
-            Swal.fire('Hata', 'Kur bulunamadı.', 'error');
-        }
-    },
-
-    async updateRates() {
-        if (this.data.rateInputMode === 'manual') {
-            const result = await Swal.fire({
-                title: 'Otomatik Kura Geçilsin mi?',
-                text: "Manuel olarak girilmiş kurlarınız otomatik servis kurlarıyla güncellenecektir.",
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Evet, Otomatik Kura Geç',
-                cancelButtonText: 'Vazgeç'
-            });
-            if (!result.isConfirmed) return;
-        }
-
-        try {
-            Swal.fire({
-                title: 'Kurlar Güncelleniyor',
-                text: 'Dış servisten güncel kurlar alınıyor...',
-                allowOutsideClick: false,
-                didOpen: () => { Swal.showLoading(); }
-            });
-            
-            const newRates = await this.simulateRateFetch(); 
-
-            newRates.forEach(newRate => {
-                const existingRate = this.data.rates.find(r => r.code === newRate.code);
-                if (existingRate) {
-                    existingRate.buy = newRate.buy;
-                    existingRate.sell = newRate.sell;
-                }
-            });
-            
-            this.data.rateInputMode = 'auto';
-            document.getElementById('activeRateMode').innerText = 'Otomatik';
-            this.saveData();
-            this.renderLiveRates();
-            Swal.close();
-            Swal.fire('Başarılı', 'Kurlar otomatik olarak güncellendi.', 'success');
-            
-        } catch (error) {
-            Swal.fire('Hata', 'Otomatik kur güncelleme servisine erişilemedi (Simülasyon Hatası).', 'error');
-        }
-    },
-    
-    simulateRateFetch() {
-        return new Promise(resolve => {
-            setTimeout(() => {
-                // Sadece mevcut kurların güncellenmesi için simülasyon
-                const simulatedRates = this.data.rates.map(r => {
-                    // Mevcut kurun %0.05'i kadar rastgele değişim
-                    const changeFactor = 1 + (Math.random() * 0.005 - 0.0025); 
-                    const buyDelta = Math.random() * 0.0001; 
-                    const sellDelta = Math.random() * 0.0001;
-                    
-                    const newBuy = parseFloat((r.buy * changeFactor + buyDelta).toFixed(4));
-                    const newSell = parseFloat((r.sell * changeFactor + sellDelta).toFixed(4));
-                    
-                    return {
-                        code: r.code,
-                        buy: newBuy,
-                        sell: newSell,
-                    };
-                });
-                resolve(simulatedRates);
-            }, 1500); 
         });
-    },
-    
-    // =================================================
-    // YARDIMCI FONKSİYONLAR
-    // =================================================
 
-    fmt(num, dp = 2) {
-        return Number(num).toLocaleString('tr-TR', {minimumFractionDigits: dp, maximumFractionDigits: dp});
-    },
-    
-    generateReceiptId() {
-        return Math.floor(100000 + Math.random() * 900000).toString();
+        db.ref('terminal_data/tv_settings').on('value', (snapshot) => {
+            const tv = snapshot.val();
+            if(tv) {
+                document.getElementById('tv-master-switch').checked = tv.master || false;
+                document.getElementById('tv-screen-select').value = tv.screen || "1";
+                document.getElementById('tv-master-switch-2').checked = tv.master2 || false;
+                document.getElementById('tv-screen-select-2').value = tv.screen2 || "1";
+                updateTvButtonState(tv.master, tv.master2);
+            }
+        });
+
+        const el = document.getElementById('currency-list');
+        Sortable.create(el, {
+            handle: '.drag-handle',
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+            onEnd: function() { reorderCurrencies(); }
+        });
     }
-};
 
-/**
- * POS (Point of Sale) İşlem Mantığı (pos)
- */
-const pos = {
-    state: { 
-        code: '', type: '', 
-        initialBuyRate: 0, 
-        initialSellRate: 0, 
-        rateStr: '0', 
-        amountStr: '0', 
-        inputMode: 'amount', 
-        totalLockedTL: 0 
-    },
-    
-    transactionList: [], 
+    // Komisyon oranını güncelleme
+    function updateCommissionRate() {
+        const newRate = parseFloat(document.getElementById('cc-commission-rate').value) || 0;
+        db.ref('terminal_data/cc_rate').set(newRate);
+        addLog(`Komisyon Oranı Güncellendi: %${newRate}`, "INFO");
+    }
 
-    open(code, type, initialBuyRate, initialSellRate) {
-        this.state = { 
-            code, type, 
-            initialBuyRate, initialSellRate,
-            rateStr: (type === 'buy' ? initialBuyRate : initialSellRate).toFixed(4).replace('.', ','),
-            amountStr: '0', 
-            inputMode: 'amount',
-            totalLockedTL: this.calculateTotalLockedTL() 
+    function toggleSettingsArea() {
+        const area = document.getElementById('tv-settings-container');
+        const list = document.getElementById('currency-list');
+        if (area.style.display === 'block') {
+            area.style.display = 'none';
+            list.style.display = 'block';
+        } else {
+            document.getElementById('tv-master-switch').checked = false;
+            document.getElementById('tv-master-switch-2').checked = false;
+            saveTvSettings();
+            area.style.display = 'block';
+            list.style.display = 'none';
+            addLog("Ayarlar Paneli Aktif", "WARN");
+        }
+    }
+
+    function saveTvSettings() {
+        const settings = {
+            master: document.getElementById('tv-master-switch').checked,
+            screen: document.getElementById('tv-screen-select').value,
+            master2: document.getElementById('tv-master-switch-2').checked,
+            screen2: document.getElementById('tv-screen-select-2').value,
+            lastUpdate: Date.now()
         };
-        
-        this.openPosScreen();
-    },
-
-    openCurrentTransaction() {
-        const lastItem = this.transactionList[this.transactionList.length - 1];
-        
-        if (lastItem) {
-            const rateInfo = app.getRateInfo(lastItem.code);
-            this.state.code = lastItem.code;
-            this.state.type = lastItem.type;
-            this.state.initialBuyRate = rateInfo.buy;
-            this.state.initialSellRate = rateInfo.sell;
-            this.state.rateStr = lastItem.rate.toFixed(4).replace('.', ',');
-            this.state.amountStr = '0'; 
-            this.state.inputMode = 'amount';
-            this.state.totalLockedTL = this.calculateTotalLockedTL();
-        }
-
-        this.openPosScreen();
-    },
-    
-    openPosScreen() {
-        const rate = this.getCurrentRate();
-        const rateDecimal = app.fmt(rate, 4);
-
-        document.getElementById('posTitle').innerText = this.state.code ? `${this.state.code} ${this.state.type === 'buy' ? 'ALIŞ' : 'SATIŞ'} EKLE` : 'İŞLEM EKLE';
-        document.getElementById('posTitle').style.color = this.state.type === 'buy' ? 'var(--success)' : 'var(--danger)';
-        
-        this.updateInputModeDisplay();
-        this.updateCalculations();
-        this.renderTransactionList(); 
-        document.getElementById('rateDisplay').innerText = `Kur: ${rateDecimal}`;
-        
-        document.getElementById('posScreen').classList.remove('hidden');
-        document.getElementById('posScreen').classList.add('active');
-        
-        document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-        document.querySelector('.bottom-nav .nav-item:nth-child(5)').classList.add('active');
-    },
-
-    close() {
-        if (this.transactionList.length > 0) {
-            Swal.fire({
-                title: 'İşlemden Çıkış', text: "Sepetteki işlemlere devam edebilirsiniz. Ana ekrana döneceksiniz.", icon: 'info',
-                showCancelButton: true, confirmButtonColor: 'var(--danger)', cancelButtonColor: 'var(--primary)',
-                confirmButtonText: 'Evet, Ana Ekrana Dön'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    document.getElementById('posScreen').classList.remove('active');
-                    document.getElementById('posScreen').classList.add('hidden');
-                    app.switchTab('kur', document.querySelector('.bottom-nav .nav-item:nth-child(1)')); 
-                }
-            });
-        } else {
-            document.getElementById('posScreen').classList.remove('active');
-            document.getElementById('posScreen').classList.add('hidden');
-            app.switchTab('kur', document.querySelector('.bottom-nav .nav-item:nth-child(1)')); 
-        }
-    },
-
-    unlockAndClose(isAbort = false) {
-        if (isAbort) {
-            this.transactionList = [];
-            this.state.totalLockedTL = 0;
-            app.updateLockStatus(false);
-            document.getElementById('paymentScreen').classList.remove('active');
-            document.getElementById('posScreen').classList.remove('active');
-            document.getElementById('posScreen').classList.add('hidden');
-        } else {
-            app.updateLockStatus(false);
-            document.getElementById('paymentScreen').classList.remove('active');
-            document.getElementById('posScreen').classList.add('active');
-            this.renderTransactionList(); 
-        }
-        app.switchTab('kur', document.querySelector('.bottom-nav .nav-item:nth-child(1)')); 
-    },
-    
-    resetAmount() {
-        this.state.amountStr = '0';
-        this.updateCalculations(); 
-    },
-    
-    getCurrentRate() {
-        return parseFloat(this.state.rateStr.replace(',', '.')) || 0;
-    },
-
-    toggleInputMode() {
-        const isRateMode = this.state.inputMode === 'rate';
-        this.state.inputMode = isRateMode ? 'amount' : 'rate';
-        
-        if (!isRateMode) {
-            const currentRate = this.getCurrentRate();
-            const integerPart = Math.floor(currentRate);
-            this.state.rateStr = integerPart.toString().replace('.', ',') + ','; 
-        } 
-
-        this.updateInputModeDisplay();
-        this.updateCalculations();
-    },
-
-    updateInputModeDisplay() {
-        const isRateMode = this.state.inputMode === 'rate';
-        const rateDisplayEl = document.getElementById('rateInputDisplay');
-        const iconEl = rateDisplayEl.querySelector('i');
-        const rateText = isRateMode ? this.state.rateStr : `Kur: ${app.fmt(this.getCurrentRate(), 4)}`;
-
-        document.getElementById('posModeTitle').innerText = isRateMode ? 'Kur Girişi' : 'Miktar Girişi';
-        document.getElementById('rateDisplay').innerText = rateText;
-        
-        if (isRateMode) {
-            rateDisplayEl.style.background = 'var(--primary)';
-            rateDisplayEl.style.color = 'white';
-            iconEl.className = 'ri-check-line';
-            iconEl.style.color = 'white';
-        } else {
-            rateDisplayEl.style.background = 'var(--input)';
-            rateDisplayEl.style.color = 'var(--text)';
-            iconEl.className = 'ri-edit-2-line';
-            iconEl.style.color = 'var(--primary)';
-        }
-    },
-    
-    num(n) {
-        let currentStr = this.state.inputMode === 'amount' ? this.state.amountStr : this.state.rateStr;
-        
-        if (currentStr === '0' || currentStr === '0,') {
-            currentStr = n.toString();
-        } else if (currentStr.length < 12) {
-            currentStr += n.toString();
-        }
-        
-        if (this.state.inputMode === 'amount') {
-            this.state.amountStr = currentStr;
-        } else {
-            this.state.rateStr = currentStr;
-        }
-
-        this.updateCalculations();
-    },
-
-    dot() {
-        let currentStr = this.state.inputMode === 'amount' ? this.state.amountStr : this.state.rateStr;
-        const dotChar = ',';
-
-        if (!currentStr.includes(dotChar)) {
-            if (currentStr === '') currentStr = '0' + dotChar;
-            else currentStr += dotChar;
-        }
-
-        if (this.state.inputMode === 'amount') {
-            this.state.amountStr = currentStr;
-        } else {
-            this.state.rateStr = currentStr;
-        }
-        this.updateCalculations();
-    },
-
-    clear() {
-        let currentStr = this.state.inputMode === 'amount' ? this.state.amountStr : this.state.rateStr;
-        currentStr = currentStr.slice(0, -1);
-        
-        if (currentStr === '') {
-            currentStr = this.state.inputMode === 'rate' ? '0,' : '0';
-        }
-
-        if (this.state.inputMode === 'amount') {
-            this.state.amountStr = currentStr;
-        } else {
-            this.state.rateStr = currentStr;
-        }
-        this.updateCalculations();
-    },
-
-    calculateTotalLockedTL() {
-        return this.transactionList.reduce((sum, item) => sum + item.total, 0);
-    },
-
-    updateCalculations() {
-        const rate = this.getCurrentRate();
-        const amt = parseFloat(this.state.amountStr.replace(',', '.')) || 0;
-        
-        const currentTotal = amt * rate;
-        const combinedTotal = this.calculateTotalLockedTL(); 
-
-        document.getElementById('displayAmount').innerText = this.state.amountStr;
-        document.getElementById('currentTotalTL').innerText = `${app.fmt(currentTotal)} ₺`; 
-        document.getElementById('displayTotal').innerHTML = `SEPET TOPLAMI: <span style="color:var(--text)">${app.fmt(combinedTotal + currentTotal)} ₺</span>`;
-
-        if (this.state.inputMode === 'rate') {
-            document.getElementById('rateDisplay').innerText = this.state.rateStr;
-        } else {
-            document.getElementById('rateDisplay').innerText = `Kur: ${app.fmt(rate, 4)}`;
-        }
-    },
-
-    addTransactionItem() {
-        const amt = parseFloat(this.state.amountStr.replace(',', '.'));
-        const rate = this.getCurrentRate();
-        const { code, type, initialBuyRate, initialSellRate } = this.state;
-        
-        if (this.state.inputMode === 'rate') {
-            
-            if (type === 'buy' && rate > initialSellRate) {
-                Swal.fire('Hata', `ALIŞ Kurunuz, Piyasa Satış Kurundan (${app.fmt(initialSellRate, 4)}) Yüksek olamaz.`, 'error');
-                return;
-            }
-            
-            if (type === 'sell' && rate < initialBuyRate) {
-                Swal.fire('Hata', `SATIŞ Kurunuz, Piyasa Alış Kurundan (${app.fmt(initialBuyRate, 4)}) Düşük olamaz.`, 'error');
-                return;
-            }
-            
-            if (rate <= 0) {
-                 Swal.fire('Hata', 'Kur sıfır veya geçersiz olamaz.', 'error');
-                 return;
-            }
-
-            this.state.inputMode = 'amount';
-            this.state.amountStr = '0'; 
-            this.updateInputModeDisplay();
-            this.updateCalculations();
-            return;
-        }
-
-        if(!amt || amt <= 0) { Swal.fire('Hata', 'Miktar sıfır veya geçersiz olamaz.', 'error'); return; }
-        if(!rate || rate <= 0) { Swal.fire('Hata', 'Kur sıfır veya geçersiz olamaz.', 'error'); return; }
-        
-        const total = amt * rate;
-        
-        this.transactionList.push({
-            code, type, amount: amt, rate: rate, total: total, id: Date.now() + Math.random()
-        });
-
-        this.resetAmount();
-        this.renderTransactionList();
-        
-        document.getElementById('posScreen').classList.remove('active');
-        document.getElementById('posScreen').classList.add('hidden');
-        app.switchTab('kur', document.querySelector('.bottom-nav .nav-item:nth-child(1)'));
-        
-        Swal.fire({
-            toast: true, position: 'top-end', icon: 'success', 
-            title: `Sepete Eklendi! (${this.transactionList.length} Kalem)`,
-            showConfirmButton: false, timer: 1500, timerProgressBar: true
-        });
-    },
-    
-    removeItem(itemId) {
-        this.transactionList = this.transactionList.filter(item => item.id !== itemId);
-        this.renderTransactionList();
-        app.updateCartCount(); 
-        
-        if (this.transactionList.length === 0) {
-            document.getElementById('posScreen').classList.remove('active');
-            document.getElementById('posScreen').classList.add('hidden');
-            app.switchTab('kur', document.querySelector('.bottom-nav .nav-item:nth-child(1)'));
-        }
-    },
-
-    renderTransactionList() {
-        const container = document.getElementById('transactionListContainer');
-        const btn = document.getElementById('startPaymentBtn');
-        let totalSumTL = this.calculateTotalLockedTL();
-        
-        app.updateCartCount();
-
-        if (this.transactionList.length === 0) {
-            container.innerHTML = '<div style="text-align: center; color: var(--muted); padding: 5px; font-size: 13px;" id="listPlaceholder">Sepetiniz boş.</div>';
-            btn.disabled = true;
-            this.state.totalLockedTL = 0;
-            return;
-        }
-        
-        let html = '';
-        this.transactionList.forEach(item => {
-            const typeText = item.type === 'buy' ? 'AL' : 'SAT'; 
-            const colorClass = item.type === 'buy' ? 'text-success' : 'text-danger';
-
-            html += `
-                <div class="transaction-item">
-                    <div class="item-info">
-                        <span class="${colorClass}">${typeText} ${item.code}</span>
-                        <span class="item-amount">${app.fmt(item.amount, 2)}</span>
-                        <span>@${app.fmt(item.rate, 4)}</span>
-                        <span class="item-total">${app.fmt(item.total)} ₺</span>
-                    </div>
-                    <button class="remove-btn" onclick="pos.removeItem(${item.id})"><i class="ri-delete-bin-line"></i></button>
-                </div>
-            `;
-        });
-        
-        container.innerHTML = html;
-        this.state.totalLockedTL = totalSumTL;
-        btn.disabled = false;
-        this.updateCalculations();
-    },
-
-    startPayment() {
-        if (this.transactionList.length === 0) {
-            Swal.fire('Hata', 'Ödeme başlatmak için en az bir işlem eklenmelidir.', 'error');
-            return;
-        }
-
-        let tempBalances = { ...app.data.balances };
-        let checksPassed = true;
-        let netTLMovement = 0; 
-        let requiredAmount = 0;
-        let currentBalance = 0;
-        let insufficientCode = '';
-        let isBuyTransaction = false;
-        let isSellTransaction = false;
-
-        this.transactionList.forEach(tx => {
-            if (!checksPassed) return;
-            
-            if (tx.type === 'sell') {
-                isSellTransaction = true;
-                if (tempBalances[tx.code] < tx.amount) {
-                    requiredAmount = tx.amount;
-                    currentBalance = app.data.balances[tx.code]; 
-                    insufficientCode = tx.code;
-                    checksPassed = false;
-                    return; 
-                }
-                tempBalances[tx.code] -= tx.amount; 
-                netTLMovement += tx.total; 
-            } 
-            else { 
-                isBuyTransaction = true;
-                netTLMovement -= tx.total; 
-            }
-        });
-        
-        if (!checksPassed) {
-            Swal.fire({
-                title: `Yetersiz Bakiye: ${insufficientCode} Satışı`, 
-                html: `<p style="text-align:left;">İşlem için gerekli olan **${insufficientCode}** miktarı, kasanızdaki mevcut bakiyeyi aşmaktadır.
-                        <br><br>**İşlem Miktarı:** ${app.fmt(requiredAmount, 2)} ${insufficientCode}
-                        <br>**Kasa Bakiyesi:** ${app.fmt(currentBalance, 2)} ${insufficientCode}</p>`,
-                icon: 'error',
-                showConfirmButton: true,
-                confirmButtonText: 'Sepeti Boşalt & Çık', 
-                showCancelButton: true,
-                cancelButtonText: 'Kapat & Sepete Dön',
-                confirmButtonColor: 'var(--danger)',
-                cancelButtonColor: 'var(--primary)'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    this.transactionList = [];
-                    this.state.totalLockedTL = 0;
-                    this.unlockAndClose(true); 
-                } else {
-                    this.openPosScreen(); 
-                }
-            });
-            return;
-        }
-
-        // Net TL hareketi kontrolü (Sadece TL çıkışı durumunda)
-        if (netTLMovement < 0 && app.data.balances['TRY'] + netTLMovement < 0) { 
-             Swal.fire('Yetersiz TL', `İşleminiz sonrasında kasada kalacak TL miktarı negatif oluyor! (Net TL Çıkışı: ${app.fmt(Math.abs(netTLMovement))} ₺. Mevcut TL: ${app.fmt(app.data.balances['TRY'])} ₺)`, 'error');
-             checksPassed = false;
-             return;
-        }
-
-        app.updateLockStatus(true);
-        document.getElementById('posScreen').classList.remove('active');
-        document.getElementById('posScreen').classList.add('hidden');
-        payment.open(this.state.totalLockedTL);
-    }
-};
-
-
-/**
- * ÖDEME MODU (payment) - TAHSİLAT EKRANI
- */
-const payment = {
-    state: {
-        totalDue: 0,
-        cashReceivedStr: '0', 
-        netTLMovement: 0, 
-    },
-    
-    open(total) {
-        this.state.totalDue = total;
-        
-        let netTLMovement = pos.transactionList.reduce((sum, tx) => sum + (tx.type === 'sell' ? tx.total : -tx.total), 0);
-        this.state.netTLMovement = netTLMovement;
-        
-        const requiredAmount = Math.abs(netTLMovement);
-        
-        // Ödeme ekranı açıldığında varsayılan olarak tahsil edilmesi gereken tutarı göster
-        this.state.cashReceivedStr = requiredAmount.toFixed(2).replace('.', ',');
-        
-        document.getElementById('paymentScreen').classList.add('active');
-        this.renderSummary(); 
-        this.updateDisplay();
-    },
-
-    renderSummary() {
-        const listEl = document.getElementById('transactionSummaryList');
-        const netLabelEl = document.getElementById('netTransactionLabel');
-        let html = '';
-
-        pos.transactionList.forEach(tx => {
-            const isSell = tx.type === 'sell'; 
-            const fxAction = isSell ? 'Verecek' : 'Alacak';
-
-            html += `
-                <div class="transaction-summary-item">
-                    <div style="display:flex; justify-content:space-between; margin:3px 0;">
-                        <span class="label">Müşteri ${fxAction} Döviz:</span>
-                        <span class="summary-value-bold ${isSell ? 'text-danger' : 'text-success'}">${app.fmt(tx.amount, 2)} ${tx.code}</span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; margin:3px 0;">
-                        <span class="label">Net TL Tutarı:</span>
-                        <span class="summary-tl-amount">${app.fmt(tx.total)} ₺</span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; margin:3px 0;">
-                        <span class="label">Kur:</span>
-                        <span class="summary-value-bold">${app.fmt(tx.rate, 4)}</span>
-                    </div>
-                </div>
-            `;
-        });
-
-        listEl.innerHTML = html;
-
-        if (this.state.netTLMovement >= 0) {
-            netLabelEl.innerText = 'Müşteriden Net Alınacak TL:';
-            document.getElementById('requiredTotalDisplay').classList.remove('text-danger');
-            document.getElementById('requiredTotalDisplay').classList.add('text-primary');
-        } else { 
-            netLabelEl.innerText = 'Müşteriye Net Ödenecek TL:';
-            document.getElementById('requiredTotalDisplay').classList.remove('text-primary');
-            document.getElementById('requiredTotalDisplay').classList.add('text-danger');
-        }
-    },
-
-
-    updateDisplay() {
-        const cashReceived = parseFloat(this.state.cashReceivedStr.replace(',', '.')) || 0;
-        const totalDue = Math.abs(this.state.netTLMovement); 
-
-        let changeDue; 
-        let finalActionText;
-        let finalColor;
-        let isButtonEnabled = false;
-        
-        if (this.state.netTLMovement >= 0) { 
-            // Vezneye TL GİRİŞİ bekleniyor (Satış Baskın - Müşteri ödüyor)
-            changeDue = cashReceived - totalDue; 
-            document.getElementById('paymentActionText').innerText = 'Müşteri Verdiği Nakit:';
-            
-            if (changeDue >= 0) { 
-                finalActionText = (changeDue === 0) ? `Ödeme Tamamlandı` : `Para Üstü:`;
-                finalColor = 'var(--success)'; 
-                isButtonEnabled = true;
-            } else { 
-                 finalActionText = `Eksik Kalan Bakiye:`; finalColor = 'var(--danger)'; isButtonEnabled = false;
-            }
-        } else { 
-            // Vezneden TL ÇIKIŞI bekleniyor (Alış Baskın - Vezne ödüyor)
-            // Kasadan çıkan para (totalDue) ve müşteriye ödenen (cashReceived) kıyaslanır.
-            changeDue = cashReceived - totalDue; 
-            // Eğer changeDue pozitifse, fazla ödeme yapıldı (fazla para üstü alındı).
-            // Eğer changeDue negatifse, eksik ödeme yapıldı (eksik para üstü alındı).
-            
-            document.getElementById('paymentActionText').innerText = 'Vezne Ödediği Nakit:';
-
-            if (changeDue >= 0) { 
-                // Ödenen miktar yeterli veya fazla
-                finalActionText = (changeDue === 0) ? `Ödeme Tamamlandı` : `Fazla Ödenen (Vezne Para Üstü Alacak):`; 
-                finalColor = 'var(--success)'; 
-                isButtonEnabled = true;
-            } else { 
-                 // Eksik ödeme yapıldı
-                 finalActionText = `Eksik Ödenen TL:`; 
-                 finalColor = 'var(--danger)'; 
-                 isButtonEnabled = false;
-            }
-            changeDue = Math.abs(changeDue); // Değeri pozitif gösteriyoruz
-        }
-
-        
-        document.getElementById('requiredTotalDisplay').innerText = app.fmt(totalDue) + ' ₺';
-        document.getElementById('cashReceivedDisplay').innerText = this.state.cashReceivedStr;
-        document.getElementById('cashInputTL').innerText = app.fmt(cashReceived) + ' ₺';
-        
-        const changeEl = document.getElementById('changeDueDisplay');
-        const finalEl = document.getElementById('finalActionText');
-        
-        // changeDue, Vezneye GİRİŞ durumunda pozitifse Para Üstü, negatifse Eksik Bakiye
-        // Vezneden ÇIKIŞ durumunda, cashReceived > totalDue ise Fazla Ödeme (Vezne için pozitif bir fark), tersi Eksik Ödeme
-        
-        let finalChangeAmount = Math.abs(parseFloat(this.state.cashReceivedStr.replace(',', '.')) - totalDue);
-        
-        if (this.state.netTLMovement >= 0) { // Vezneye TL GİRİŞİ
-            finalChangeAmount = parseFloat(this.state.cashReceivedStr.replace(',', '.')) - totalDue;
-            finalColor = finalChangeAmount >= 0 ? 'var(--success)' : 'var(--danger)';
-            finalEl.innerText = finalChangeAmount >= 0 ? 'Para Üstü:' : 'Eksik Kalan Bakiye:';
-            changeEl.innerText = app.fmt(Math.abs(finalChangeAmount)) + ' ₺';
-        } else { // Vezneden TL ÇIKIŞI
-            finalChangeAmount = parseFloat(this.state.cashReceivedStr.replace(',', '.')) - totalDue;
-            finalColor = finalChangeAmount <= 0 ? 'var(--danger)' : 'var(--success)';
-            finalEl.innerText = finalChangeAmount <= 0 ? 'Eksik Ödenen TL:' : 'Fazla Ödenen (Vezne Para Üstü Alacak):';
-            changeEl.innerText = app.fmt(Math.abs(finalChangeAmount)) + ' ₺';
-        }
-        
-        changeEl.style.color = finalColor;
-        
-        const processBtn = document.querySelector('.payment-button-row .action');
-        processBtn.disabled = finalChangeAmount < 0 && this.state.netTLMovement >= 0 || finalChangeAmount < 0 && this.state.netTLMovement < 0; // Hem girişte hem çıkışta eksiye düşerse düğme pasif
-        processBtn.disabled = finalChangeAmount < 0 && finalColor === 'var(--danger)';
-        
-    },
-    
-    num(n) {
-        let current = this.state.cashReceivedStr;
-        const dotChar = ','; 
-        
-        if (current === '0,00' || current === '0') current = n.toString();
-        else if (current.length < 12) current += n.toString();
-        
-        this.state.cashReceivedStr = current;
-        this.updateDisplay();
-    },
-    dot() {
-        let current = this.state.cashReceivedStr;
-        const dotChar = ',';
-        if (!current.includes(dotChar)) {
-            if (current === '0') this.state.cashReceivedStr = '0' + dotChar;
-            else current += dotChar;
-        }
-        this.updateDisplay();
-    },
-    clear() {
-        let current = this.state.cashReceivedStr;
-        current = current.slice(0, -1);
-        this.state.cashReceivedStr = current === '' ? '0' : current;
-        this.updateDisplay();
-    },
-
-    fullCash() {
-        const totalDue = Math.abs(this.state.netTLMovement); 
-        this.state.cashReceivedStr = totalDue.toFixed(2).replace('.', ',');
-        this.updateDisplay();
-    },
-
-    processPayment(method) {
-        const cashReceived = parseFloat(this.state.cashReceivedStr.replace(',', '.')) || 0;
-        const totalDue = Math.abs(this.state.netTLMovement);
-        
-        let changeDue; // Müşteriye para üstü veya vezneye kalan fark
-        
-        if (this.state.netTLMovement >= 0) { 
-            // Vezneye TL GİRİŞİ (Müşteri ödüyor)
-            changeDue = cashReceived - totalDue; 
-        } else { 
-            // Vezneden TL ÇIKIŞI (Vezne ödüyor)
-            changeDue = cashReceived - totalDue; 
-        }
-
-        if (this.state.netTLMovement >= 0 && changeDue < 0) {
-            Swal.fire('Hata', `Müşteriden eksik kalan bakiye (${app.fmt(Math.abs(changeDue))} ₺) bulunmaktadır.`, 'error');
-            return;
-        }
-        if (this.state.netTLMovement < 0 && changeDue < 0) {
-            Swal.fire('Hata', `Vezne tarafından müşteriye eksik ödenen bakiye (${app.fmt(Math.abs(changeDue))} ₺) bulunmaktadır.`, 'error');
-            return;
-        }
-        
-        const transactionList = pos.transactionList;
-        const receiptId = app.generateReceiptId(); 
-        
-        let finalTLMovement = this.state.netTLMovement; 
-
-        if (this.state.netTLMovement >= 0) {
-             // Müşteriden Alınan TL (totalDue) + Kalan Para Üstü (changeDue)
-             // Net TL Hareketi = totalDue - changeDue (eğer changeDue pozitifse)
-             // Aslında: Kasaya Giren = cashReceived - changeDue (eğer changeDue pozitifse)
-             // Ya da daha basit: Kasaya Giren TL = totalDue (alınması gereken) - (changeDue < 0 ? abs(changeDue) : 0)
-             // Daha doğru: Kasaya Giren TL = cashReceived - changeDue (pozitifse para üstü)
-             finalTLMovement = totalDue;
-             app.data.balances['TRY'] += totalDue;
-             app.data.balances['TRY'] -= changeDue; 
-
-        } else {
-             // Vezneden Çıkan TL (totalDue) + Kalan Para Üstü (changeDue)
-             // netTLMovement (negatifse vezneden çıkış) = -totalDue + changeDue (negatifse para üstü)
-             // Kasadan Çıkan TL = cashReceived - changeDue (eğer changeDue pozitifse)
-             finalTLMovement = -totalDue;
-             app.data.balances['TRY'] -= totalDue;
-             app.data.balances['TRY'] += changeDue;
-        }
-        
-app.printReceipt = function(receiptId) {
-    // İlgili işleme ait tüm satırları bul
-    const transactions = app.data.transactions.filter(t => t.receiptId === receiptId);
-    if (!transactions.length) {
-        alert("Fiş bulunamadı!");
-        return;
+        db.ref('terminal_data/tv_settings').set(settings);
     }
 
-    // Termal Fiş Tasarımı
-    let printHtml = `
-    <html>
-    <head>
-        <title>Fiş No: ${receiptId}</title>
-        <style>
-            @page { margin: 0; size: 80mm auto; } /* 58mm ise 58mm yapın */
-            body { 
-                margin: 0; padding: 5mm; 
-                font-family: 'Courier New', monospace; 
-                width: 70mm; /* Kenarlardan taşmaması için biraz dar tutuyoruz */
-                font-size: 12px;
-                color: #000;
-            }
-            .center { text-align: center; }
-            .right { text-align: right; }
-            .bold { font-weight: bold; }
-            .dashed-line { border-top: 1px dashed #000; margin: 5px 0; }
-            table { width: 100%; border-collapse: collapse; }
-            .item-row td { padding: 3px 0; }
-            .total-section { font-size: 14px; margin-top: 10px; }
-        </style>
-    </head>
-    <body onload="window.print(); window.close();">
-        <div class="center">
-            <h2 style="margin:0;">DÖVİZ VEZNE</h2>
-            <p style="margin:5px 0;">Fiş No: ${receiptId}<br>${new Date().toLocaleString('tr-TR')}</p>
-        </div>
-        
-        <div class="dashed-line"></div>
-        
-        <table>
-            ${transactions.map(tx => `
-                <tr class="item-row">
-                    <td class="bold">${tx.type.toUpperCase() === 'BUY' ? 'ALIŞ' : 'SATIŞ'} ${tx.code}</td>
-                    <td class="right">${app.fmt(tx.amount, 2)}</td>
-                </tr>
-                <tr class="item-row">
-                    <td style="font-size:10px;">Kur: ${app.fmt(tx.rate, 4)}</td>
-                    <td class="right bold">${app.fmt(tx.total)} ₺</td>
-                </tr>
-            `).join('')}
-        </table>
-
-        <div class="dashed-line"></div>
-        
-        <div class="total-section">
-            <div style="display:flex; justify-content:space-between;">
-                <span>Para Üstü:</span>
-                <span class="bold">${app.fmt(transactions[0].changeDue)} ₺</span>
-            </div>
-        </div>
-
-        <div class="dashed-line"></div>
-        <p class="center" style="margin-top:10px;">TEŞEKKÜR EDERİZ</p>
-    </body>
-    </html>`;
-
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(printHtml);
-    printWindow.document.close();
-};
-
-        transactionList.forEach(tx => {
-            if(tx.type === 'buy') {
-                app.data.balances[tx.code] += tx.amount;
-            } else {
-                app.data.balances[tx.code] -= tx.amount;
-            }
-
-            app.data.transactions.push({
-                date: Date.now(), 
-                code: tx.code, type: tx.type, 
-                amount: tx.amount, rate: tx.rate, total: tx.total,
-                paymentMethod: method, 
-                changeDue: changeDue,
-                vezneId: app.data.activeVezneId, 
-                receiptId: receiptId
-            });
-        });
-        
-        // Final TL Hareketini Kaydetmek (Zaten yukarıda güncellendi)
-
-        app.saveData();
-        pos.unlockAndClose(false); 
-        
-        const itemDetailsHtml = transactionList.map(tx => `
-            <div style="display:flex; justify-content:space-between; font-size:14px; padding:5px 0; border-bottom:1px dotted var(--muted); margin-top:5px;">
-                <span style="font-weight:600; color:${tx.type === 'buy' ? 'var(--success)' : 'var(--danger)'}">
-                    ${tx.type === 'buy' ? 'ALIŞ' : 'SATIŞ'} ${app.fmt(tx.amount, 2)} ${tx.code}
-                </span>
-                <span style="font-weight:800">${app.fmt(tx.total)} ₺</span>
-            </div>
-        `).join('');
-        
-        const changeAbs = Math.abs(changeDue);
-        
-        let changeLabel = '';
-        if (this.state.netTLMovement >= 0) { 
-            changeLabel = changeDue >= 0 ? 'Müşteriye Para Üstü' : 'Eksik Kalan Bakiye (Hata)';
-        } else { 
-            changeLabel = changeDue >= 0 ? 'Fazla Ödeme (Vezneye Kalan)' : 'Eksik Ödeme (Hata)';
-        }
-
-
-        Swal.fire({
-            title: 'İşlem Başarılı',
-            html: `
-                <div style="text-align:left; background:var(--bg); border:1px solid var(--border); padding:15px; border-radius:10px; color:var(--text)">
-                    <h3 style="margin:0 0 10px 0; border-bottom:1px dashed var(--border); padding-bottom:10px">FİŞ ÖZETİ (Fiş No: ${receiptId})</h3>
-                    
-                    <div style="margin-bottom:15px; max-height:150px; overflow-y:auto; padding-right:5px;">
-                        ${itemDetailsHtml}
-                    </div>
-
-                    <div style="font-weight:800; margin-top:10px; color:var(--primary); font-size:22px; border-top:2px solid var(--primary); padding-top:10px;">
-                        <b>NET TL HAREKETİ: ${app.fmt(Math.abs(this.state.netTLMovement))} ₺</b>
-                        <span style="font-size:14px; display:block; color:var(--muted); font-weight:600;">(Vezne ${this.state.netTLMovement >= 0 ? 'Alacak' : 'Ödeyecek'})</span>
-                    </div>
-                    
-                    <div style="margin-top:15px; font-size:14px;">
-                        <p style="margin:2px 0;"><b>Giriş Yapılan Nakit:</b> ${app.fmt(cashReceived)} ₺</p>
-                        <p style="margin:2px 0; color:${changeDue >= 0 ? 'var(--success)' : 'var(--danger)'}"><b>${changeLabel}:</b> ${app.fmt(changeAbs)} ₺</p>
-                    </div>
-                </div>
-                
-                <div class="receipt-action-group">
-                    <button class="btn-print" onclick="app.printReceipt('${receiptId}')">
-                        <i class="ri-printer-line"></i> Yazdır
-                    </button>
-                    <button class="btn-whatsapp" onclick="app.sendWhatsappReceipt('${receiptId}')">
-                        <i class="ri-whatsapp-line"></i> WhatsApp
-                    </button>
-                    <button class="btn-close" onclick="Swal.close()">
-                        <i class="ri-check-line"></i> Ekrana Dön
-                    </button>
-                </div>
-            `,
-            icon: 'success',
-            showConfirmButton: false 
-        });
-
-        pos.transactionList = [];
-        pos.state.totalLockedTL = 0;
-        app.updateCartCount();
+    function updateTvButtonState(m1, m2) {
+        const tvBtn = document.getElementById('tv-btn');
+        const b1 = document.getElementById('badge-tv1');
+        const b2 = document.getElementById('badge-tv2');
+        (m1 || m2) ? tvBtn.classList.add('active-green') : tvBtn.classList.remove('active-green');
+        b1.style.background = m1 ? 'var(--success)' : '#ccc';
+        b2.style.background = m2 ? 'var(--success)' : '#ccc';
     }
-};
 
-// Start App
-document.addEventListener('DOMContentLoaded', () => {
-    app.init();
-});
+    function roundToTen(value) { return Math.round(value * 100) / 100; }
+
+    async function fetchMarketData() {
+        if (!isAutoMode) return;
+        try {
+            let hasChange = false;
+            const tryResp = await fetch(`https://hexarate.paikama.co/api/rates/USD/TRY/latest`);
+            const tryJson = await tryResp.json();
+            const tryRate = parseFloat(tryJson?.data?.mid || 1);
+
+            const updatedList = await Promise.all(currencies.map(async (c) => {
+                if(!c.autoSync) return c;
+                try {
+                    let base = c.name.toUpperCase() === "GA" ? "XAU" : c.name.toUpperCase();
+                    const resp = await fetch(`https://hexarate.paikama.co/api/rates/${base}/USD/latest`);
+                    const json = await resp.json();
+                    const midPrice = json?.data?.mid;
+                    if(midPrice) {
+                        const usdPrice = parseFloat(midPrice);
+                        let finalPrice = (base === "XAU" || base === "XAG") ? (usdPrice * tryRate / 31.1035) : (usdPrice * tryRate);
+                        
+                        let newSell, newBuy;
+                        if(base === "XAU" || c.category === 'altin') {
+                            newSell = Math.floor(finalPrice + (c.sellMargin || 0));
+                            newBuy = Math.floor(finalPrice - (c.buyMargin || 0));
+                        } else {
+                            newSell = roundToTen(finalPrice + (c.sellMargin || 0));
+                            newBuy = roundToTen(finalPrice - (c.buyMargin || 0));
+                        }
+
+                        if(Math.abs(c.sell - newSell) > 0.0001 || Math.abs(c.buy - newBuy) > 0.0001) {
+                            hasChange = true;
+                            return { ...c, buy: newBuy, sell: newSell, basePrice: finalPrice };
+                        }
+                    }
+                } catch (e) { console.error(e); }
+                return c;
+            }));
+
+            if(hasChange) { currencies = updatedList; saveToFirebase(); }
+            document.getElementById('stat-sync').innerText = new Date().toLocaleTimeString('tr-TR');
+            resetCountdown();
+            syncTimer = setTimeout(fetchMarketData, (parseInt(document.getElementById('sync-interval').value) || 30) * 1000);
+        } catch (e) { syncTimer = setTimeout(fetchMarketData, 5000); }
+    }
+
+    function formatPrice(val, name, category) {
+        if(category === "altin") return Math.floor(val).toString();
+        return val.toFixed(3);
+    }
+
+    function render() {
+        const list = document.getElementById('currency-list');
+        list.innerHTML = '';
+        currencies.forEach(c => {
+            let iconUrl;
+            if (c.category === 'altin' || c.flag === 'gold') iconUrl = GOLD_ICON;
+            else if (c.category === 'kripto' || c.flag === 'btc') iconUrl = CRYPTO_ICON;
+            else if (c.flag.length === 2) iconUrl = `https://flagcdn.com/w80/${c.flag}.png`;
+            else iconUrl = DEFAULT_ICON;
+
+            // Kredi Kartı Fiyat Hesaplama
+            let ccHtml = "";
+            if(c.category === 'altin') {
+                const ccPrice = Math.floor(c.sell + (c.sell * (ccRate / 100)));
+                ccHtml = `
+                    <div class="cc-price-box">
+                        <span class="cc-label">K. Kartı (%${ccRate})</span>
+                        <div class="cc-price-val">${ccPrice}</div>
+                    </div>
+                `;
+            }
+
+            list.innerHTML += `
+                <div class="currency-card" data-id="${c.id}" onclick="openUpdateModal(${c.id})">
+                    <div class="drag-handle"><i class="fas fa-grip-vertical"></i></div>
+                    <div class="lock-indicator">${c.autoSync ? '<i class="fas fa-sync-alt fa-spin"></i>' : '<i class="fas fa-lock"></i>'}</div>
+                    <div class="flag-box">
+                        <img src="${iconUrl}" class="flag-anim" onerror="this.src='${DEFAULT_ICON}'">
+                    </div>
+                    <div class="currency-meta"><b>${c.name}</b><br><span style="font-size:9px">${c.category.toUpperCase()}</span></div>
+                    <div class="price-col">
+                        <span class="label-style">ALIŞ</span>
+                        <div class="price-val">${formatPrice(c.buy || 0, c.name, c.category)}</div>
+                        <div class="margin-tag">-${(c.buyMargin || 0).toFixed(2)}</div>
+                    </div>
+                    <div class="price-col">
+                        <span class="label-style">SATIŞ</span>
+                        <div class="price-val">${formatPrice(c.sell || 0, c.name, c.category)}</div>
+                        ${ccHtml}
+                    </div>
+                </div>`;
+        });
+        document.getElementById('stat-count').innerText = currencies.length;
+    }
+
+    function toggleAuto() {
+        isAutoMode = !isAutoMode;
+        document.getElementById('auto-btn').classList.toggle('active-green', isAutoMode);
+        clearTimeout(syncTimer);
+        if(isAutoMode) { fetchMarketData(); addLog("Oto-Mod Başlatıldı.", "INFO"); }
+        else { document.getElementById('timer-box').innerText = "--"; addLog("Oto-Mod Durduruldu.", "WARN"); }
+    }
+
+    function saveToFirebase() { db.ref('terminal_data/currencies').set(currencies); }
+    
+    function reorderCurrencies() {
+        const items = document.querySelectorAll('.currency-card');
+        const newOrderedList = [];
+        items.forEach((item, index) => {
+            const id = parseInt(item.getAttribute('data-id'));
+            const curr = currencies.find(c => c.id === id);
+            if(curr) { curr.order = index; newOrderedList.push(curr); }
+        });
+        currencies = newOrderedList;
+        saveToFirebase();
+    }
+
+    function openUpdateModal(id) {
+        const c = currencies.find(x => x.id === id);
+        if(!c) return;
+        document.getElementById('edit-id').value = c.id;
+        document.getElementById('edit-title').innerText = c.name;
+        document.getElementById('edit-buy-price').value = c.buy;
+        document.getElementById('edit-sell-price').value = c.sell;
+        document.getElementById('edit-buy-margin').value = c.buyMargin;
+        document.getElementById('edit-sell-margin').value = c.sellMargin;
+        document.getElementById('edit-flag').value = c.flag || "";
+        document.getElementById('edit-auto-sync').checked = c.autoSync;
+        document.getElementById('update-modal').style.display = 'flex';
+    }
+
+    function saveManualUpdate() {
+        const id = parseInt(document.getElementById('edit-id').value);
+        currencies = currencies.map(c => c.id === id ? {
+            ...c, 
+            buy: parseFloat(document.getElementById('edit-buy-price').value),
+            sell: parseFloat(document.getElementById('edit-sell-price').value),
+            buyMargin: parseFloat(document.getElementById('edit-buy-margin').value),
+            sellMargin: parseFloat(document.getElementById('edit-sell-margin').value),
+            flag: document.getElementById('edit-flag').value.toLowerCase(),
+            autoSync: document.getElementById('edit-auto-sync').checked
+        } : c);
+        saveToFirebase(); closeModal();
+        addLog(`ID: ${id} Güncellendi.`, "UPDATE");
+    }
+
+    function addNewCurrency() {
+        const name = document.getElementById('new-name').value.toUpperCase().trim();
+        const cat = document.getElementById('new-api-cat').value;
+        if(!name) return;
+        let flagInput = document.getElementById('new-flag').value.toLowerCase();
+        if(cat === 'altin' && !flagInput) flagInput = 'gold';
+
+        const newItem = {
+            id: Date.now(), name: name, category: cat,
+            flag: flagInput || 'tr',
+            buy: 0, sell: 0, buyMargin: parseFloat(document.getElementById('new-buy-margin').value) || 0.1,
+            sellMargin: parseFloat(document.getElementById('new-sell-margin').value) || 0.2,
+            autoSync: true, order: currencies.length
+        };
+        currencies.push(newItem); saveToFirebase();
+        document.getElementById('new-name').value = '';
+        addLog(`Eklendi: ${name}`, "INFO");
+    }
+
+    function deleteCurrency() {
+        if(!confirm("Silinsin mi?")) return;
+        const id = parseInt(document.getElementById('edit-id').value);
+        currencies = currencies.filter(c => c.id !== id);
+        saveToFirebase(); closeModal();
+    }
+
+    function resetCountdown() {
+        clearInterval(countdownTimer);
+        secondsLeft = parseInt(document.getElementById('sync-interval').value) || 30;
+        countdownTimer = setInterval(() => {
+            secondsLeft--; 
+            document.getElementById('timer-box').innerText = secondsLeft + "s";
+            if(secondsLeft <= 0) clearInterval(countdownTimer);
+        }, 1000);
+    }
+
+    function closeModal() { document.getElementById('update-modal').style.display = 'none'; }
+    function toggleTheme() { document.body.setAttribute('data-theme', document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); }
+
+    function addLog(m, type) {
+        const l = document.getElementById('log-list');
+        const footerStatus = document.getElementById('footer-status');
+        const entry = document.createElement('div');
+        entry.className = 'log-entry';
+        let tagClass = 'tag-info';
+        if(type === 'UPDATE') tagClass = 'tag-update';
+        if(type === 'ERROR') tagClass = 'tag-error';
+        if(type === 'WARN') tagClass = 'tag-warn';
+        entry.innerHTML = `<span class="log-time">${new Date().toLocaleTimeString()}</span><span class="log-tag ${tagClass}">${type}</span><span class="log-msg">${m}</span>`;
+        l.prepend(entry);
+        footerStatus.innerText = m;
+        if(l.childNodes.length > 40) l.removeChild(l.lastChild);
+    }
+
+    initApp();
 </script>
 </body>
 </html>
