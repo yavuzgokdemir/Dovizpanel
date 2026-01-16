@@ -23,7 +23,7 @@
         :root {
             --bg: #f0f2f5; --card: #ffffff; --text: #1c1e21; --primary: #007bff;
             --secondary: #65676b; --success: #00c853; --danger: #ff5252; --border: #e4e6eb;
-            --warning: #f39c12;
+            --warning: #f39c12; 
             --header-gradient: linear-gradient(135deg, #0062cc 0%, #004a99 100%);
             --overlay: rgba(0,0,0,0.5);
         }
@@ -54,7 +54,7 @@
         #tv-settings-container { display: none; margin-bottom: 15px; }
         #settings-panel, #tv-panel { background: var(--card); border-radius: 18px; padding: 18px; border: 1px solid var(--border); box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-top: 5px; }
         .input-box { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 10px; font-size: 13px; }
-        .label-style { font-size: 10px; font-weight: 800; color: var(--secondary); margin-bottom: 4px; display: block; text-transform: uppercase; }
+        .label-style { font-size: 10px; font-weight: 800; color: var(--secondary); margin-bottom: 4px; display: block; }
 
         .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
         .switch input { opacity: 0; width: 0; height: 0; }
@@ -66,14 +66,13 @@
         .currency-card { background: var(--card); border-radius: 15px; padding: 14px; margin-bottom: 10px; display: grid; grid-template-columns: auto auto 1fr auto auto; align-items: center; gap: 12px; border: 1px solid var(--border); cursor: pointer; transition: transform 0.1s; position: relative; }
         .drag-handle { color: var(--secondary); cursor: grab; padding: 5px; opacity: 0.5; }
         .flag-box { position: relative; width: 42px; height: 42px; }
-        .flag-anim { width: 100%; height: 100%; border-radius: 50%; border: 2px solid var(--primary); object-fit: cover; display: flex; align-items: center; justify-content: center; font-size: 20px; background: var(--bg); }
+        .flag-anim { width: 100%; height: 100%; border-radius: 50%; border: 2px solid var(--primary); object-fit: cover; }
         .price-col { text-align: right; min-width: 85px; }
         .price-val { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 800; color: var(--primary); }
         
         .cc-price-box { margin-top: 4px; padding: 2px 4px; background: rgba(243, 156, 18, 0.1); border-radius: 4px; border: 1px solid rgba(243, 156, 18, 0.2); }
         .cc-price-val { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 800; color: var(--warning); }
         .cc-label { font-size: 8px; font-weight: bold; color: var(--warning); display: block; text-transform: uppercase; }
-
         .margin-tag { font-size: 9px; color: var(--secondary); font-weight: bold; margin-top: 2px; }
         
         .internal-logs { background: #111; border-radius: 10px; padding: 10px; margin-top: 15px; max-height: 200px; overflow-y: auto; border: 1px solid #333; font-family: 'monospace'; }
@@ -169,12 +168,12 @@
                 <div class="tv-card-inner">
                     <label class="label-style">2. MONİTÖR (WEB)</label>
                     <select id="tv-screen-select-2" class="input-box" onchange="saveTvSettings()">
-                        <option value="1">1. Karsilama Ekranı</option>
-                        <option value="2">2. Video/Resim Tasarımı</option>
-                        <option value="3">3. Video/Resim Tasarımı</option>
-                        <option value="4">4. Altın Tasarım</option>
+                        <option value="1">1.Karsilama Ekran</option>
+                        <option value="2">2.video veya resim Tasarımı</option>
+                        <option value="3">3.video veya resim Tasarımı</option>
+                        <option value="4">4.altin tasarim</option>
                         <option value="5">5. Geleneksel Pano</option>
-                        <option value="6">6. Cnbce Tasarım</option>
+                        <option value="6">6. Cnbce tasarim</option>
                     </select>
                     <div style="display:flex; align-items:center; gap:8px">
                          <label class="switch"><input type="checkbox" id="tv-master-switch-2" onchange="saveTvSettings()"><span class="slider"></span></label>
@@ -185,17 +184,27 @@
         </div>
 
         <div id="settings-panel">
+            <div style="padding:15px; background:rgba(0, 123, 255, 0.1); border-radius:12px; border:1px solid var(--primary); margin-bottom:15px">
+                <label class="label-style" style="color:var(--primary)">GOOGLE SHEETS ID</label>
+                <input type="text" id="sheets-id-input" class="input-box" placeholder="15hEw-s-Zl...7x7Y" onchange="saveSheetsId()">
+                <small style="font-size:9px; color:var(--secondary)">Dosyanızı "Bağlantıya sahip olan herkes görüntüleyebilir" yapın.</small>
+            </div>
+
             <div style="padding:15px; background:rgba(243, 156, 18, 0.1); border-radius:12px; border:1px solid var(--warning); margin-bottom:15px">
                 <label class="label-style" style="color:var(--warning)">KREDİ KARTI KOMİSYON (%)</label>
                 <input type="number" id="cc-commission-rate" class="input-box" value="3.5" step="0.1" onchange="updateCommissionRate()">
                 <small style="font-size:9px; color:var(--secondary)">Sadece altın kategorisindeki ürünlere otomatik eklenir.</small>
             </div>
 
-            <span class="label-style">GOOGLE SHEETS CSV URL (CANLI VERİ)</span>
-            <input type="text" id="sheet-url-input" class="input-box" placeholder="Linkinizi buraya yapıştırın..." onchange="updateSheetURL()">
+            <span class="label-style">API KAYNAK YÖNETİMİ</span>
+            <select id="api-source-select" class="input-box" style="background: var(--primary); color: white; border: none; font-weight: bold;" onchange="saveApiSource()">
+                <option value="exchange-rate-v2">Exchange-Rate V2 (Yeni/Dinamik)</option>
+                <option value="hexarate">Hexarate API (Yedek)</option>
+                <option value="google-sheets">Google Sheets (Özel Liste)</option>
+            </select>
 
             <label class="label-style">GÜNCELLEME HIZI (SANİYE)</label>
-            <input type="number" id="sync-interval" class="input-box" value="20">
+            <input type="number" id="sync-interval" class="input-box" value="30">
 
             <div style="padding:15px; background:var(--bg); border-radius:12px; border:1px solid var(--border)">
                 <span class="label-style" style="color:var(--primary)">YENİ VARLIK EKLE</span>
@@ -241,7 +250,6 @@
 </div>
 
 <script>
-    // Firebase Yapılandırması
     const firebaseConfig = {
       apiKey: "AIzaSyCfcppc4rGYxmAj7fTzmYMZgcyBO4s8bFI",
       authDomain: "doviz-kurlari-35554.firebaseapp.com",
@@ -255,7 +263,9 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const DEFAULT_SHEET = "https://docs.google.com/spreadsheets/d/1wNQRm7dgcWnG09ibr9k5b84taVo-j6lZUUBTj6TtjXU/export?format=csv";
+    const GOLD_ICON = "https://img.icons8.com/?size=100&id=nTH8lhDLqpDI&format=png&color=000000";
+    const CRYPTO_ICON = "https://cdn-icons-png.flaticon.com/512/2091/2091665.png";
+    const DEFAULT_ICON = "https://cdn-icons-png.flaticon.com/512/197/197518.png";
     
     let currencies = [];
     let isAutoMode = false;
@@ -263,22 +273,27 @@
     let countdownTimer = null;
     let secondsLeft = 0;
     let ccRate = 3.5;
-    let sheetURL = localStorage.getItem('sheet_url') || DEFAULT_SHEET;
+    let sheetId = "";
+    let activeApiSource = "exchange-rate-v2";
 
     function initApp() {
-        addLog("Sistem Başlatıldı. Pro Terminal Aktif.", "INFO");
-        document.getElementById('sheet-url-input').value = sheetURL;
-
-        // Kredi Kartı Komisyon Dinleyicisi
-        db.ref('terminal_data/cc_rate').on('value', (snapshot) => {
-            if(snapshot.exists()) {
-                ccRate = snapshot.val();
+        addLog("Sistem Başlatıldı. Veriler Yükleniyor...", "INFO");
+        
+        // Komisyon ve Genel Ayarları Firebase'den Yükle
+        db.ref('terminal_data/config').on('value', (snapshot) => {
+            const config = snapshot.val();
+            if(config) {
+                ccRate = config.cc_rate || 3.5;
+                sheetId = config.sheet_id || "";
+                activeApiSource = config.api_source || "exchange-rate-v2";
+                
                 document.getElementById('cc-commission-rate').value = ccRate;
+                document.getElementById('sheets-id-input').value = sheetId;
+                document.getElementById('api-source-select').value = activeApiSource;
                 render();
             }
         });
 
-        // Para Birimleri Dinleyicisi
         db.ref('terminal_data/currencies').on('value', (snapshot) => {
             const data = snapshot.val();
             if (data) { 
@@ -288,7 +303,6 @@
             }
         });
 
-        // TV Ayarları Dinleyicisi
         db.ref('terminal_data/tv_settings').on('value', (snapshot) => {
             const tv = snapshot.val();
             if(tv) {
@@ -300,7 +314,6 @@
             }
         });
 
-        // Sürükle Bırak Entegrasyonu
         const el = document.getElementById('currency-list');
         Sortable.create(el, {
             handle: '.drag-handle',
@@ -310,106 +323,149 @@
         });
     }
 
+    // --- AYAR KAYDETME FONKSİYONLARI ---
     function updateCommissionRate() {
-        const newRate = parseFloat(document.getElementById('cc-commission-rate').value) || 0;
-        db.ref('terminal_data/cc_rate').set(newRate);
-        addLog(`Komisyon Güncellendi: %${newRate}`, "INFO");
+        const val = parseFloat(document.getElementById('cc-commission-rate').value) || 0;
+        db.ref('terminal_data/config/cc_rate').set(val);
+        addLog(`Komisyon Güncellendi: %${val}`, "INFO");
     }
 
-    function updateSheetURL() {
-        let rawURL = document.getElementById('sheet-url-input').value;
-        if(rawURL.includes("/edit")) {
-            sheetURL = rawURL.split("/edit")[0] + "/export?format=csv";
-        } else {
-            sheetURL = rawURL;
-        }
-        localStorage.setItem('sheet_url', sheetURL);
-        addLog("CSV Kaynağı Güncellendi.", "INFO");
+    function saveSheetsId() {
+        const val = document.getElementById('sheets-id-input').value.trim();
+        db.ref('terminal_data/config/sheet_id').set(val);
+        sheetId = val;
+        addLog("Sheets ID Kaydedildi.", "UPDATE");
     }
 
+    function saveApiSource() {
+        const val = document.getElementById('api-source-select').value;
+        db.ref('terminal_data/config/api_source').set(val);
+        activeApiSource = val;
+        addLog(`Kaynak Değişti: ${val}`, "WARN");
+    }
+
+    // --- VERİ ÇEKME MANTIĞI ---
     async function fetchMarketData() {
         if (!isAutoMode) return;
         
         try {
-            const response = await fetch(sheetURL);
-            const data = await response.text();
-            processCSVData(data);
-            addLog("Veriler Güncellendi.", "UPDATE");
-        } catch (e) {
-            addLog("Sheet Erişim Hatası!", "ERROR");
-            console.error(e);
-        }
+            let hasChange = false;
+            let updatedList = [...currencies];
 
-        document.getElementById('stat-sync').innerText = new Date().toLocaleTimeString('tr-TR');
-        resetCountdown();
-        syncTimer = setTimeout(fetchMarketData, (parseInt(document.getElementById('sync-interval').value) || 20) * 1000);
-    }
-
-    function processCSVData(csv) {
-        const rows = csv.split('\n').filter(row => row.trim() !== "");
-        let hasChange = false;
-
-        rows.forEach(row => {
-            const cols = row.split(',');
-            if (cols.length < 2) return;
-
-            const name = cols[0].replace(/"/g, '').trim();
-            const price = parseFloat(cols[1].replace(/"/g, '').trim().replace(',', '.'));
-
-            if (isNaN(price)) return;
-
-            const index = currencies.findIndex(c => c.name.toUpperCase() === name.toUpperCase());
-            if(index !== -1 && currencies[index].autoSync) {
-                const newSell = price + (currencies[index].sellMargin || 0);
-                const newBuy = price - (currencies[index].buyMargin || 0);
-                
-                if(currencies[index].sell !== newSell || currencies[index].buy !== newBuy) {
-                    currencies[index].sell = newSell;
-                    currencies[index].buy = newBuy;
-                    hasChange = true;
+            if (activeApiSource === "google-sheets") {
+                // GOOGLE SHEETS MODU
+                if(!sheetId) {
+                    addLog("Sheets ID Eksik!", "ERROR");
+                    toggleAuto();
+                    return;
                 }
-            }
-        });
+                const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
+                const resp = await fetch(url);
+                const text = await resp.text();
+                const json = JSON.parse(text.substr(47).slice(0, -2));
+                const rows = json.table.rows;
 
-        if(hasChange) { saveToFirebase(); render(); }
+                updatedList = currencies.map(c => {
+                    const sheetRow = rows.find(r => r.c[0] && r.c[0].v.toString().toUpperCase() === c.name.toUpperCase());
+                    if (sheetRow) {
+                        const newBuy = parseFloat(sheetRow.c[1]?.v || 0);
+                        const newSell = parseFloat(sheetRow.c[2]?.v || 0);
+                        if (c.buy !== newBuy || c.sell !== newSell) {
+                            hasChange = true;
+                            return { ...c, buy: newBuy, sell: newSell };
+                        }
+                    }
+                    return c;
+                });
+            } else {
+                // HEXARATE / EXCHANGE-RATE MODU
+                const tryResp = await fetch(`https://hexarate.paikama.co/api/rates/USD/TRY/latest`);
+                const tryJson = await tryResp.json();
+                const tryRate = parseFloat(tryJson?.data?.mid || 1);
+
+                updatedList = await Promise.all(currencies.map(async (c) => {
+                    if(!c.autoSync) return c;
+                    try {
+                        let base = c.name.toUpperCase() === "GA" ? "XAU" : c.name.toUpperCase();
+                        const resp = await fetch(`https://hexarate.paikama.co/api/rates/${base}/USD/latest`);
+                        const json = await resp.json();
+                        const midPrice = json?.data?.mid;
+                        if(midPrice) {
+                            const usdPrice = parseFloat(midPrice);
+                            let finalPrice = (base === "XAU" || base === "XAG") ? (usdPrice * tryRate / 31.1035) : (usdPrice * tryRate);
+                            
+                            let newSell, newBuy;
+                            if(base === "XAU" || c.category === 'altin') {
+                                newSell = Math.floor(finalPrice + (c.sellMargin || 0));
+                                newBuy = Math.floor(finalPrice - (c.buyMargin || 0));
+                            } else {
+                                newSell = roundToTen(finalPrice + (c.sellMargin || 0));
+                                newBuy = roundToTen(finalPrice - (c.buyMargin || 0));
+                            }
+
+                            if(Math.abs(c.sell - newSell) > 0.0001 || Math.abs(c.buy - newBuy) > 0.0001) {
+                                hasChange = true;
+                                return { ...c, buy: newBuy, sell: newSell, basePrice: finalPrice };
+                            }
+                        }
+                    } catch (e) { console.error(e); }
+                    return c;
+                }));
+            }
+
+            if(hasChange) { 
+                currencies = updatedList; 
+                saveToFirebase(); 
+            }
+            
+            document.getElementById('stat-sync').innerText = new Date().toLocaleTimeString('tr-TR');
+            resetCountdown();
+            syncTimer = setTimeout(fetchMarketData, (parseInt(document.getElementById('sync-interval').value) || 30) * 1000);
+            
+        } catch (e) { 
+            addLog("Veri Çekme Hatası!", "ERROR");
+            syncTimer = setTimeout(fetchMarketData, 5000); 
+        }
     }
 
-    function formatPrice(val, category) {
-        if(category === "altin") return Math.floor(val).toLocaleString('tr-TR');
-        return val.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 3 });
+    // --- DİĞER FONKSİYONLAR (DEĞİŞMEDİ) ---
+    function roundToTen(value) { return Math.round(value * 100) / 100; }
+
+    function formatPrice(val, name, category) {
+        if(category === "altin") return Math.floor(val).toString();
+        return val.toFixed(3);
     }
 
     function render() {
         const list = document.getElementById('currency-list');
         list.innerHTML = '';
         currencies.forEach(c => {
-            let iconBox;
-            const isGold = c.category === 'altin' || c.flag === 'gold';
-            
-            if (isGold) iconBox = '🟡';
-            else if (c.category === 'kripto' || c.flag === 'btc') iconBox = '₿';
-            else if (c.flag && c.flag.length === 2) iconBox = `<img src="https://flagcdn.com/w80/${c.flag}.png" style="width:100%; height:100%; border-radius:50%; object-fit:cover">`;
-            else iconBox = '💵';
+            let iconUrl;
+            if (c.category === 'altin' || c.flag === 'gold') iconUrl = GOLD_ICON;
+            else if (c.category === 'kripto' || c.flag === 'btc') iconUrl = CRYPTO_ICON;
+            else if (c.flag.length === 2) iconUrl = `https://flagcdn.com/w80/${c.flag}.png`;
+            else iconUrl = DEFAULT_ICON;
 
             let ccHtml = "";
-            if(isGold) {
+            if(c.category === 'altin') {
                 const ccPrice = Math.floor(c.sell + (c.sell * (ccRate / 100)));
-                ccHtml = `<div class="cc-price-box"><span class="cc-label">K. Kartı (%${ccRate})</span><div class="cc-price-val">${ccPrice.toLocaleString('tr-TR')}</div></div>`;
+                ccHtml = `<div class="cc-price-box"><span class="cc-label">K. Kartı (%${ccRate})</span><div class="cc-price-val">${ccPrice}</div></div>`;
             }
 
             list.innerHTML += `
                 <div class="currency-card" data-id="${c.id}" onclick="openUpdateModal(${c.id})">
                     <div class="drag-handle"><i class="fas fa-grip-vertical"></i></div>
                     <div class="lock-indicator">${c.autoSync ? '<i class="fas fa-sync-alt fa-spin"></i>' : '<i class="fas fa-lock"></i>'}</div>
-                    <div class="flag-box"><div class="flag-anim">${iconBox}</div></div>
+                    <div class="flag-box"><img src="${iconUrl}" class="flag-anim" onerror="this.src='${DEFAULT_ICON}'"></div>
                     <div class="currency-meta"><b>${c.name}</b><br><span style="font-size:9px">${c.category.toUpperCase()}</span></div>
                     <div class="price-col">
                         <span class="label-style">ALIŞ</span>
-                        <div class="price-val" style="color:var(--secondary)">${formatPrice(c.buy || 0, c.category)}</div>
+                        <div class="price-val">${formatPrice(c.buy || 0, c.name, c.category)}</div>
+                        <div class="margin-tag">-${(c.buyMargin || 0).toFixed(2)}</div>
                     </div>
                     <div class="price-col">
                         <span class="label-style">SATIŞ</span>
-                        <div class="price-val">${formatPrice(c.sell || 0, c.category)}</div>
+                        <div class="price-val">${formatPrice(c.sell || 0, c.name, c.category)}</div>
                         ${ccHtml}
                     </div>
                 </div>`;
@@ -425,6 +481,18 @@
         else { document.getElementById('timer-box').innerText = "--"; addLog("Oto-Mod Durduruldu.", "WARN"); }
     }
 
+    function toggleSettingsArea() {
+        const area = document.getElementById('tv-settings-container');
+        const list = document.getElementById('currency-list');
+        if (area.style.display === 'block') {
+            area.style.display = 'none';
+            list.style.display = 'block';
+        } else {
+            area.style.display = 'block';
+            list.style.display = 'none';
+        }
+    }
+
     function saveToFirebase() { db.ref('terminal_data/currencies').set(currencies); }
     
     function reorderCurrencies() {
@@ -437,6 +505,26 @@
         });
         currencies = newOrderedList;
         saveToFirebase();
+    }
+
+    function saveTvSettings() {
+        const settings = {
+            master: document.getElementById('tv-master-switch').checked,
+            screen: document.getElementById('tv-screen-select').value,
+            master2: document.getElementById('tv-master-switch-2').checked,
+            screen2: document.getElementById('tv-screen-select-2').value,
+            lastUpdate: Date.now()
+        };
+        db.ref('terminal_data/tv_settings').set(settings);
+    }
+
+    function updateTvButtonState(m1, m2) {
+        const tvBtn = document.getElementById('tv-btn');
+        const b1 = document.getElementById('badge-tv1');
+        const b2 = document.getElementById('badge-tv2');
+        (m1 || m2) ? tvBtn.classList.add('active-green') : tvBtn.classList.remove('active-green');
+        b1.style.background = m1 ? 'var(--success)' : '#ccc';
+        b2.style.background = m2 ? 'var(--success)' : '#ccc';
     }
 
     function openUpdateModal(id) {
@@ -465,7 +553,7 @@
             autoSync: document.getElementById('edit-auto-sync').checked
         } : c);
         saveToFirebase(); closeModal();
-        addLog("Düzenleme Kaydedildi.", "UPDATE");
+        addLog(`ID: ${id} Güncellendi.`, "UPDATE");
     }
 
     function addNewCurrency() {
@@ -488,7 +576,7 @@
     }
 
     function deleteCurrency() {
-        if(!confirm("Emin misiniz?")) return;
+        if(!confirm("Silinsin mi?")) return;
         const id = parseInt(document.getElementById('edit-id').value);
         currencies = currencies.filter(c => c.id !== id);
         saveToFirebase(); closeModal();
@@ -496,7 +584,7 @@
 
     function resetCountdown() {
         clearInterval(countdownTimer);
-        secondsLeft = parseInt(document.getElementById('sync-interval').value) || 20;
+        secondsLeft = parseInt(document.getElementById('sync-interval').value) || 30;
         countdownTimer = setInterval(() => {
             secondsLeft--; 
             document.getElementById('timer-box').innerText = secondsLeft + "s";
@@ -504,43 +592,12 @@
         }, 1000);
     }
 
-    function toggleSettingsArea() {
-        const area = document.getElementById('tv-settings-container');
-        const list = document.getElementById('currency-list');
-        if (area.style.display === 'block') {
-            area.style.display = 'none';
-            list.style.display = 'block';
-        } else {
-            area.style.display = 'block';
-            list.style.display = 'none';
-        }
-    }
-
-    function saveTvSettings() {
-        const settings = {
-            master: document.getElementById('tv-master-switch').checked,
-            screen: document.getElementById('tv-screen-select').value,
-            master2: document.getElementById('tv-master-switch-2').checked,
-            screen2: document.getElementById('tv-screen-select-2').value,
-            lastUpdate: Date.now()
-        };
-        db.ref('terminal_data/tv_settings').set(settings);
-    }
-
-    function updateTvButtonState(m1, m2) {
-        const tvBtn = document.getElementById('tv-btn');
-        const b1 = document.getElementById('badge-tv1');
-        const b2 = document.getElementById('badge-tv2');
-        (m1 || m2) ? tvBtn.classList.add('active-green') : tvBtn.classList.remove('active-green');
-        b1.style.background = m1 ? 'var(--success)' : '#ccc';
-        b2.style.background = m2 ? 'var(--success)' : '#ccc';
-    }
-
     function closeModal() { document.getElementById('update-modal').style.display = 'none'; }
     function toggleTheme() { document.body.setAttribute('data-theme', document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); }
 
     function addLog(m, type) {
         const l = document.getElementById('log-list');
+        const footerStatus = document.getElementById('footer-status');
         const entry = document.createElement('div');
         entry.className = 'log-entry';
         let tagClass = 'tag-info';
@@ -549,8 +606,8 @@
         if(type === 'WARN') tagClass = 'tag-warn';
         entry.innerHTML = `<span class="log-time">${new Date().toLocaleTimeString()}</span><span class="log-tag ${tagClass}">${type}</span><span class="log-msg">${m}</span>`;
         l.prepend(entry);
-        document.getElementById('footer-status').innerText = m;
-        if(l.childNodes.length > 20) l.removeChild(l.lastChild);
+        footerStatus.innerText = m;
+        if(l.childNodes.length > 40) l.removeChild(l.lastChild);
     }
 
     initApp();
