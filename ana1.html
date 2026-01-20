@@ -12,7 +12,7 @@
     <meta name="theme-color" content="#0062cc">
     <link rel="apple-touch-icon" href="https://img.icons8.com/?size=100&id=nTH8lhDLqpDI&format=png&color=000000">
     
-    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkVudGVycHJpc2UgQ3VycmVuY3kgVGVybWluYWwiLAogICJzaG9ydF9uYW1lIjogIkTDtnZpeiBUZXJtIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmMGYyZjUiLAogICJ0aGVtZV9jb2xvciI6ICIjMDA2MmNjIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly9pbWcuaWNvbnM4LmNvbS8/c2l6ZT0xMDAmaWQ9blRIOGxhRExxcERJJmZvcm1hdD1wbmcmY29sb3I9MDAwMDAwIiwKICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgInR5cGUiOiAiaW1hZ2UvcG5nIgogICAgfQogIF0KfQ==">
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkVudGVycHJpc2UgQ3VycmVuY3kgVGVybWluYWwiLAogICJzaG9ydF9uYW1lIjogIkTDtnZpeiBUZXJtIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmMGYyZjUiLAogICJ0aGVtZV9jb2xvciI6ICIjMDA2MmNjIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly9pbWcuaWNvbnM4LmNvbS8/c2l6ZT0xMDAmaWQ9blRIOGxhRExxcERJJmZvcm1hdD1wbmcmY29sb3I9MDAwMDAwIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJzaXplcyI6ICI1MTJ4NTEyIiwKICAidHlwZSI6ICJpbWFnZS9wbmciCiAgICB9CiAgX ]Cn0=">
 
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
@@ -73,7 +73,7 @@
         .cc-price-box { margin-top: 4px; padding: 2px 4px; background: rgba(243, 156, 18, 0.1); border-radius: 4px; border: 1px solid rgba(243, 156, 18, 0.2); }
         .cc-price-val { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 800; color: var(--warning); }
         .cc-label { font-size: 8px; font-weight: bold; color: var(--warning); display: block; text-transform: uppercase; }
-        .margin-tag { font-size: 9px; color: var(--secondary); font-weight: bold; margin-top: 2px; }
+        .margin-tag { font-size: 10px; color: var(--secondary); font-weight: 800; margin-top: 2px; font-family: monospace; }
         
         .internal-logs { background: #111; border-radius: 10px; padding: 10px; margin-top: 15px; max-height: 200px; overflow-y: auto; border: 1px solid #333; font-family: 'monospace'; }
         .log-entry { display: flex; align-items: flex-start; gap: 8px; font-size: 10px; padding: 4px 0; border-bottom: 1px solid #222; }
@@ -279,7 +279,6 @@
     function initApp() {
         addLog("Sistem Başlatıldı. Veriler Yükleniyor...", "INFO");
         
-        // Komisyon ve Genel Ayarları Firebase'den Yükle
         db.ref('terminal_data/config').on('value', (snapshot) => {
             const config = snapshot.val();
             if(config) {
@@ -323,7 +322,6 @@
         });
     }
 
-    // --- AYAR KAYDETME FONKSİYONLARI ---
     function updateCommissionRate() {
         const val = parseFloat(document.getElementById('cc-commission-rate').value) || 0;
         db.ref('terminal_data/config/cc_rate').set(val);
@@ -344,7 +342,6 @@
         addLog(`Kaynak Değişti: ${val}`, "WARN");
     }
 
-    // --- VERİ ÇEKME MANTIĞI ---
     async function fetchMarketData() {
         if (!isAutoMode) return;
         
@@ -353,7 +350,6 @@
             let updatedList = [...currencies];
 
             if (activeApiSource === "google-sheets") {
-                // GOOGLE SHEETS MODU
                 if(!sheetId) {
                     addLog("Sheets ID Eksik!", "ERROR");
                     toggleAuto();
@@ -368,8 +364,8 @@
                 updatedList = currencies.map(c => {
                     const sheetRow = rows.find(r => r.c[0] && r.c[0].v.toString().toUpperCase() === c.name.toUpperCase());
                     if (sheetRow) {
-                        const newBuy = parseFloat(sheetRow.c[1]?.v || 0);
-                        const newSell = parseFloat(sheetRow.c[2]?.v || 0);
+                        const newBuy = applyMargins(parseFloat(sheetRow.c[1]?.v || 0), c.buyMargin, 'buy', c.category);
+                        const newSell = applyMargins(parseFloat(sheetRow.c[2]?.v || 0), c.sellMargin, 'sell', c.category);
                         if (c.buy !== newBuy || c.sell !== newSell) {
                             hasChange = true;
                             return { ...c, buy: newBuy, sell: newSell };
@@ -378,7 +374,6 @@
                     return c;
                 });
             } else {
-                // HEXARATE / EXCHANGE-RATE MODU
                 const tryResp = await fetch(`https://hexarate.paikama.co/api/rates/USD/TRY/latest`);
                 const tryJson = await tryResp.json();
                 const tryRate = parseFloat(tryJson?.data?.mid || 1);
@@ -394,16 +389,10 @@
                             const usdPrice = parseFloat(midPrice);
                             let finalPrice = (base === "XAU" || base === "XAG") ? (usdPrice * tryRate / 31.1035) : (usdPrice * tryRate);
                             
-                            let newSell, newBuy;
-                            if(base === "XAU" || c.category === 'altin') {
-                                newSell = Math.floor(finalPrice + (c.sellMargin || 0));
-                                newBuy = Math.floor(finalPrice - (c.buyMargin || 0));
-                            } else {
-                                newSell = roundToTen(finalPrice + (c.sellMargin || 0));
-                                newBuy = roundToTen(finalPrice - (c.buyMargin || 0));
-                            }
+                            let newSell = applyMargins(finalPrice, c.sellMargin, 'sell', c.category);
+                            let newBuy = applyMargins(finalPrice, c.buyMargin, 'buy', c.category);
 
-                            if(Math.abs(c.sell - newSell) > 0.0001 || Math.abs(c.buy - newBuy) > 0.0001) {
+                            if(Math.abs(c.sell - newSell) > 0.00001 || Math.abs(c.buy - newBuy) > 0.00001) {
                                 hasChange = true;
                                 return { ...c, buy: newBuy, sell: newSell, basePrice: finalPrice };
                             }
@@ -428,11 +417,26 @@
         }
     }
 
-    // --- DİĞER FONKSİYONLAR (DEĞİŞMEDİ) ---
-    function roundToTen(value) { return Math.round(value * 100) / 100; }
+    // Uygulanan Marj ve Yuvarlama Mantığı (Virgülden sonra 3. basamağı 0 yapar)
+    function applyMargins(price, margin, type, category) {
+        let final;
+        if (type === 'sell') {
+            final = price + (margin || 0);
+        } else {
+            final = price - (margin || 0);
+        }
+        
+        if (category === 'altin') {
+            return Math.floor(final);
+        } else {
+            // Döviz için 3. basamağı 0'a yuvarlama (Örn: 25.432 -> 25.430)
+            return Math.round(final * 100) / 100;
+        }
+    }
 
     function formatPrice(val, name, category) {
         if(category === "altin") return Math.floor(val).toString();
+        // UI'da her zaman 3 basamak göster (Zaten 3. basamak 0 olacak)
         return val.toFixed(3);
     }
 
@@ -466,6 +470,7 @@
                     <div class="price-col">
                         <span class="label-style">SATIŞ</span>
                         <div class="price-val">${formatPrice(c.sell || 0, c.name, c.category)}</div>
+                        <div class="margin-tag" style="color:var(--success)">+${(c.sellMargin || 0).toFixed(2)}</div>
                         ${ccHtml}
                     </div>
                 </div>`;
@@ -543,12 +548,15 @@
 
     function saveManualUpdate() {
         const id = parseInt(document.getElementById('edit-id').value);
+        const bMargin = parseFloat(document.getElementById('edit-buy-margin').value) || 0;
+        const sMargin = parseFloat(document.getElementById('edit-sell-margin').value) || 0;
+        
         currencies = currencies.map(c => c.id === id ? {
             ...c, 
             buy: parseFloat(document.getElementById('edit-buy-price').value),
             sell: parseFloat(document.getElementById('edit-sell-price').value),
-            buyMargin: parseFloat(document.getElementById('edit-buy-margin').value),
-            sellMargin: parseFloat(document.getElementById('edit-sell-margin').value),
+            buyMargin: bMargin,
+            sellMargin: sMargin,
             flag: document.getElementById('edit-flag').value.toLowerCase(),
             autoSync: document.getElementById('edit-auto-sync').checked
         } : c);
