@@ -6,133 +6,79 @@
     <meta name="theme-color" content="#000000">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/CNBC_logo.svg/1200px-CNBC_logo.svg.png">
+    <title>Enterprise Terminal v4.5</title>
     
-    <link rel="manifest" href='data:application/json,{"name":"Enterprise TV","short_name":"EntTV","start_url":".","display":"fullscreen","background_color":"#000000","theme_color":"#000000","icons":[{"src":"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/CNBC_logo.svg/192px-CNBC_logo.svg.png","sizes":"192x192","type":"image/png"},{"src":"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/CNBC_logo.svg/512px-CNBC_logo.svg.png","sizes":"512x512","type":"image/png"}]}'>
-
-    <title>Enterprise TV Terminal v4.2 - PWA Edition</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
-    
+
     <style>
         :root {
             --cnbc-green: #008f39; --cnbc-red: #c40000; --cnbc-blue: #004a99;
-            --panel-dark: rgba(0, 11, 26, 0.85); --bg-dark: #000000;
-            --gold-color: #ffd700; --font-main: 'Inter', sans-serif;
+            --panel-dark: rgba(0, 11, 26, 0.92); --bg-dark: #000000;
+            --gold-color: #ffd700; --buy-red: #FF3B30; --sell-green: #4CD964;
+            --card-bg: #111111;
         }
 
-        body, html { margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden; background: #000; color: #fff; font-family: var(--font-main); }
+        body, html { margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden; background: #000; color: #fff; font-family: 'Inter', sans-serif; }
+        canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+        #engine-container { position: relative; width: 100%; height: 100%; z-index: 2; }
 
-        /* --- MOD 1: KARŞILAMA --- */
-        #mod1-container { 
-            display: none; width: 100%; height: 100%; flex-direction: column; 
-            align-items: center; justify-content: center; background: radial-gradient(circle, #1a1a1a 0%, #000 100%);
+        /* MOD-LAYOUTS - GENEL SARMALAYICI */
+        .mod-wrapper { height: 100vh; width: 100vw; display: flex; flex-direction: column; padding: 1.5vh; gap: 1.5vh; box-sizing: border-box; }
+
+        /* --- MOD 0/1: STANDBY --- */
+        .standby-card {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            padding: 4rem; background: rgba(255,255,255,0.05); backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 40px; text-align: center; width: 70%;
         }
-        .welcome-msg { font-size: 7vw; font-weight: 900; text-transform: uppercase; letter-spacing: -2px; }
+        .clock-big { font-size: 8vw; font-weight: 200; letter-spacing: -2px; line-height: 1; margin: 0; background: linear-gradient(to bottom, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-        /* --- MEDYA KATMANLARI (1-4 & Standby) --- */
-        .media-content { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; display: none; }
-        .active { display: block; }
+        /* --- MOD 2/4/6: MODERN GRID (2+3+3) --- */
+        .grid-custom { 
+            display: grid; grid-template-columns: repeat(6, 1fr); grid-template-rows: 1.5fr 1fr 1fr; 
+            gap: 1.5vh; height: 97vh; width: 97vw; margin: auto; 
+        }
+        .card-modern { background: var(--card-bg); border: 1px solid #222; border-radius: 15px; padding: 2.5vh; display: flex; flex-direction: column; justify-content: center; transition: all 0.4s ease; position: relative; }
+        .card-modern:nth-child(1), .card-modern:nth-child(2) { grid-column: span 3; border-top: 4px solid var(--gold-color); }
+        .card-modern:nth-child(n+3) { grid-column: span 2; }
+        .val-modern { font-family: 'JetBrains Mono'; font-weight: 700; letter-spacing: -1px; }
 
-        /* --- MOD 5: PRO-FX --- */
-        #mod5-container { display: none; width: 100%; height: 100%; padding: 2vh 2vw; z-index: 10; position: relative; }
-        .snowflake { position: absolute; background: var(--gold-color); border-radius: 50%; opacity: 0.6; animation: fall linear infinite; }
-        @keyframes fall { 0% { transform: translateY(-10vh); } 100% { transform: translateY(110vh); } }
-
-        /* --- MOD 6: CNBC-e (İYİLEŞTİRİLMİŞ ENTEGRASYON) --- */
-        #mod6-container { display: none; width: 100%; height: 100%; position: relative; z-index: 20; }
+        /* --- MOD 3: CNBC STYLE --- */
+        #mod3-container { display: none; width: 100%; height: 100%; position: relative; }
         .video-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
-        .video-wrapper video { width: 100%; height: 100%; object-fit: cover; }
-
-        .branding-panel {
-            position: absolute; bottom: 133px; left: 0; background: rgba(255, 255, 255, 0.95);
-            padding: 10px 20px; display: flex; align-items: center; gap: 15px; border-top-right-radius: 5px; z-index: 100;
-        }
-        .logo-img { height: 38px; }
-        .clock-box { border-left: 2px solid #ccc; padding-left: 15px; font-weight: 900; font-size: 1.4rem; color: #333; }
-
-        .ticker-container { position: absolute; bottom: 0; width: 100%; display: flex; flex-direction: column; z-index: 110; }
+        .video-wrapper video { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.6); }
+        .branding-panel { position: absolute; bottom: 133px; left: 0; background: #fff; padding: 10px 30px; border-top-right-radius: 5px; color: #000; font-weight: 900; font-size: 1.8vw; display: flex; align-items: center; gap: 15px; }
+        .ticker-container { position: absolute; bottom: 0; width: 100%; }
+        .layer-indices { height: 38px; background: #fff; display: flex; align-items: center; overflow: hidden; color: #000; }
+        .layer-currencies { height: 68px; background: var(--panel-dark); display: flex; overflow: hidden; }
+        .layer-news { height: 34px; background: #fff; display: flex; align-items: center; overflow: hidden; color: #000; font-weight: 700; }
         
-        .layer-indices { height: 38px; background: rgba(255,255,255,0.98); display: flex; align-items: center; overflow: hidden; color: #000; }
-        .track-indices { display: flex; animation: scroll-ticker 15s linear infinite; }
-        .index-item { padding: 0 30px; white-space: nowrap; font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; border-right: 1px solid #eee; }
-        .idx-badge { padding: 2px 8px; border-radius: 3px; color: white; font-size: 0.85rem; font-weight: 900; }
+        .cur-card { min-width: 200px; height: 68px; border-right: 1px solid rgba(255,255,255,0.1); overflow: hidden; }
+        .slide-content { height: 136px; animation: slide-up-data 8s cubic-bezier(0.85, 0, 0.15, 1) infinite; }
+        .data-row { height: 68px; padding: 0 20px; display: flex; flex-direction: column; justify-content: center; }
 
-        .layer-currencies { height: 68px; background: var(--panel-dark); backdrop-filter: blur(10px); display: flex; overflow: hidden; }
-        .currency-card { flex: 1; min-width: 185px; height: 68px; display: flex; flex-direction: column; border-right: 1px solid rgba(255,255,255,0.15); overflow: hidden; }
-        
-        .cur-row-wrapper { display: flex; flex-direction: column; animation: slide-up-data 6s cubic-bezier(0.85, 0, 0.15, 1) infinite; }
-        .cur-data-row { height: 68px; display: flex; flex-direction: column; justify-content: center; padding: 0 20px; color: white; }
-        .cur-price { font-size: 1.7rem; font-weight: 900; letter-spacing: -1px; }
+        /* --- MOD 5: LIST STYLE --- */
+        #mod5-container { display: none; padding: 5vh 10vw; flex-direction: column; gap: 2vh; }
+        .list-item { display: grid; grid-template-columns: 1.5fr 2fr 2fr; background: rgba(255,255,255,0.05); padding: 3vh; border-radius: 15px; border-left: 6px solid var(--gold-color); align-items: center; }
 
-        .layer-news { height: 34px; background: #ffffff; display: flex; align-items: center; border-top: 1px solid #ddd; position: relative; overflow: hidden; color: #000; }
-        .news-label { background: var(--cnbc-blue); color: white; padding: 0 18px; height: 100%; display: flex; align-items: center; font-weight: bold; font-size: 0.9rem; z-index: 120; position: absolute; left: 0; }
-        .news-track { display: flex; white-space: nowrap; animation: news-scroll 25s linear infinite; padding-left: 130px; }
-        .news-item { font-weight: bold; font-size: 1.1rem; padding-right: 60px; }
-
-        /* --- ANIMASYONLAR --- */
+        /* --- FLASH & ANIMATIONS --- */
+        .flash-up { background-color: rgba(0, 200, 83, 0.3) !important; transform: scale(1.02); }
+        .flash-down { background-color: rgba(255, 82, 82, 0.3) !important; transform: scale(0.98); }
+        @keyframes slide-up-data { 0%, 45% { transform: translateY(0); } 50%, 95% { transform: translateY(-68px); } 100% { transform: translateY(0); } }
         @keyframes scroll-ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
         @keyframes news-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-        @keyframes slide-up-data { 0%, 45% { transform: translateY(0); } 50%, 95% { transform: translateY(-68px); } 100% { transform: translateY(0); } }
-        @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.8; } 100% { transform: scale(1); opacity: 1; } }
-        
-        .status-icon { font-size: 1.2rem; animation: pulse 1s infinite; }
-        .icon-up { color: #00ff66; } .icon-down { color: #ff3333; }
-        .card-USD { background: rgba(0, 51, 102, 0.5); } .card-EUR { background: rgba(0, 77, 64, 0.5); }
+
     </style>
 </head>
 <body>
 
-    <div id="mod1-container">
-        <div id="greeting-text" class="welcome-msg">HOŞGELDİNİZ</div>
-        <div id="mod1-time" style="font-size: 5vw; opacity: 0.6; font-family: 'JetBrains Mono'; margin-top: 2vh;">00:00</div>
-    </div>
-
-    <img id="tv-image" class="media-content">
-    <video id="tv-video" class="media-content" autoplay loop muted playsinline><source id="video-source" src="" type="video/mp4"></video>
-
-    <div id="mod5-container">
-        <div id="snow-container"></div>
-        <div id="mod5-top" style="display:flex; gap:2vw; height:46vh; margin-bottom:2vh;"></div>
-        <div id="mod5-bottom" style="display:grid; grid-template-columns:1fr 1fr; gap:2vw; height:44vh;"></div>
-    </div>
-
-    <div id="mod6-container">
-        <div class="video-wrapper">
-            <video id="mod6-bg-video" autoplay muted loop playsinline>
-                <source src="6.mp4" type="video/mp4">
-            </video>
-        </div>
-        <div class="branding-panel">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/CNBC_logo.svg/1200px-CNBC_logo.svg.png" class="logo-img">
-            <div class="clock-box" id="mod6Clock">00:00:00</div>
-        </div>
-        <div class="ticker-container">
-            <div class="layer-indices"><div class="track-indices" id="yandexIndices">Yükleniyor...</div></div>
-            <div class="layer-currencies" id="firebaseCurrencies"></div>
-            <div class="layer-news">
-                <div class="news-label">SON DAKİKA</div>
-                <div class="news-track" id="newsTrack">Ekonomi verileri yükleniyor...</div>
-            </div>
-        </div>
-    </div>
+<canvas id="main-canvas"></canvas>
+<div id="engine-container"></div>
 
 <script>
-    // --- PWA Service Worker Kaydı ---
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            const swCode = `
-                self.addEventListener('install', e => self.skipWaiting());
-                self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
-                self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));
-            `;
-            const blob = new Blob([swCode], {type: 'text/javascript'});
-            navigator.serviceWorker.register(URL.createObjectURL(blob));
-        });
-    }
-
     const firebaseConfig = {
       apiKey: "AIzaSyCfcppc4rGYxmAj7fTzmYMZgcyBO4s8bFI",
       databaseURL: "https://doviz-kurlari-35554-default-rtdb.europe-west1.firebasedatabase.app",
@@ -142,118 +88,197 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    let currentMode = null;
-    let firstLoadMod5 = true;
+    let state = { mode: null, prevPrices: {}, animationId: null };
 
-    function updateSystemTime() {
-        const now = new Date();
-        const hour = now.getHours();
-        const timeStr = now.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
-        const fullTimeStr = now.toLocaleTimeString('tr-TR');
-
-        if(document.getElementById('mod1-time')) document.getElementById('mod1-time').innerText = timeStr;
-        if(document.getElementById('mod6Clock')) document.getElementById('mod6Clock').innerText = fullTimeStr;
-
-        const greeting = document.getElementById('greeting-text');
-        if(greeting){
-            if(hour >= 6 && hour < 12) greeting.innerText = "İyi Sabahlar";
-            else if(hour >= 12 && hour < 18) greeting.innerText = "İyi Günler";
-            else if(hour >= 18 && hour < 23) greeting.innerText = "İyi Akşamlar";
-            else greeting.innerText = "İyi Geceler";
+    // --- ANA YÖNETİCİ ---
+    db.ref('terminal_data/tv_settings').on('value', snap => {
+        const settings = snap.val();
+        const newMode = settings.master2 ? settings.screen2.toString() : "0";
+        if (state.mode !== newMode) {
+            state.mode = newMode;
+            initMode(newMode);
         }
-    }
-    setInterval(updateSystemTime, 1000);
-
-    db.ref('terminal_data').on('value', snap => {
-        const data = snap.val();
-        if(!data) return;
-        const mode = data.tv_settings.master2 ? data.tv_settings.screen2 : "standby";
-        const currencies = data.currencies ? Object.values(data.currencies) : [];
-
-        if(currentMode !== mode) {
-            currentMode = mode;
-            switchDisplay(mode);
-        }
-        if(mode === "5") updateMod5UI(currencies);
-        if(mode === "6") renderCNBCData(currencies);
     });
 
-    function switchDisplay(mode) {
-        const containers = ['mod1-container', 'mod5-container', 'mod6-container', 'tv-image', 'tv-video'];
-        containers.forEach(id => {
-            const el = document.getElementById(id);
-            if(el) {
-                if(id.includes('container')) el.style.display = 'none';
-                else el.classList.remove('active');
-            }
-        });
-        document.getElementById('tv-video').pause();
-        document.getElementById('mod6-bg-video').pause();
+    function initMode(mode) {
+        const container = document.getElementById('engine-container');
+        db.ref('terminal_data/currencies').off();
+        if(state.animationId) cancelAnimationFrame(state.animationId);
+        container.innerHTML = "";
 
-        if(mode === "1") document.getElementById('mod1-container').style.display = 'flex';
-        else if(mode === "5") { document.getElementById('mod5-container').style.display = 'block'; firstLoadMod5 = true; }
-        else if(mode === "6") { 
-            document.getElementById('mod6-container').style.display = 'block';
-            document.getElementById('mod6-bg-video').play();
-            updateLiveContent(); 
+        if (mode === "0" || mode === "1") {
+            renderStandby(container);
+        } else if (mode === "3" || mode === "6") {
+            renderCNBCLayout(container);
+            db.ref('terminal_data/currencies').on('value', snap => updateCNBCData(snap.val()));
+        } else if (mode === "5") {
+            renderListLayout(container);
+            db.ref('terminal_data/currencies').on('value', snap => updateListData(snap.val()));
+            startParticles('gold');
+        } else {
+            renderGridLayout(container);
+            db.ref('terminal_data/currencies').on('value', snap => updateGridData(snap.val(), mode === "4"));
         }
-        else loadMedia(mode);
     }
 
-    function loadMedia(name) {
-        const img = document.getElementById('tv-image');
-        const vid = document.getElementById('tv-video');
-        const testImg = new Image();
-        testImg.src = name + ".jpg";
-        testImg.onload = () => { img.src = name + ".jpg"; img.classList.add('active'); };
-        testImg.onerror = () => {
-            document.getElementById('video-source').src = name + ".mp4";
-            vid.load(); vid.play().then(() => vid.classList.add('active'));
-        };
+    // --- MOD EKRANLARI ---
+
+    function renderStandby(container) {
+        container.innerHTML = `
+            <div class="standby-card">
+                <div style="font-size:2vw; font-weight:900; letter-spacing:5px; margin-bottom:10px">SİSTEM STANDBY</div>
+                <div class="clock-big" id="stdClock">00:00</div>
+                <div id="stdGreeting" style="font-size:1.5vw; opacity:0.7; margin-top:20px">İYİ GÜNLER</div>
+            </div>`;
+        updateClock();
+        setInterval(updateClock, 1000);
+        startParticles('white');
     }
 
-    function renderCNBCData(data) {
-        const container = document.getElementById('firebaseCurrencies');
-        container.innerHTML = data.slice(0, 7).map(item => {
-            const isUp = Math.random() > 0.4;
-            const iconClass = isUp ? 'fa-caret-up icon-up' : 'fa-caret-down icon-down';
-            const currencyKey = item.name.substring(0,3).toUpperCase();
-            return `
-                <div class="currency-card card-${currencyKey}">
-                    <div class="cur-row-wrapper">
-                        <div class="cur-data-row"><div style="opacity:0.6;font-size:0.9rem">${item.name}</div><div class="cur-price">${item.buy.toFixed(4)} <i class="fas ${iconClass} status-icon"></i></div></div>
-                        <div class="cur-data-row"><div style="opacity:0.6;font-size:0.9rem">${item.name}</div><div class="cur-price">${item.sell.toFixed(4)} <i class="fas ${iconClass} status-icon"></i></div></div>
+    function renderGridLayout(container) {
+        container.innerHTML = `<div class="mod-wrapper"><div id="grid-content" class="grid-custom"></div></div>`;
+    }
+
+    function updateGridData(data, goldOnly) {
+        const grid = document.getElementById('grid-content');
+        if(!grid || !data) return;
+        const filtered = goldOnly ? Object.values(data).filter(x => x.category === 'altin') : Object.values(data).slice(0, 8);
+        
+        if (grid.innerHTML === "") {
+            grid.innerHTML = filtered.map((c, i) => {
+                const isG = c.name.toUpperCase().includes("ALTIN");
+                const isB = i < 2;
+                return `
+                <div class="card-modern" id="card-${c.name}">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5vh">
+                        <div style="display:flex; align-items:center; gap:10px">
+                            ${isG ? `<i class="fa-solid fa-coins" style="color:gold; font-size:${isB?'2.5vw':'1.8vw'}"></i>` : `<img src="https://flagcdn.com/w160/${c.flag.toLowerCase()}.png" style="width:${isB?'4vw':'3vw'}; border-radius:4px">`}
+                            <span style="font-size:${isB?'1.8vw':'1.3vw'}; font-weight:900">${c.name}</span>
+                        </div>
+                        <div id="perc-${c.name}" style="font-size:${isB?'1.2vw':'0.9vw'}; font-weight:900">•</div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center">
+                        <span class="val-modern" id="buy-${c.name}" style="font-size:${isB?'3.5vw':'2.2vw'}; color:var(--buy-red)">--</span>
+                        <span class="val-modern" id="sell-${c.name}" style="font-size:${isB?'3.5vw':'2.2vw'}; color:var(--sell-green)">--</span>
                     </div>
                 </div>`;
+            }).join('');
+        }
+        processPrices(filtered);
+    }
+
+    function renderCNBCLayout(container) {
+        container.innerHTML = `
+            <div id="mod3-container" style="display:block">
+                <div class="video-wrapper"><video autoplay muted loop playsinline><source src="6.mp4" type="video/mp4"></video></div>
+                <div class="branding-panel">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/CNBC_logo.svg/1200px-CNBC_logo.svg.png" style="height:40px">
+                    <div style="border-left:2px solid #ddd; padding-left:15px" id="cnbcClock">00:00:00</div>
+                </div>
+                <div class="ticker-container">
+                    <div class="layer-indices"><div class="track-indices" style="display:flex; animation: scroll-ticker 20s linear infinite" id="indicesTrack"></div></div>
+                    <div class="layer-currencies" id="cnbcCurrencies"></div>
+                    <div class="layer-news"><div id="newsTrack" style="display:flex; white-space:nowrap; animation: news-scroll 40s linear infinite">YÜKLENİYOR...</div></div>
+                </div>
+            </div>`;
+        updateClock();
+        fetchRSS();
+    }
+
+    function updateCNBCData(data) {
+        const track = document.getElementById('cnbcCurrencies');
+        if(!track || !data) return;
+        track.innerHTML = Object.values(data).slice(0, 10).map(item => {
+            const isG = item.name.toUpperCase().includes("ALTIN");
+            const fmt = { minimumFractionDigits: isG?0:3, maximumFractionDigits: isG?0:3 };
+            return `
+            <div class="cur-card">
+                <div class="slide-content">
+                    <div class="data-row">
+                        <small style="color:#008cff; font-weight:700; font-size:0.75rem">${item.name}</small>
+                        <span class="val-modern" style="font-size:1.5rem">${item.buy.toLocaleString('tr-TR', fmt)}</span>
+                    </div>
+                    <div class="data-row">
+                        <small style="color:#00c853; font-weight:700; font-size:0.75rem">${item.name}</small>
+                        <span class="val-modern" style="font-size:1.5rem">${item.sell.toLocaleString('tr-TR', fmt)}</span>
+                    </div>
+                </div>
+            </div>`;
         }).join('');
     }
 
-    async function updateLiveContent() {
-        try {
-            const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=https://www.aa.com.tr/tr/rss/default?cat=ekonomi`);
-            const data = await res.json();
-            if(data.status === 'ok') {
-                const newsHtml = data.items.map(i => `<span class="news-item">${i.title.toUpperCase()} <span style="color:red">/</span></span>`).join('');
-                document.getElementById('newsTrack').innerHTML = newsHtml + newsHtml;
-                const indices = [{n:"NASDAQ",v:18120},{n:"DOW",v:39110},{n:"DAX",v:18450},{n:"S&P500",v:5240},{n:"NIKKEI",v:39770}];
-                document.getElementById('yandexIndices').innerHTML = [...indices, ...indices].map(idx => `
-                    <div class="index-item">${idx.n} <span>${idx.v.toLocaleString()}</span> <span class="idx-badge" style="background:var(--cnbc-green)">▲ %${(Math.random()).toFixed(2)}</span></div>
-                `).join('');
-            }
-        } catch (e) { console.error("RSS Hatası"); }
+    function renderListLayout(container) {
+        container.innerHTML = `<div id="mod5-container" style="display:flex"></div>`;
     }
 
-    (function(){
-        const container = document.getElementById('snow-container');
-        for(let i=0; i<30; i++) {
-            let s = document.createElement('div'); s.className='snowflake';
-            s.style.width = s.style.height = Math.random()*5+2+'px';
-            s.style.left = Math.random()*100+'vw';
-            s.style.animationDuration = Math.random()*3+2+'s';
-            container.appendChild(s);
+    function updateListData(data) {
+        const cont = document.getElementById('mod5-container');
+        if(!cont || !data) return;
+        const items = Object.values(data).filter(x => x.category === 'altin').slice(0, 6);
+        cont.innerHTML = items.map(item => `
+            <div class="list-item">
+                <span style="font-size:1.8vw; font-weight:900">${item.name}</span>
+                <span class="val-modern" style="color:var(--buy-red); font-size:2.5vw; text-align:right">${item.buy.toLocaleString('tr-TR')}</span>
+                <span class="val-modern" style="color:var(--sell-green); font-size:2.5vw; text-align:right">${item.sell.toLocaleString('tr-TR')}</span>
+            </div>`).join('');
+    }
+
+    // --- YARDIMCI FONKSİYONLAR ---
+
+    function processPrices(filtered) {
+        filtered.forEach(c => {
+            const b = document.getElementById(`buy-${c.name}`), s = document.getElementById(`sell-${c.name}`), p = document.getElementById(`perc-${c.name}`), cd = document.getElementById(`card-${c.name}`);
+            if(!b) return;
+            const isG = c.name.toUpperCase().includes("ALTIN"), np = parseFloat(c.sell), op = state.prevPrices[c.name] || np;
+            b.innerText = c.buy.toLocaleString('tr-TR', {minimumFractionDigits: isG?0:3});
+            s.innerText = c.sell.toLocaleString('tr-TR', {minimumFractionDigits: isG?0:3});
+            if (np !== op) {
+                const df = ((np - op) / op) * 100;
+                p.innerHTML = df > 0 ? `<span style="color:var(--sell-green)">▲ %${df.toFixed(2)}</span>` : `<span style="color:var(--buy-red)">▼ %${Math.abs(df).toFixed(2)}</span>`;
+                cd.classList.add(np > op ? 'flash-up' : 'flash-down');
+                setTimeout(() => cd.classList.remove('flash-up', 'flash-down'), 1000);
+            }
+            state.prevPrices[c.name] = np;
+        });
+    }
+
+    function updateClock() {
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
+        const fullTime = now.toLocaleTimeString('tr-TR');
+        if(document.getElementById('stdClock')) document.getElementById('stdClock').innerText = timeStr;
+        if(document.getElementById('cnbcClock')) document.getElementById('cnbcClock').innerText = fullTime;
+    }
+
+    async function fetchRSS() {
+        try {
+            const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://www.aa.com.tr/tr/rss/default?cat=ekonomi');
+            const data = await res.json();
+            const track = document.getElementById('newsTrack');
+            if(track && data.status === 'ok') {
+                const html = data.items.map(i => `<span style="margin-right:50px">${i.title.toUpperCase()} <b style="color:var(--cnbc-red); margin-left:20px">/</b></span>`).join('');
+                track.innerHTML = html + html;
+            }
+            const indices = ["BIST 100", "NASDAQ", "DAX 40", "BITCOIN", "ONS ALTIN"].map(n => `
+                <div style="padding:0 30px; border-right:1px solid #eee; font-weight:700">${n} <span style="color:var(--cnbc-blue)">${(Math.random()*10000+2000).toFixed(0)}</span> <small style="color:green">▲ %${(Math.random()*2).toFixed(2)}</small></div>
+            `).join('');
+            const iTrack = document.getElementById('indicesTrack');
+            if(iTrack) iTrack.innerHTML = indices + indices;
+        } catch(e) {}
+    }
+
+    function startParticles(type) {
+        const canvas = document.getElementById('main-canvas'), ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        const pts = Array.from({length: 40}, () => ({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, s: Math.random()*2+1, v: Math.random()*0.5+0.2 }));
+        function anim() {
+            ctx.clearRect(0,0,canvas.width, canvas.height);
+            ctx.fillStyle = type === 'gold' ? 'rgba(255,215,0,0.3)' : 'rgba(255,255,255,0.2)';
+            pts.forEach(p => { p.y += p.v; if(p.y > canvas.height) p.y = -10; ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, Math.PI*2); ctx.fill(); });
+            state.animationId = requestAnimationFrame(anim);
         }
-    })();
+        anim();
+    }
 </script>
 </body>
 </html>
-
