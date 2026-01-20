@@ -42,16 +42,32 @@
         #weather-info { display: flex; align-items: center; justify-content: center; gap: 20px; font-size: 1.8vw; opacity: 0.8; }
         .temp-badge { background: white; color: #000; padding: 5px 15px; border-radius: 12px; font-weight: 900; }
 
-        /* MOD-LAYOUTS */
+        /* MOD-LAYOUTS - YENİ GRID YAPISI (2+3+3) */
         .mod-wrapper { height: 100vh; width: 100vw; display: flex; flex-direction: column; padding: 1.5vh; gap: 1.5vh; box-sizing: border-box; background: #000; position: absolute; top: 0; left: 0; }
         
-        /* Mod 2 & 4 & 6: Özel Sütun Yapısı (1fr 1fr 3fr) */
-        .grid-3-col { display: grid; grid-template-columns: 1fr 1fr 3fr; grid-template-rows: repeat(3, 1fr); gap: 1.5vh; height: 97vh; width: 97vw; margin: auto; }
+        .grid-custom { 
+            display: grid; 
+            grid-template-columns: repeat(6, 1fr); 
+            grid-template-rows: 1.5fr 1fr 1fr; 
+            gap: 1.5vh; 
+            height: 97vh; 
+            width: 97vw; 
+            margin: auto; 
+        }
 
-        .card-modern { background: var(--mod6-card); border: 1px solid #222; border-radius: 15px; padding: 2vh; display: flex; flex-direction: column; justify-content: center; transition: all 0.4s ease; }
+        /* İlk iki kart büyük (3'er sütun kaplar) */
+        .card-modern:nth-child(1), .card-modern:nth-child(2) { grid-column: span 3; border-top: 4px solid var(--gold-m5); }
+        /* Diğer kartlar normal (2'şer sütun kaplar) */
+        .card-modern:nth-child(n+3) { grid-column: span 2; }
+
+        .card-modern { background: var(--mod6-card); border: 1px solid #222; border-radius: 15px; padding: 2vh; display: flex; flex-direction: column; justify-content: center; transition: all 0.4s ease; position: relative; overflow: hidden;}
         .val-modern { font-family: 'JetBrains Mono'; font-weight: 700; letter-spacing: -1px; }
 
-        /* CNBC */
+        /* CNBC TICKER OPTIMIZATIONS */
+        .cur-card { min-width: 200px; height: 65px; border-right: 1px solid rgba(255, 255, 255, 0.1); overflow: hidden; }
+        .slide-content { height: 130px; animation: slide-up-data 8s cubic-bezier(0.85, 0, 0.15, 1) infinite; }
+        .data-row { height: 65px; padding: 0 20px; display: flex; flex-direction: column; justify-content: center; }
+        
         .video-wrapper { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
         video { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.5); }
         .branding-panel { position: absolute; bottom: 133px; left: 0; background: #fff; padding: 10px 30px; border-top-right-radius: 4px; z-index: 100; color: #000; font-weight: 900; font-size: 2vw; }
@@ -104,29 +120,14 @@
         if(window.marketInterval) clearInterval(window.marketInterval);
         if(window.clockInterval) clearInterval(window.clockInterval);
 
-        if (!state.master) {
-            renderStandby(container);
-        } else {
-            renderActiveScreen(container, state.screen.toString());
-        }
+        if (!state.master) { renderStandby(container); } 
+        else { renderActiveScreen(container, state.screen.toString()); }
     }
 
     function renderStandby(container) {
         document.body.style.background = "#020617";
-        container.innerHTML = `
-            <div class="main-card">
-                <div id="greeting">HOŞGELDİNİZ</div>
-                <div id="clock">00:00</div>
-                <div id="greeting-sub">İYİ GÜNLER</div>
-                <div class="divider"></div>
-                <div id="weather-info">
-                    <span id="city">İSTANBUL</span>
-                    <span class="temp-badge" id="temp">--°C</span>
-                </div>
-            </div>`;
-        startClock();
-        initParticles('white');
-        fetchWeather();
+        container.innerHTML = `<div class="main-card"><div id="greeting">HOŞGELDİNİZ</div><div id="clock">00:00</div><div id="greeting-sub">BİLGİ EKRANI</div><div class="divider"></div><div id="weather-info"><span id="city">İSTANBUL</span><span class="temp-badge" id="temp">--°C</span></div></div>`;
+        startClock(); initParticles('white'); fetchWeather();
     }
 
     function renderActiveScreen(container, sid) {
@@ -149,35 +150,49 @@
         }
     }
 
-    function setupGrid(container) {
-        container.innerHTML = `<div class="mod-wrapper"><div id="grid-content" class="grid-3-col"></div></div>`;
+    function setupGrid(container) { container.innerHTML = `<div class="mod-wrapper"><div id="grid-content" class="grid-custom"></div></div>`; }
+
+    function setupLiveTicker(container) {
+        container.innerHTML = `<div class="video-wrapper"><video autoplay muted loop playsinline><source src="cnbce1.mp4" type="video/mp4"></video></div><div class="branding-panel" id="liveClock">00:00:00</div><div class="ticker-container"><div class="layer-indices"><div style="display:flex; animation: scroll-ticker 25s linear infinite" id="indicesTrack"></div></div><div class="layer-currencies" id="currenciesTrack"></div><div class="layer-news"><div class="news-track" id="newsTrack"></div></div></div>`;
+        window.clockInterval = setInterval(() => { const el = document.getElementById('liveClock'); if(el) el.innerText = new Date().toLocaleTimeString('tr-TR'); }, 1000);
+    }
+
+    function renderTickerData(data) {
+        const container = document.getElementById('currenciesTrack');
+        if(!container || !data) return;
+        container.innerHTML = data.slice(0, 12).map(item => {
+            const isG = item.name.toUpperCase().includes("ALTIN");
+            const fmt = { minimumFractionDigits: isG ? 0 : 3, maximumFractionDigits: isG ? 0 : 3 };
+            return `<div class="cur-card"><div class="slide-content"><div class="data-row"><small style="color:#008cff; font-weight:700; font-size:0.75rem; opacity:0.8">${item.name}</small><span style="font-size:1.4rem; font-weight:800; font-family:'JetBrains Mono'">${item.buy.toLocaleString('tr-TR', fmt)}</span></div><div class="data-row"><small style="color:#00c853; font-weight:700; font-size:0.75rem; opacity:0.8">${item.name}</small><span style="font-size:1.4rem; font-weight:800; font-family:'JetBrains Mono'">${item.sell.toLocaleString('tr-TR', fmt)}</span></div></div></div>`;
+        }).join('');
     }
 
     function renderGridData(data, goldOnly) {
         const grid = document.getElementById('grid-content');
         if(!grid || !data) return;
-        let filtered = goldOnly ? Object.values(data).filter(x => x.category === 'altin') : data.slice(0, 9);
+        let filtered = goldOnly ? Object.values(data).filter(x => x.category === 'altin') : data.slice(0, 8);
         
         if (grid.innerHTML === "") {
-            grid.innerHTML = filtered.map(c => {
+            grid.innerHTML = filtered.map((c, index) => {
                 const isGold = c.name.toUpperCase().includes("ALTIN");
-                const flag = c.flag ? c.flag.toLowerCase() : 'un';
+                const isLarge = index < 2;
                 return `
                 <div class="card-modern" id="card-${c.name}">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1vh">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5vh">
                         <div style="display:flex; align-items:center; gap:10px">
-                            ${isGold ? '<i class="fa-solid fa-coins" style="color:gold; font-size:1.8vw"></i>' : '<img src="https://flagcdn.com/w160/'+flag+'.png" style="width:3vw; border-radius:4px">'} 
-                            <span style="font-size:1.3vw; font-weight:900; white-space:nowrap">${c.name}</span>
+                            ${isGold ? `<i class="fa-solid fa-coins" style="color:gold; font-size:${isLarge ? '2.5vw' : '1.8vw'}"></i>` : `<img src="https://flagcdn.com/w160/${(c.flag?c.flag.toLowerCase():'un')}.png" style="width:${isLarge ? '4vw' : '3vw'}; border-radius:4px">`} 
+                            <span style="font-size:${isLarge ? '1.8vw' : '1.3vw'}; font-weight:900; white-space:nowrap">${c.name}</span>
                         </div>
-                        <div id="perc-${c.name}" style="font-size:0.9vw; font-weight:900;">--</div>
+                        <div id="perc-${c.name}" style="font-size:${isLarge ? '1.2vw' : '0.9vw'}; font-weight:900;">•</div>
                     </div>
                     <div style="display:flex; justify-content:space-between; align-items:center">
-                        <div style="text-align:left"><span class="val-modern" id="buy-${c.name}" style="font-size:2.2vw; color:var(--buy-red-m5)">--</span></div>
-                        <div style="text-align:right"><span class="val-modern" id="sell-${c.name}" style="font-size:2.2vw; color:var(--sell-green-m5)">--</span></div>
+                        <span class="val-modern" id="buy-${c.name}" style="font-size:${isLarge ? '3.5vw' : '2.2vw'}; color:var(--buy-red-m5)">--</span>
+                        <span class="val-modern" id="sell-${c.name}" style="font-size:${isLarge ? '3.5vw' : '2.2vw'}; color:var(--sell-green-m5)">--</span>
                     </div>
                 </div>`;
             }).join('');
         }
+        
         filtered.forEach(c => {
             const b = document.getElementById(`buy-${c.name}`), s = document.getElementById(`sell-${c.name}`), p = document.getElementById(`perc-${c.name}`), cd = document.getElementById(`card-${c.name}`);
             if(!b) return;
@@ -189,29 +204,13 @@
                 p.innerHTML = df > 0 ? `<span style="color:var(--success)">▲ %${df.toFixed(2)}</span>` : `<span style="color:var(--danger)">▼ %${Math.abs(df).toFixed(2)}</span>`;
                 cd.classList.add(np > op ? 'flash-up' : 'flash-down');
                 setTimeout(() => cd.classList.remove('flash-up', 'flash-down'), 1000);
-            } else if(p.innerText === "--") { p.innerText = "•"; }
+            }
             state.prevPrices[c.name] = np;
         });
     }
 
-    function setupLiveTicker(container) {
-        container.innerHTML = `<div class="video-wrapper"><video autoplay muted loop playsinline><source src="cnbce1.mp4" type="video/mp4"></video></div><div class="branding-panel" id="liveClock">00:00:00</div><div class="ticker-container"><div class="layer-indices"><div style="display:flex; animation: scroll-ticker 25s linear infinite" id="indicesTrack"></div></div><div class="layer-currencies" id="currenciesTrack"></div><div class="layer-news"><div class="news-track" id="newsTrack"></div></div></div>`;
-        window.clockInterval = setInterval(() => { const el = document.getElementById('liveClock'); if(el) el.innerText = new Date().toLocaleTimeString('tr-TR'); }, 1000);
-    }
-
-    function renderTickerData(data) {
-        const container = document.getElementById('currenciesTrack');
-        if(!container || !data) return;
-        container.innerHTML = data.slice(0, 10).map(item => {
-            const isGold = item.name.includes("ALTIN");
-            return `<div class="cur-card"><div style="display:flex; flex-direction:column; animation: slide-up-data 7s infinite"><div style="height:65px; padding:10px 20px"><small style="opacity:0.6; font-weight:700">${item.name}</small><br><span style="font-size:1.4rem; font-weight:800">${item.buy.toLocaleString('tr-TR', {minimumFractionDigits: isGold?0:3})}</span></div><div style="height:65px; padding:10px 20px"><small style="opacity:0.6; font-weight:700">${item.name}</small><br><span style="font-size:1.4rem; font-weight:800">${item.sell.toLocaleString('tr-TR', {minimumFractionDigits: isGold?0:3})}</span></div></div></div>`;
-        }).join('');
-    }
-
-    function setupList(container) {
-        container.innerHTML = `<div style="width:100%; height:100%; padding:2vh 5vw; box-sizing:border-box; z-index:2; position:relative"><div id="listContent" style="display:flex; flex-direction:column; gap:1.5vh;"></div></div>`;
-    }
-
+    function setupList(container) { container.innerHTML = `<div style="width:100%; height:100%; padding:2vh 5vw; box-sizing:border-box; z-index:2; position:relative"><div id="listContent" style="display:flex; flex-direction:column; gap:1.5vh;"></div></div>`; }
+    
     function renderListData(data) {
         const list = document.getElementById('listContent');
         if(!list || !data) return;
