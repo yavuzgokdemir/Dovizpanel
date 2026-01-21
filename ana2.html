@@ -2,78 +2,114 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Enterprise Terminal v4.5 - CNBC-e Professional</title>
-    
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Pano v4.5 - Professional TV</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --cnbc-green: #008f39; --cnbc-red: #c40000; --cnbc-blue: #003366;
-            --cnbc-light-blue: #004a99; --gold-color: #ffd700;
+            --bg-dark: #0a0b0d; --card-bg: rgba(255, 255, 255, 0.04); --text-main: #ffffff;
+            --primary: #00d2ff; --gold: #ffcc00; --up: #00ff88; --down: #ff5252; --border: rgba(255, 255, 255, 0.08);
+            --cnbc-green: #008f39; --cnbc-red: #c40000; --cnbc-blue: #003366; --cnbc-light-blue: #004a99;
         }
 
-        body, html { margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden; background: #000; color: #fff; font-family: 'Inter', sans-serif; }
-        canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
-        #engine-container { position: relative; width: 100%; height: 100%; z-index: 2; }
+        body, html { margin: 0; padding: 0; width: 100vw; height: 100vh; background-color: var(--bg-dark); color: var(--text-main); font-family: 'Inter', sans-serif; overflow: hidden; box-sizing: border-box; }
 
-        .grid-custom { display: grid; grid-template-columns: repeat(6, 1fr); grid-template-rows: 1.5fr 1fr 1fr; gap: 1.5vh; height: 97vh; width: 97vw; margin: auto; }
-        
-        #mod3-container { display: none; width: 100%; height: 100%; position: relative; }
-        .video-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
-        .video-wrapper video { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.7); }
-        
-        .branding-panel { position: absolute; bottom: 135px; left: 0; background: #fff; padding: 5px 20px; border-radius: 0 4px 0 0; display: flex; align-items: center; gap: 15px; z-index: 110; }
-        .cnbc-clock { font-size: 1.4vw; font-weight: 900; color: #003366; font-family: 'JetBrains Mono'; border-left: 2px solid #ddd; padding-left: 15px; }
+        /* --- MOD 0: KARŞILAMA --- */
+        #screen-off { display: none; height: 100vh; width: 100%; background: radial-gradient(circle at center, #1a1c20 0%, #0a0b0d 100%); flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        .welcome-logo { font-size: 8vw; margin-bottom: 2vh; animation: pulse 3s infinite; }
+        @keyframes pulse { 0% { opacity: 0.5; transform: scale(1); } 50% { opacity: 1; transform: scale(1.1); } 100% { opacity: 0.5; transform: scale(1); } }
 
-        .ticker-container { position: absolute; bottom: 0; width: 100%; display: flex; flex-direction: column; z-index: 100; }
-        
-        /* 1. Üst Ticker - Hızlandırıldı */
-        .layer-indices { height: 40px; background: #fff; display: flex; align-items: center; position: relative; overflow: hidden; }
-        .bist-box { background: var(--cnbc-green); color: #fff; padding: 0 25px; height: 100%; display: flex; align-items: center; gap: 10px; font-weight: 900; font-size: 1.2vw; position: relative; z-index: 130; box-shadow: 20px 0 25px rgba(0,0,0,0.5); }
-        .index-track-wrapper { flex: 1; overflow: hidden; position: relative; z-index: 120; }
-        .index-track { display: flex; white-space: nowrap; animation: scroll-ticker 48s linear infinite; color: #003366; } /* %25 Hızlandı: 65s -> 48s */
-        .index-item { padding: 0 30px; display: flex; align-items: center; gap: 8px; font-size: 0.95vw; font-weight: 800; }
+        /* --- PANO MODLARI (1, 3) --- */
+        #screen-active { display: none; padding: 2.5vh 2vw; height: 100vh; width: 100vw; box-sizing: border-box; }
+        .grid-container { display: grid; grid-template-columns: repeat(6, 1fr); grid-template-rows: repeat(2, 1fr); gap: 1.5vw; height: 82vh; }
+        .currency-card:nth-child(1), .currency-card:nth-child(2) { grid-column: span 3; }
+        .currency-card:nth-child(n+3) { grid-column: span 2; }
+        .currency-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 1.5vw; padding: 2vh 1.5vw; display: flex; flex-direction: column; justify-content: space-between; position: relative; backdrop-filter: blur(20px); overflow: hidden; animation: fadeIn 0.8s ease-out forwards; }
+        .card-header { display: flex; align-items: center; gap: 1vw; z-index: 2; }
+        .flag-img { width: 4.5vw; height: 4.5vw; border-radius: 50%; object-fit: cover; border: 0.3vw solid var(--border); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        .symbol-name { font-size: 2.2vw; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; }
+        .price-section { position: relative; height: 12vh; margin-top: auto; overflow: hidden; }
+        .price-label { font-size: 1.1vw; color: #aaa; text-transform: uppercase; font-weight: 800; margin-bottom: 0.5vh; }
+        .price-wrapper { position: absolute; width: 100%; transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+        .show-buy .price-wrapper { transform: translateY(-11vh); }
+        .price-block { height: 11vh; display: flex; flex-direction: column; justify-content: center; }
+        .price-value { font-family: 'JetBrains Mono', monospace; font-size: 4vw; font-weight: 800; line-height: 1; }
+        .currency-card:nth-child(-n+2) .price-value { font-size: 5vw; }
+        .up { color: var(--up) !important; text-shadow: 0 0 20px rgba(0,255,136,0.3); }
+        .down { color: var(--down) !important; text-shadow: 0 0 20px rgba(255,82,82,0.3); }
+        .card-extra { position: absolute; bottom: 6vh; right: -1vw; background: linear-gradient(90deg, #ffcc00, #ff9900); color: #000; padding: 0.5vh 1.5vw; font-size: 1.1vw; font-weight: 900; transform: rotate(-5deg); box-shadow: 0 5px 15px rgba(0,0,0,0.3); animation: cardSlide 3s infinite alternate ease-in-out; z-index: 3; }
+        @keyframes cardSlide { from { transform: rotate(-5deg) translateX(0); } to { transform: rotate(-5deg) translateX(-1vw); } }
+        .bottom-bar { position: absolute; bottom: 0; left: 0; width: 100%; height: 8vh; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: space-between; padding: 0 3vw; box-sizing: border-box; border-top: 1px solid var(--border); z-index: 10; }
+        .clock { font-size: 2.5vw; font-weight: bold; font-family: 'JetBrains Mono'; color: var(--primary); }
 
-        /* 2. Orta Ticker - 4 Kart ve Parlama Efekti */
-        .layer-currencies { height: 60px; background: var(--cnbc-blue); display: flex; align-items: center; overflow: hidden; border-top: 1px solid rgba(255,255,255,0.1); }
-        .cur-card { 
-            flex: 0 0 25%; min-width: 25%; height: 100%; display: flex; flex-direction: column; justify-content: center; padding: 0 20px; 
-            border-right: 1px solid rgba(255,255,255,0.1); transition: background 0.5s ease, box-shadow 0.3s ease; position: relative; box-sizing: border-box;
-        }
-        .cur-name { font-size: 0.75rem; color: #a5c7ff; font-weight: 700; margin-bottom: 2px; }
-        .cur-value-box { height: 30px; overflow: hidden; position: relative; }
-        .cur-price-container { display: flex; flex-direction: column; transition: transform 0.6s cubic-bezier(0.65, 0, 0.35, 1); }
-        .cur-price { height: 30px; line-height: 30px; font-size: 1.5rem; color: #fff; font-family: 'JetBrains Mono'; font-weight: 800; }
-        
-        /* Parlama (Flash) Efekti Sınıfı */
-        .card-flash { animation: flash-glow 0.8s ease-out; }
-        @keyframes flash-glow {
-            0% { filter: brightness(1); }
-            50% { filter: brightness(2); box-shadow: inset 0 0 20px #fff; }
-            100% { filter: brightness(1); }
-        }
-
-        /* 3. Alt Ticker - Hızlandırıldı */
-        .layer-news { height: 35px; background: #fff; display: flex; align-items: center; color: #003366; font-weight: 700; font-size: 0.9vw; position: relative; overflow: hidden; }
-        .news-label { background: var(--cnbc-light-blue); color: #fff; padding: 0 20px; height: 100%; display: flex; align-items: center; z-index: 130; position: relative; box-shadow: 10px 0 15px rgba(0,0,0,0.2); }
-        .news-track-wrapper { flex: 1; overflow: hidden; z-index: 120; }
-        .news-track { display: flex; white-space: nowrap; animation: scroll-ticker 45s linear infinite; } /* %25 Hızlandı: 60s -> 45s */
-
+        /* --- CNBC-E MODAL TASARIMI (MOD 2'ye atandı) --- */
+        #mod-cnbc { display: none; width: 100vw; height: 100vh; position: relative; }
+        .video-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+        .video-bg video { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.6); }
+        .cnbc-branding { position: absolute; bottom: 135px; left: 0; background: #fff; padding: 5px 20px; border-radius: 0 4px 0 0; display: flex; align-items: center; gap: 15px; z-index: 110; }
+        .ticker-wrap { position: absolute; bottom: 0; width: 100%; display: flex; flex-direction: column; z-index: 100; }
+        .l-indices { height: 40px; background: #fff; display: flex; align-items: center; overflow: hidden; }
+        .bist-label { background: var(--cnbc-green); color: #fff; padding: 0 20px; height: 100%; display: flex; align-items: center; gap: 10px; font-weight: 900; box-shadow: 10px 0 20px rgba(0,0,0,0.3); z-index: 10; }
+        .l-currencies { height: 60px; background: var(--cnbc-blue); display: flex; align-items: center; overflow: hidden; }
+        .cnbc-card { flex: 0 0 25%; height: 100%; border-right: 1px solid rgba(255,255,255,0.1); padding: 0 20px; display: flex; flex-direction: column; justify-content: center; position: relative; }
+        .cnbc-val-box { height: 30px; overflow: hidden; position: relative; }
+        .cnbc-price-stack { display: flex; flex-direction: column; transition: transform 0.6s cubic-bezier(0.65, 0, 0.35, 1); }
+        .cnbc-p { height: 30px; line-height: 30px; font-size: 1.5rem; color: #fff; font-family: 'JetBrains Mono'; font-weight: 800; }
+        .l-news { height: 35px; background: #fff; display: flex; align-items: center; color: #003366; font-weight: 800; overflow: hidden; }
+        .news-track { display: flex; white-space: nowrap; animation: scroll-ticker 45s linear infinite; }
         @keyframes scroll-ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-        .slide-up { transform: translateY(-30px); }
+        .card-flash { animation: cnbc-flash 0.8s ease-out; }
+        @keyframes cnbc-flash { 0% { filter: brightness(1); } 50% { filter: brightness(2.5); } 100% { filter: brightness(1); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
-<div id="engine-container"></div>
+    <div id="screen-off">
+        <div class="welcome-logo">💎</div>
+        <h1 style="font-size: 4vw; letter-spacing: 1vw; margin:0;">TV2 MONITOR</h1>
+        <p style="color: #555; font-size: 1.5vw; font-weight: bold; margin-top:2vh;">SİSTEM BEKLEMEDE</p>
+    </div>
+
+    <div id="screen-active">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2vh">
+            <h2 id="pano-title" style="margin:0; font-size:2.8vw; font-weight:900; color:var(--primary); letter-spacing:2px;">PİYASA ANALİZİ</h2>
+            <div id="active-mode-label" style="background:var(--primary); color:#000; padding:0.5vh 1.5vw; border-radius:1vh; font-weight:900; font-size:1.4vw;">MOD</div>
+        </div>
+        <div class="grid-container" id="currency-grid"></div>
+    </div>
+
+    <div id="mod-cnbc">
+        <div class="video-bg"><video autoplay muted loop playsinline><source src="videocnbce.mp4" type="video/mp4"></video></div>
+        <div class="cnbc-branding">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/CNBC_logo.svg/1200px-CNBC_logo.svg.png" style="height:32px">
+            <div style="font-size:1.4vw; font-weight:900; color:#003366; border-left:2px solid #ddd; padding-left:15px;" id="cnbcClock">00:00</div>
+        </div>
+        <div class="ticker-wrap">
+            <div class="l-indices">
+                <div class="bist-label">BIST100 <span id="bistVal">9.243,10</span> <i class="fas fa-caret-up"></i></div>
+                <div style="flex:1; overflow:hidden;"><div class="news-track" id="indicesTrack" style="color:#003366; font-size:1vw;"></div></div>
+            </div>
+            <div class="l-currencies" id="cnbcCurrencies"></div>
+            <div class="l-news">
+                <div style="background:var(--cnbc-light-blue); color:#fff; padding:0 20px; height:100%; display:flex; align-items:center; z-index:11;">HABER</div>
+                <div style="flex:1; overflow:hidden;"><div class="news-track" id="newsTrack"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-bar" id="standard-bottom-bar">
+        <div class="status-tag"><i class="fas fa-satellite-dish fa-beat"></i> CANLI VERİ AKIŞI</div>
+        <div id="clock" class="clock">00:00:00</div>
+    </div>
 
 <script>
     const firebaseConfig = {
       apiKey: "AIzaSyCfcppc4rGYxmAj7fTzmYMZgcyBO4s8bFI",
+      authDomain: "doviz-kurlari-35554.firebaseapp.com",
       databaseURL: "https://doviz-kurlari-35554-default-rtdb.europe-west1.firebasedatabase.app",
       projectId: "doviz-kurlari-35554",
       appId: "1:822410580056:web:40d02d7729d7cf72aafa2d"
@@ -81,104 +117,134 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    let state = { mode: null };
+    let lastData = {};
+    let flipToggle = false;
+    let currentMode = "0";
 
-    db.ref('terminal_data/tv_settings').on('value', snap => {
-        const s = snap.val();
-        const newMode = s.master2 ? s.screen2.toString() : "0";
-        if (state.mode !== newMode) { state.mode = newMode; initMode(newMode); }
-    });
-
-    function initMode(mode) {
-        const container = document.getElementById('engine-container');
-        db.ref('terminal_data/currencies').off();
-        container.innerHTML = "";
-        if (mode === "3" || mode === "6") {
-            renderCNBCLayout(container);
-            db.ref('terminal_data/currencies').on('value', snap => updateCNBCData(snap.val()));
-        }
+    function updateClocks() {
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('tr-TR');
+        const shortTime = now.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
+        if(document.getElementById('clock')) document.getElementById('clock').innerText = timeStr;
+        if(document.getElementById('cnbcClock')) document.getElementById('cnbcClock').innerText = shortTime;
     }
+    setInterval(updateClocks, 1000);
 
-    function renderCNBCLayout(container) {
-        container.innerHTML = `
-            <div id="mod3-container" style="display:block">
-                <div class="video-wrapper"><video autoplay muted loop playsinline><source src="videocnbce.mp4" type="video/mp4"></video></div>
-                <div class="branding-panel">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/CNBC_logo.svg/1200px-CNBC_logo.svg.png" style="height:32px">
-                    <div class="cnbc-clock" id="cnbcClock">00:00</div>
-                </div>
-                <div class="ticker-container">
-                    <div class="layer-indices">
-                        <div class="bist-box">BIST100 <span>12.793,10</span> <i class="fas fa-caret-down"></i></div>
-                        <div class="index-track-wrapper"><div class="index-track" id="indicesTrack"></div></div>
-                    </div>
-                    <div class="layer-currencies" id="cnbcCurrencies"></div>
-                    <div class="layer-news">
-                        <div class="news-label">HABER</div>
-                        <div class="news-track-wrapper"><div class="news-track" id="newsTrack">YÜKLENİYOR...</div></div>
-                    </div>
-                </div>
-            </div>`;
-        
-        setInterval(() => {
-            document.getElementById('cnbcClock').innerText = new Date().toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
-        }, 1000);
+    setInterval(() => {
+        flipToggle = !flipToggle;
+        document.querySelectorAll('.currency-card').forEach(card => card.classList.toggle('show-buy', flipToggle));
+        document.querySelectorAll('.cnbc-price-stack').forEach(el => {
+            el.style.transform = flipToggle ? 'translateY(-30px)' : 'translateY(0)';
+        });
+        if(currentMode === "2") applyCNBCFlash();
+    }, 3000);
 
-        // Alım-Satım Kaydırma ve Renk/Parlama Döngüsü
-        setInterval(() => {
-            document.querySelectorAll('.cur-price-container').forEach(el => el.classList.toggle('slide-up'));
-            applyFlashAndColors();
-        }, 3000);
-
+    function init() {
+        db.ref('terminal_data/tv_settings').on('value', (snap) => {
+            const s = snap.val();
+            if(!s || !s.master2) { showMode("0"); return; }
+            const mode = s.screen2.toString();
+            currentMode = mode;
+            showMode(mode);
+            
+            db.ref('terminal_data/currencies').on('value', (currSnap) => {
+                const data = Object.values(currSnap.val() || {}).sort((a,b) => (a.order || 0) - (b.order || 0));
+                if (mode === "2") renderCNBC(data);
+                else renderStandard(data, parseInt(mode));
+            });
+        });
         fetchRSS();
     }
 
-    function updateCNBCData(data) {
+    function showMode(mode) {
+        const modes = {
+            off: document.getElementById('screen-off'),
+            active: document.getElementById('screen-active'),
+            cnbc: document.getElementById('mod-cnbc'),
+            bar: document.getElementById('standard-bottom-bar')
+        };
+        
+        Object.values(modes).forEach(m => m.style.display = 'none');
+
+        if(mode === "0") {
+            modes.off.style.display = 'flex';
+            modes.bar.style.display = 'flex';
+        } else if(mode === "2") {
+            modes.cnbc.style.display = 'block';
+        } else {
+            modes.active.style.display = 'block';
+            modes.bar.style.display = 'flex';
+            const label = document.getElementById('active-mode-label');
+            const title = document.getElementById('pano-title');
+            label.innerText = "MOD " + mode;
+            title.innerText = (mode === "1") ? "ALTIN PİYASASI" : "GENEL PİYASA";
+        }
+    }
+
+    function renderStandard(data, mode) {
+        const grid = document.getElementById('currency-grid');
+        let filtered = data;
+        if(mode === 1) filtered = data.filter(c => c.category === 'altin').slice(0, 8);
+        else if(mode === 3) filtered = [...data.filter(c => c.category === 'doviz').slice(0, 4), ...data.filter(c => c.category === 'altin').slice(0, 4)];
+
+        grid.innerHTML = filtered.map((c, i) => {
+            const oldPrice = lastData[c.id] || c.sell;
+            const pClass = c.sell > oldPrice ? "up" : (c.sell < oldPrice ? "down" : "");
+            const fClass = c.sell > oldPrice ? "bg-flash-up" : (c.sell < oldPrice ? "bg-flash-down" : "");
+            lastData[c.id] = c.sell;
+            const iconUrl = (c.flag === 'gold') ? 'https://img.icons8.com/?size=100&id=nTH8lhDLqpDI&format=png&color=000000' : (c.flag === 'btc') ? 'https://cdn-icons-png.flaticon.com/512/2091/2091665.png' : `https://flagcdn.com/w160/${c.flag}.png`;
+            return `
+                <div class="currency-card ${fClass} ${flipToggle ? 'show-buy' : ''}">
+                    <div class="card-header"><img src="${iconUrl}" class="flag-img"><span class="symbol-name">${c.name}</span></div>
+                    ${c.category === 'altin' ? `<div class="card-extra"><i class="fas fa-credit-card"></i> K.KARTI: ${(c.sell * 1.025).toLocaleString('tr-TR', {maximumFractionDigits:0})}</div>` : ''}
+                    <div class="price-section"><div class="price-wrapper">
+                        <div class="price-block"><div class="price-label">SATIŞ</div><div class="price-value ${pClass}">${c.sell.toLocaleString('tr-TR', {minimumFractionDigits: (c.category==='altin'?0:3)})}</div></div>
+                        <div class="price-block"><div class="price-label" style="color:var(--gold)">ALIŞ</div><div class="price-value" style="color:var(--gold)">${c.buy.toLocaleString('tr-TR', {minimumFractionDigits: (c.category==='altin'?0:3)})}</div></div>
+                    </div></div>
+                    <div style="display:flex; justify-content:space-between; font-weight:bold; opacity:0.6; font-size:1vw;"><span>VERİ DOĞRULANDI</span><span>SIRA: ${i+1}</span></div>
+                </div>`;
+        }).join('');
+    }
+
+    function renderCNBC(data) {
         const track = document.getElementById('cnbcCurrencies');
-        if(!track || !data) return;
-        // Firebase verilerini al (limit koymadan hepsini render edebiliriz ama ekran 4 tane gösterir)
-        const currencies = Object.values(data);
-        track.innerHTML = currencies.map(item => `
-            <div class="cur-card" id="card-${item.name.replace(/\s/g, '')}">
-                <span class="cur-name">${item.name}</span>
-                <div class="cur-value-box">
-                    <div class="cur-price-container">
-                        <span class="cur-price">${item.sell.toLocaleString('tr-TR', {minimumFractionDigits:4})}</span>
-                        <span class="cur-price">${item.buy.toLocaleString('tr-TR', {minimumFractionDigits:4})}</span>
+        const displayData = data.slice(0, 4);
+        track.innerHTML = displayData.map(item => `
+            <div class="cnbc-card">
+                <span style="font-size:0.75rem; color:#a5c7ff; font-weight:700;">${item.name}</span>
+                <div class="cnbc-val-box">
+                    <div class="cnbc-price-stack">
+                        <span class="cnbc-p">${item.sell.toLocaleString('tr-TR', {minimumFractionDigits:2})}</span>
+                        <span class="cnbc-p" style="color:var(--gold)">${item.buy.toLocaleString('tr-TR', {minimumFractionDigits:2})}</span>
                     </div>
                 </div>
             </div>`).join('');
     }
 
-    function applyFlashAndColors() {
-        document.querySelectorAll('.cur-card').forEach(card => {
-            // Parlama efekti ekle
+    function applyCNBCFlash() {
+        document.querySelectorAll('.cnbc-card').forEach(card => {
             card.classList.remove('card-flash');
-            void card.offsetWidth; // Reflow
+            void card.offsetWidth;
             card.classList.add('card-flash');
-
-            // Renk değişimi
             const rand = Math.random();
-            if (rand > 0.7) card.style.background = 'rgba(0, 143, 57, 0.9)'; 
-            else if (rand > 0.4) card.style.background = 'rgba(196, 0, 0, 0.9)'; 
-            else card.style.background = '#003366';
+            card.style.background = (rand > 0.7) ? 'rgba(0, 143, 57, 0.8)' : (rand > 0.4) ? 'rgba(196, 0, 0, 0.8)' : '#003366';
         });
     }
 
     async function fetchRSS() {
         try {
             const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://www.aa.com.tr/tr/rss/default?cat=ekonomi');
-            const data = await res.json();
-            const track = document.getElementById('newsTrack');
-            if(track && data.status === 'ok') {
-                const html = data.items.map(i => `<span style="margin-right:60px">${i.title.toUpperCase()} • </span>`).join('');
-                track.innerHTML = html + html;
+            const d = await res.json();
+            if(d.status === 'ok') {
+                const html = d.items.map(i => `<span style="margin-right:60px">${i.title.toUpperCase()} • </span>`).join('');
+                document.getElementById('newsTrack').innerHTML = html + html;
             }
-            const iTrack = document.getElementById('indicesTrack');
-            const indices = ["NASDAQ 18.240,40 %0,45 ▲", "DAX 17.120,10 %0,12 ▼", "DOW JONES 39.120 %0,05 ▲", "FTSE 100 7.820 %0,22 ▼"];
-            iTrack.innerHTML = indices.map(n => `<div class="index-item">${n}</div>`).join('') + indices.map(n => `<div class="index-item">${n}</div>`).join('');
+            const indices = ["NASDAQ 18.240 %0,4 ▲", "DAX 17.120 %0,1 ▼", "DOW 39.120 %0,1 ▲", "FTSE 7.820 %0,2 ▼", "NIKKEI 38.450 %0,8 ▲"];
+            document.getElementById('indicesTrack').innerHTML = indices.map(n => `<span style="margin-right:40px">${n}</span>`).join('') + indices.map(n => `<span style="margin-right:40px">${n}</span>`).join('');
         } catch(e) {}
     }
+
+    init();
 </script>
 </body>
 </html>
