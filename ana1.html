@@ -50,6 +50,19 @@
         .toolbar-btns { display: flex; gap: 6px; }
         .btn-round { width: 34px; height: 34px; border-radius: 10px; border: none; background: rgba(255,255,255,0.15); color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; font-size: 14px; }
         .btn-round.active-green { background: var(--success); box-shadow: 0 0 10px var(--success); }
+        .btn-round.active-blue { background: #00e5ff; box-shadow: 0 0 10px #00e5ff; }
+
+        /* YENİ GELİŞMİŞ ANİMASYONLAR */
+        @keyframes flash-green-bg { 
+            0% { background-color: rgba(0, 200, 83, 0.4); color: #00c853; transform: scale(1.05); } 
+            100% { background-color: transparent; color: var(--primary); transform: scale(1); } 
+        }
+        @keyframes flash-red-bg { 
+            0% { background-color: rgba(255, 82, 82, 0.4); color: #ff5252; transform: scale(1.05); } 
+            100% { background-color: transparent; color: var(--primary); transform: scale(1); } 
+        }
+        .price-up { animation: flash-green-bg 2s cubic-bezier(0.23, 1, 0.32, 1); border-radius: 4px; padding: 0 4px; }
+        .price-down { animation: flash-red-bg 2s cubic-bezier(0.23, 1, 0.32, 1); border-radius: 4px; padding: 0 4px; }
         
         #tv-settings-container { display: none; margin-bottom: 15px; }
         #settings-panel, #tv-panel { background: var(--card); border-radius: 18px; padding: 18px; border: 1px solid var(--border); box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-top: 5px; }
@@ -63,12 +76,13 @@
         input:checked + .slider { background-color: var(--success); }
         input:checked + .slider:before { transform: translateX(22px); }
 
-        .currency-card { background: var(--card); border-radius: 15px; padding: 14px; margin-bottom: 10px; display: grid; grid-template-columns: auto auto 1fr auto auto; align-items: center; gap: 12px; border: 1px solid var(--border); cursor: pointer; transition: transform 0.1s; position: relative; }
+        .currency-card { background: var(--card); border-radius: 15px; padding: 14px; margin-bottom: 10px; display: grid; grid-template-columns: auto auto 1fr auto auto; align-items: center; gap: 12px; border: 1px solid var(--border); cursor: pointer; transition: 0.2s; position: relative; }
+        .currency-card:active { transform: scale(0.98); }
         .drag-handle { color: var(--secondary); cursor: grab; padding: 5px; opacity: 0.5; }
         .flag-box { position: relative; width: 42px; height: 42px; }
         .flag-anim { width: 100%; height: 100%; border-radius: 50%; border: 2px solid var(--primary); object-fit: cover; }
         .price-col { text-align: right; min-width: 85px; }
-        .price-val { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 800; color: var(--primary); }
+        .price-val { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 800; color: var(--primary); transition: color 0.5s, background-color 0.5s; display: inline-block; padding: 2px 4px; }
         
         .cc-price-box { margin-top: 4px; padding: 2px 4px; background: rgba(243, 156, 18, 0.1); border-radius: 4px; border: 1px solid rgba(243, 156, 18, 0.2); }
         .cc-price-val { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 800; color: var(--warning); }
@@ -113,14 +127,11 @@
             <div><label class="label-style">ALIŞ MARJI (-)</label><input type="number" id="edit-buy-margin" class="input-box" step="0.0001"></div>
             <div><label class="label-style">SATIŞ MARJI (+)</label><input type="number" id="edit-sell-margin" class="input-box" step="0.0001"></div>
         </div>
-        
         <div><label class="label-style">BAYRAK KODU (us, tr, gold, btc...)</label><input type="text" id="edit-flag" class="input-box"></div>
-
         <div style="display:flex; align-items:center; gap:10px; margin: 10px 0; background: var(--bg); padding:10px; border-radius:8px">
             <label class="switch"><input type="checkbox" id="edit-auto-sync"><span class="slider"></span></label>
-            <label for="edit-auto-sync" style="font-size:12px; font-weight:bold">Oto-Mod Aktif</label>
+            <label for="edit-auto-sync" style="font-size:12px; font-weight:bold">Oto-Mod Aktif (Kilit Açık)</label>
         </div>
-
         <div style="display:flex; gap:10px">
             <button class="btn-round" style="flex:1; background:var(--danger); border-radius:8px; font-weight:bold" onclick="deleteCurrency()"><i class="fas fa-trash"></i> SİL</button>
             <button class="btn-round" style="flex:3; background:var(--success); border-radius:8px; font-weight:bold" onclick="saveManualUpdate()">KAYDET</button>
@@ -140,8 +151,9 @@
                 </div>
             </div>
             <div class="toolbar-btns">
-                <button class="btn-round" onclick="toggleAuto()" id="auto-btn"><i class="fas fa-robot"></i></button>
-                <button class="btn-round" onclick="toggleSettingsArea()" id="tv-btn"><i class="fas fa-tv"></i></button>
+                <button class="btn-round" onclick="toggleAuto()" id="auto-btn" title="Oto-Bot"><i class="fas fa-robot"></i></button>
+                <button class="btn-round" onclick="toggleAllTv()" id="tv-master-btn" title="Yayını Başlat/Durdur"><i class="fas fa-broadcast-tower"></i></button>
+                <button class="btn-round" onclick="toggleSettingsArea()" id="tv-settings-btn"><i class="fas fa-tv"></i></button>
                 <button class="btn-round" onclick="toggleTheme()"><i class="fas fa-moon"></i></button>
             </div>
         </div>
@@ -172,8 +184,6 @@
                         <option value="2">2.video veya resim Tasarımı</option>
                         <option value="3">3.video veya resim Tasarımı</option>
                         <option value="4">4.altin tasarim</option>
-                        <option value="5">5. Geleneksel Pano</option>
-                        <option value="6">6. Cnbce tasarim</option>
                     </select>
                     <div style="display:flex; align-items:center; gap:8px">
                          <label class="switch"><input type="checkbox" id="tv-master-switch-2" onchange="saveTvSettings()"><span class="slider"></span></label>
@@ -186,48 +196,21 @@
         <div id="settings-panel">
             <div style="padding:15px; background:rgba(0, 123, 255, 0.1); border-radius:12px; border:1px solid var(--primary); margin-bottom:15px">
                 <label class="label-style" style="color:var(--primary)">GOOGLE SHEETS ID</label>
-                <input type="text" id="sheets-id-input" class="input-box" placeholder="15hEw-s-Zl...7x7Y" onchange="saveSheetsId()">
-                <small style="font-size:9px; color:var(--secondary)">Dosyanızı "Bağlantıya sahip olan herkes görüntüleyebilir" yapın.</small>
+                <input type="text" id="sheets-id-input" class="input-box" onchange="saveSheetsId()">
             </div>
-
             <div style="padding:15px; background:rgba(243, 156, 18, 0.1); border-radius:12px; border:1px solid var(--warning); margin-bottom:15px">
                 <label class="label-style" style="color:var(--warning)">KREDİ KARTI KOMİSYON (%)</label>
-                <input type="number" id="cc-commission-rate" class="input-box" value="3.5" step="0.1" onchange="updateCommissionRate()">
-                <small style="font-size:9px; color:var(--secondary)">Sadece altın kategorisindeki ürünlere otomatik eklenir.</small>
+                <input type="number" id="cc-commission-rate" class="input-box" step="0.1" onchange="updateCommissionRate()">
             </div>
-
             <span class="label-style">API KAYNAK YÖNETİMİ</span>
             <select id="api-source-select" class="input-box" style="background: var(--primary); color: white; border: none; font-weight: bold;" onchange="saveApiSource()">
-                <option value="exchange-rate-v2">Exchange-Rate V2 (Yeni/Dinamik)</option>
+                <option value="exchange-rate-v2">Exchange-Rate V2 (Yeni)</option>
                 <option value="hexarate">Hexarate API (Yedek)</option>
-                <option value="google-sheets">Google Sheets (Özel Liste)</option>
+                <option value="google-sheets">Google Sheets (Özel)</option>
             </select>
-
             <label class="label-style">GÜNCELLEME HIZI (SANİYE)</label>
             <input type="number" id="sync-interval" class="input-box" value="30">
-
-            <div style="padding:15px; background:var(--bg); border-radius:12px; border:1px solid var(--border)">
-                <span class="label-style" style="color:var(--primary)">YENİ VARLIK EKLE</span>
-                <input type="text" id="new-name" class="input-box" placeholder="Sembol (USD, GA, BTC, EUR...)">
-                
-                <label class="label-style">API KATEGORİSİ</label>
-                <select id="new-api-cat" class="input-box">
-                    <option value="doviz">Döviz</option>
-                    <option value="altin">Altın</option>
-                    <option value="kripto">Kripto</option>
-                </select>
-
-                <input type="text" id="new-flag" class="input-box" placeholder="Bayrak Kodu (us, gold, btc)">
-                
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px">
-                    <div><label class="label-style">ALIŞ MARJI (-)</label><input type="number" id="new-buy-margin" class="input-box" value="0.100"></div>
-                    <div><label class="label-style">SATIŞ MARJI (+)</label><input type="number" id="new-sell-margin" class="input-box" value="0.250"></div>
-                </div>
-                <button class="btn-round" style="width:100%; background:var(--primary); border-radius:8px; font-weight:bold" onclick="addNewCurrency()">VARLIĞI EKLE</button>
-            </div>
-            <div class="internal-logs">
-                <div id="log-list"></div>
-            </div>
+            <div class="internal-logs"><div id="log-list"></div></div>
         </div>
     </div>
 
@@ -235,11 +218,10 @@
 </div>
 
 <div class="bottom-nav">
-    <div style="display:flex; align-items:center; gap:8px; overflow: hidden; white-space: nowrap; flex: 1; margin-right: 10px;">
-        <div id="status-dot" style="width:10px; height:10px; background:var(--success); border-radius:50%; flex-shrink: 0;"></div>
-        <small id="footer-status" style="font-size:11px; font-weight:bold; overflow: hidden; text-overflow: ellipsis;">Sistem Hazır</small>
+    <div style="display:flex; align-items:center; gap:8px; overflow: hidden; flex: 1;">
+        <div id="status-dot" style="width:10px; height:10px; background:var(--success); border-radius:50%;"></div>
+        <small id="footer-status" style="font-size:11px; font-weight:bold;">Sistem Hazır</small>
     </div>
-    
     <div class="bottom-tv-control">
         <small style="font-size:10px; font-weight:800; color:var(--secondary)">AKTİF YAYIN</small>
         <div id="active-tv-badges" style="display:flex; gap:4px">
@@ -250,6 +232,7 @@
 </div>
 
 <script>
+    // Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyCfcppc4rGYxmAj7fTzmYMZgcyBO4s8bFI",
       authDomain: "doviz-kurlari-35554.firebaseapp.com",
@@ -259,7 +242,6 @@
       messagingSenderId: "822410580056",
       appId: "1:822410580056:web:40d02d7729d7cf72aafa2d"
     };
-
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
@@ -275,9 +257,10 @@
     let ccRate = 3.5;
     let sheetId = "";
     let activeApiSource = "exchange-rate-v2";
+    let lastRenderedCurrencies = [];
 
     function initApp() {
-        addLog("Sistem Başlatıldı. Veriler Yükleniyor...", "INFO");
+        addLog("Sistem Başlatıldı.", "INFO");
         
         db.ref('terminal_data/config').on('value', (snapshot) => {
             const config = snapshot.val();
@@ -285,11 +268,9 @@
                 ccRate = config.cc_rate || 3.5;
                 sheetId = config.sheet_id || "";
                 activeApiSource = config.api_source || "exchange-rate-v2";
-                
                 document.getElementById('cc-commission-rate').value = ccRate;
                 document.getElementById('sheets-id-input').value = sheetId;
                 document.getElementById('api-source-select').value = activeApiSource;
-                render();
             }
         });
 
@@ -297,8 +278,11 @@
             const data = snapshot.val();
             if (data) { 
                 const newData = Array.isArray(data) ? data : Object.values(data);
-                currencies = newData.sort((a,b) => (a.order || 0) - (b.order || 0));
-                render();
+                const sortedData = newData.sort((a,b) => (a.order || 0) - (b.order || 0));
+                
+                render(sortedData);
+                lastRenderedCurrencies = JSON.parse(JSON.stringify(sortedData));
+                currencies = sortedData;
             }
         });
 
@@ -315,94 +299,67 @@
 
         const el = document.getElementById('currency-list');
         Sortable.create(el, {
-            handle: '.drag-handle',
-            animation: 150,
-            ghostClass: 'sortable-ghost',
+            handle: '.drag-handle', animation: 150,
             onEnd: function() { reorderCurrencies(); }
         });
     }
 
-    function updateCommissionRate() {
-        const val = parseFloat(document.getElementById('cc-commission-rate').value) || 0;
-        db.ref('terminal_data/config/cc_rate').set(val);
-        addLog(`Komisyon Güncellendi: %${val}`, "INFO");
-    }
-
-    function saveSheetsId() {
-        const val = document.getElementById('sheets-id-input').value.trim();
-        db.ref('terminal_data/config/sheet_id').set(val);
-        sheetId = val;
-        addLog("Sheets ID Kaydedildi.", "UPDATE");
-    }
-
-    function saveApiSource() {
-        const val = document.getElementById('api-source-select').value;
-        db.ref('terminal_data/config/api_source').set(val);
-        activeApiSource = val;
-        addLog(`Kaynak Değişti: ${val}`, "WARN");
-    }
-
     async function fetchMarketData() {
-        if (!isAutoMode) return;
+        if (!isAutoMode) {
+            clearTimeout(syncTimer);
+            return;
+        }
         
         try {
-            let hasChange = false;
-            let updatedList = [...currencies];
+            let hasGlobalChange = false;
+            let updatedList = JSON.parse(JSON.stringify(currencies));
+            let marketRates = {};
 
             if (activeApiSource === "google-sheets") {
-                if(!sheetId) {
-                    addLog("Sheets ID Eksik!", "ERROR");
-                    toggleAuto();
-                    return;
-                }
+                if(!sheetId) { toggleAuto(); return; }
                 const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
                 const resp = await fetch(url);
                 const text = await resp.text();
                 const json = JSON.parse(text.substr(47).slice(0, -2));
-                const rows = json.table.rows;
-
-                updatedList = currencies.map(c => {
-                    const sheetRow = rows.find(r => r.c[0] && r.c[0].v.toString().toUpperCase() === c.name.toUpperCase());
-                    if (sheetRow) {
-                        const newBuy = applyMargins(parseFloat(sheetRow.c[1]?.v || 0), c.buyMargin, 'buy', c.category);
-                        const newSell = applyMargins(parseFloat(sheetRow.c[2]?.v || 0), c.sellMargin, 'sell', c.category);
-                        if (c.buy !== newBuy || c.sell !== newSell) {
-                            hasChange = true;
-                            return { ...c, buy: newBuy, sell: newSell };
-                        }
-                    }
-                    return c;
+                json.table.rows.forEach(r => {
+                    if(r.c[0] && r.c[1]) marketRates[r.c[0].v.toString().toUpperCase()] = parseFloat(r.c[1].v);
                 });
             } else {
                 const tryResp = await fetch(`https://hexarate.paikama.co/api/rates/USD/TRY/latest`);
                 const tryJson = await tryResp.json();
                 const tryRate = parseFloat(tryJson?.data?.mid || 1);
-
-                updatedList = await Promise.all(currencies.map(async (c) => {
-                    if(!c.autoSync) return c;
-                    try {
-                        let base = c.name.toUpperCase() === "GA" ? "XAU" : c.name.toUpperCase();
-                        const resp = await fetch(`https://hexarate.paikama.co/api/rates/${base}/USD/latest`);
-                        const json = await resp.json();
-                        const midPrice = json?.data?.mid;
-                        if(midPrice) {
-                            const usdPrice = parseFloat(midPrice);
-                            let finalPrice = (base === "XAU" || base === "XAG") ? (usdPrice * tryRate / 31.1035) : (usdPrice * tryRate);
-                            
-                            let newSell = applyMargins(finalPrice, c.sellMargin, 'sell', c.category);
-                            let newBuy = applyMargins(finalPrice, c.buyMargin, 'buy', c.category);
-
-                            if(Math.abs(c.sell - newSell) > 0.00001 || Math.abs(c.buy - newBuy) > 0.00001) {
-                                hasChange = true;
-                                return { ...c, buy: newBuy, sell: newSell, basePrice: finalPrice };
-                            }
-                        }
-                    } catch (e) { console.error(e); }
-                    return c;
-                }));
+                marketRates["_USDTRY"] = tryRate;
             }
 
-            if(hasChange) { 
+            for (let i = 0; i < updatedList.length; i++) {
+                let c = updatedList[i];
+                if (c.autoSync === false) continue; 
+
+                let basePrice = 0;
+                if (activeApiSource === "google-sheets") {
+                    basePrice = marketRates[c.name] || 0;
+                } else {
+                    let sym = c.name === "GA" ? "XAU" : (c.name === "GR" ? "XAG" : c.name);
+                    const resp = await fetch(`https://hexarate.paikama.co/api/rates/${sym}/USD/latest`);
+                    const json = await resp.json();
+                    const mid = parseFloat(json?.data?.mid || 0);
+                    const usdTry = marketRates["_USDTRY"];
+                    basePrice = (sym === "XAU" || sym === "XAG") ? (mid * usdTry / 31.1035) : (mid * usdTry);
+                }
+
+                if (basePrice > 0) {
+                    const newBuy = applyMargins(basePrice, c.buyMargin, 'buy', c.category);
+                    const newSell = applyMargins(basePrice, c.sellMargin, 'sell', c.category);
+                    
+                    if (Math.abs(c.buy - newBuy) > 0.0001 || Math.abs(c.sell - newSell) > 0.0001) {
+                        updatedList[i].buy = newBuy;
+                        updatedList[i].sell = newSell;
+                        hasGlobalChange = true;
+                    }
+                }
+            }
+
+            if(hasGlobalChange && isAutoMode) { 
                 currencies = updatedList; 
                 saveToFirebase(); 
             }
@@ -410,126 +367,108 @@
             document.getElementById('stat-sync').innerText = new Date().toLocaleTimeString('tr-TR');
             resetCountdown();
             syncTimer = setTimeout(fetchMarketData, (parseInt(document.getElementById('sync-interval').value) || 30) * 1000);
-            
         } catch (e) { 
-            addLog("Veri Çekme Hatası!", "ERROR");
+            addLog("Bağlantı Hatası!", "ERROR");
             syncTimer = setTimeout(fetchMarketData, 5000); 
         }
     }
 
-    // Uygulanan Marj ve Yuvarlama Mantığı (Virgülden sonra 3. basamağı 0 yapar)
     function applyMargins(price, margin, type, category) {
-        let final;
-        if (type === 'sell') {
-            final = price + (margin || 0);
-        } else {
-            final = price - (margin || 0);
-        }
-        
-        if (category === 'altin') {
-            return Math.floor(final);
-        } else {
-            // Döviz için 3. basamağı 0'a yuvarlama (Örn: 25.432 -> 25.430)
-            return Math.round(final * 100) / 100;
-        }
+        let final = (type === 'sell') ? (price + (margin || 0)) : (price - (margin || 0));
+        return (category === 'altin') ? Math.floor(final) : Math.round(final * 1000) / 1000;
     }
 
-    function formatPrice(val, name, category) {
-        if(category === "altin") return Math.floor(val).toString();
-        // UI'da her zaman 3 basamak göster (Zaten 3. basamak 0 olacak)
-        return val.toFixed(3);
+    function formatPrice(val, category) {
+        if(!val) return "0.00";
+        return category === "altin" ? Math.floor(val).toLocaleString('tr-TR') : val.toFixed(3);
     }
 
-    function render() {
+    function render(newList) {
         const list = document.getElementById('currency-list');
         list.innerHTML = '';
-        currencies.forEach(c => {
-            let iconUrl;
-            if (c.category === 'altin' || c.flag === 'gold') iconUrl = GOLD_ICON;
-            else if (c.category === 'kripto' || c.flag === 'btc') iconUrl = CRYPTO_ICON;
-            else if (c.flag.length === 2) iconUrl = `https://flagcdn.com/w80/${c.flag}.png`;
-            else iconUrl = DEFAULT_ICON;
-
-            let ccHtml = "";
-            if(c.category === 'altin') {
-                const ccPrice = Math.floor(c.sell + (c.sell * (ccRate / 100)));
-                ccHtml = `<div class="cc-price-box"><span class="cc-label">K. Kartı (%${ccRate})</span><div class="cc-price-val">${ccPrice}</div></div>`;
+        newList.forEach(c => {
+            const oldItem = lastRenderedCurrencies.find(o => o.id === c.id);
+            let buyClass = "", sellClass = "";
+            
+            // Parlama Efekti Mantığı
+            if (oldItem) {
+                if (c.buy > oldItem.buy) buyClass = "price-up";
+                else if (c.buy < oldItem.buy) buyClass = "price-down";
+                if (c.sell > oldItem.sell) sellClass = "price-up";
+                else if (c.sell < oldItem.sell) sellClass = "price-down";
             }
+
+            let iconUrl = (c.category === 'altin' || c.flag === 'gold') ? GOLD_ICON : 
+                          (c.category === 'kripto' || c.flag === 'btc') ? CRYPTO_ICON : 
+                          (c.flag?.length === 2) ? `https://flagcdn.com/w80/${c.flag}.png` : DEFAULT_ICON;
+            
+            let ccHtml = (c.category === 'altin') ? 
+                `<div class="cc-price-box"><span class="cc-label">K. Kartı (%${ccRate})</span><div class="cc-price-val">${Math.floor(c.sell * (1 + ccRate/100))}</div></div>` : "";
 
             list.innerHTML += `
                 <div class="currency-card" data-id="${c.id}" onclick="openUpdateModal(${c.id})">
                     <div class="drag-handle"><i class="fas fa-grip-vertical"></i></div>
-                    <div class="lock-indicator">${c.autoSync ? '<i class="fas fa-sync-alt fa-spin"></i>' : '<i class="fas fa-lock"></i>'}</div>
+                    <div class="lock-indicator">${c.autoSync ? '<i class="fas fa-sync-alt fa-spin" style="color:var(--success)"></i>' : '<i class="fas fa-lock" style="color:var(--danger)"></i>'}</div>
                     <div class="flag-box"><img src="${iconUrl}" class="flag-anim" onerror="this.src='${DEFAULT_ICON}'"></div>
                     <div class="currency-meta"><b>${c.name}</b><br><span style="font-size:9px">${c.category.toUpperCase()}</span></div>
                     <div class="price-col">
                         <span class="label-style">ALIŞ</span>
-                        <div class="price-val">${formatPrice(c.buy || 0, c.name, c.category)}</div>
+                        <div class="price-val ${buyClass}">${formatPrice(c.buy, c.category)}</div>
                         <div class="margin-tag">-${(c.buyMargin || 0).toFixed(2)}</div>
                     </div>
                     <div class="price-col">
                         <span class="label-style">SATIŞ</span>
-                        <div class="price-val">${formatPrice(c.sell || 0, c.name, c.category)}</div>
+                        <div class="price-val ${sellClass}">${formatPrice(c.sell, c.category)}</div>
                         <div class="margin-tag" style="color:var(--success)">+${(c.sellMargin || 0).toFixed(2)}</div>
                         ${ccHtml}
                     </div>
                 </div>`;
         });
-        document.getElementById('stat-count').innerText = currencies.length;
+        document.getElementById('stat-count').innerText = newList.length;
     }
 
     function toggleAuto() {
         isAutoMode = !isAutoMode;
         document.getElementById('auto-btn').classList.toggle('active-green', isAutoMode);
         clearTimeout(syncTimer);
-        if(isAutoMode) { fetchMarketData(); addLog("Oto-Mod Başlatıldı.", "INFO"); }
-        else { document.getElementById('timer-box').innerText = "--"; addLog("Oto-Mod Durduruldu.", "WARN"); }
+        if(isAutoMode) { 
+            fetchMarketData(); 
+            addLog("Genel Bot Başlatıldı.", "INFO"); 
+        } else { 
+            document.getElementById('timer-box').innerText = "--"; 
+            addLog("Genel Bot Durduruldu.", "WARN"); 
+        }
     }
 
-    function toggleSettingsArea() {
-        const area = document.getElementById('tv-settings-container');
-        const list = document.getElementById('currency-list');
-        if (area.style.display === 'block') {
-            area.style.display = 'none';
-            list.style.display = 'block';
-        } else {
-            area.style.display = 'block';
-            list.style.display = 'none';
-        }
+    function saveManualUpdate() {
+        const id = parseInt(document.getElementById('edit-id').value);
+        const bPrice = parseFloat(document.getElementById('edit-buy-price').value) || 0;
+        const sPrice = parseFloat(document.getElementById('edit-sell-price').value) || 0;
+        const bMargin = parseFloat(document.getElementById('edit-buy-margin').value) || 0;
+        const sMargin = parseFloat(document.getElementById('edit-sell-margin').value) || 0;
+        const isAuto = document.getElementById('edit-auto-sync').checked;
+
+        currencies = currencies.map(c => c.id === id ? {
+            ...c, buy: bPrice, sell: sPrice, buyMargin: bMargin, sellMargin: sMargin,
+            flag: document.getElementById('edit-flag').value.toLowerCase(),
+            autoSync: isAuto
+        } : c);
+        
+        saveToFirebase(); 
+        closeModal();
+        addLog(`Manuel Güncelleme: ${id}`, "UPDATE");
     }
 
     function saveToFirebase() { db.ref('terminal_data/currencies').set(currencies); }
     
     function reorderCurrencies() {
         const items = document.querySelectorAll('.currency-card');
-        const newOrderedList = [];
         items.forEach((item, index) => {
             const id = parseInt(item.getAttribute('data-id'));
             const curr = currencies.find(c => c.id === id);
-            if(curr) { curr.order = index; newOrderedList.push(curr); }
+            if(curr) curr.order = index;
         });
-        currencies = newOrderedList;
         saveToFirebase();
-    }
-
-    function saveTvSettings() {
-        const settings = {
-            master: document.getElementById('tv-master-switch').checked,
-            screen: document.getElementById('tv-screen-select').value,
-            master2: document.getElementById('tv-master-switch-2').checked,
-            screen2: document.getElementById('tv-screen-select-2').value,
-            lastUpdate: Date.now()
-        };
-        db.ref('terminal_data/tv_settings').set(settings);
-    }
-
-    function updateTvButtonState(m1, m2) {
-        const tvBtn = document.getElementById('tv-btn');
-        const b1 = document.getElementById('badge-tv1');
-        const b2 = document.getElementById('badge-tv2');
-        (m1 || m2) ? tvBtn.classList.add('active-green') : tvBtn.classList.remove('active-green');
-        b1.style.background = m1 ? 'var(--success)' : '#ccc';
-        b2.style.background = m2 ? 'var(--success)' : '#ccc';
     }
 
     function openUpdateModal(id) {
@@ -546,48 +485,56 @@
         document.getElementById('update-modal').style.display = 'flex';
     }
 
-    function saveManualUpdate() {
-        const id = parseInt(document.getElementById('edit-id').value);
-        const bMargin = parseFloat(document.getElementById('edit-buy-margin').value) || 0;
-        const sMargin = parseFloat(document.getElementById('edit-sell-margin').value) || 0;
-        
-        currencies = currencies.map(c => c.id === id ? {
-            ...c, 
-            buy: parseFloat(document.getElementById('edit-buy-price').value),
-            sell: parseFloat(document.getElementById('edit-sell-price').value),
-            buyMargin: bMargin,
-            sellMargin: sMargin,
-            flag: document.getElementById('edit-flag').value.toLowerCase(),
-            autoSync: document.getElementById('edit-auto-sync').checked
-        } : c);
-        saveToFirebase(); closeModal();
-        addLog(`ID: ${id} Güncellendi.`, "UPDATE");
+    function closeModal() { document.getElementById('update-modal').style.display = 'none'; }
+    
+    function toggleSettingsArea() {
+        const area = document.getElementById('tv-settings-container');
+        const list = document.getElementById('currency-list');
+        const btn = document.getElementById('tv-settings-btn');
+        const isOpen = area.style.display === 'block';
+        area.style.display = isOpen ? 'none' : 'block';
+        list.style.display = isOpen ? 'block' : 'none';
+        btn.classList.toggle('active-blue', !isOpen);
     }
 
-    function addNewCurrency() {
-        const name = document.getElementById('new-name').value.toUpperCase().trim();
-        const cat = document.getElementById('new-api-cat').value;
-        if(!name) return;
-        let flagInput = document.getElementById('new-flag').value.toLowerCase();
-        if(cat === 'altin' && !flagInput) flagInput = 'gold';
-
-        const newItem = {
-            id: Date.now(), name: name, category: cat,
-            flag: flagInput || 'tr',
-            buy: 0, sell: 0, buyMargin: parseFloat(document.getElementById('new-buy-margin').value) || 0.1,
-            sellMargin: parseFloat(document.getElementById('new-sell-margin').value) || 0.2,
-            autoSync: true, order: currencies.length
-        };
-        currencies.push(newItem); saveToFirebase();
-        document.getElementById('new-name').value = '';
-        addLog(`Eklendi: ${name}`, "INFO");
+    function saveTvSettings() {
+        db.ref('terminal_data/tv_settings').set({
+            master: document.getElementById('tv-master-switch').checked,
+            screen: document.getElementById('tv-screen-select').value,
+            master2: document.getElementById('tv-master-switch-2').checked,
+            screen2: document.getElementById('tv-screen-select-2').value,
+            lastUpdate: Date.now()
+        });
     }
 
-    function deleteCurrency() {
-        if(!confirm("Silinsin mi?")) return;
-        const id = parseInt(document.getElementById('edit-id').value);
-        currencies = currencies.filter(c => c.id !== id);
-        saveToFirebase(); closeModal();
+    function toggleAllTv() {
+        const s1 = document.getElementById('tv-master-switch');
+        const s2 = document.getElementById('tv-master-switch-2');
+        const newState = !(s1.checked || s2.checked);
+        s1.checked = newState; s2.checked = newState;
+        saveTvSettings();
+    }
+
+    function updateTvButtonState(m1, m2) {
+        const btn = document.getElementById('tv-master-btn');
+        (m1 || m2) ? btn.classList.add('active-green') : btn.classList.remove('active-green');
+        document.getElementById('badge-tv1').style.background = m1 ? 'var(--success)' : '#ccc';
+        document.getElementById('badge-tv2').style.background = m2 ? 'var(--success)' : '#ccc';
+    }
+
+    function updateCommissionRate() {
+        const val = parseFloat(document.getElementById('cc-commission-rate').value) || 0;
+        db.ref('terminal_data/config/cc_rate').set(val);
+    }
+
+    function saveSheetsId() {
+        const val = document.getElementById('sheets-id-input').value.trim();
+        db.ref('terminal_data/config/sheet_id').set(val);
+    }
+
+    function saveApiSource() {
+        const val = document.getElementById('api-source-select').value;
+        db.ref('terminal_data/config/api_source').set(val);
     }
 
     function resetCountdown() {
@@ -600,22 +547,27 @@
         }, 1000);
     }
 
-    function closeModal() { document.getElementById('update-modal').style.display = 'none'; }
-    function toggleTheme() { document.body.setAttribute('data-theme', document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); }
-
     function addLog(m, type) {
         const l = document.getElementById('log-list');
-        const footerStatus = document.getElementById('footer-status');
         const entry = document.createElement('div');
         entry.className = 'log-entry';
-        let tagClass = 'tag-info';
-        if(type === 'UPDATE') tagClass = 'tag-update';
-        if(type === 'ERROR') tagClass = 'tag-error';
-        if(type === 'WARN') tagClass = 'tag-warn';
-        entry.innerHTML = `<span class="log-time">${new Date().toLocaleTimeString()}</span><span class="log-tag ${tagClass}">${type}</span><span class="log-msg">${m}</span>`;
+        let tc = type === 'UPDATE' ? 'tag-update' : (type === 'ERROR' ? 'tag-error' : (type === 'WARN' ? 'tag-warn' : 'tag-info'));
+        entry.innerHTML = `<span class="log-time">${new Date().toLocaleTimeString()}</span><span class="log-tag ${tc}">${type}</span><span class="log-msg">${m}</span>`;
         l.prepend(entry);
-        footerStatus.innerText = m;
-        if(l.childNodes.length > 40) l.removeChild(l.lastChild);
+        document.getElementById('footer-status').innerText = m;
+        if(l.childNodes.length > 30) l.removeChild(l.lastChild);
+    }
+
+    function toggleTheme() {
+        const cur = document.body.getAttribute('data-theme');
+        document.body.setAttribute('data-theme', cur === 'dark' ? 'light' : 'dark');
+    }
+
+    function deleteCurrency() {
+        if(!confirm("Emin misiniz?")) return;
+        const id = parseInt(document.getElementById('edit-id').value);
+        currencies = currencies.filter(c => c.id !== id);
+        saveToFirebase(); closeModal();
     }
 
     initApp();
