@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Enterprise Currency Terminal v3.2 Pro</title>
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Döviz Terminal">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0062cc">
+    <link rel="apple-touch-icon" href="https://img.icons8.com/?size=100&id=nTH8lhDLqpDI&format=png&color=000000">
+    
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkVudGVycHJpc2UgQ3VycmVuY3kgVGVybWluYWwiLAogICJzaG9ydF9uYW1lIjogIkTDtnZpeiBUZXJtIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmMGYyZjUiLAogICJ0aGVtZV9jb2xvciI6ICIjMDA2MmNjIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly9pbWcuaWNvbnM4LmNvbS8/c2l6ZT0xMDAmaWQ9blRIOGxhRExxcERJJmZvcm1hdD1wbmcmY29sb3I9MDAwMDAwIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJzaXplcyI6ICI1MTJ4NTEyIiwKICAidHlwZSI6ICJpbWFnZS9wbmciCiAgICB9CiAgX ]Cn0=">
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg: #f0f2f5; --card: #ffffff; --text: #1c1e21; --primary: #007bff;
+            --secondary: #65676b; --success: #00c853; --danger: #ff5252; --border: #e4e6eb;
+            --warning: #f39c12; 
+            --header-gradient: linear-gradient(135deg, #0062cc 0%, #004a99 100%);
+            --overlay: rgba(0,0,0,0.5);
+        }
+        [data-theme="dark"] {
+            --bg: #0f1011; --card: #1c1e21; --text: #e4e6eb; --secondary: #b0b3b8;
+            --border: #333537; --header-gradient: linear-gradient(135deg, #161719 0%, #25272a 100%);
+            --overlay: rgba(0,0,0,0.8);
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; display: flex; justify-content: center; transition: background 0.3s; overflow-x: hidden; }
+        .container { width: 100%; max-width: 500px; padding: 0 12px 100px 12px; }
+        
+        /* Header & UI */
+        .header { background: var(--header-gradient); padding: 12px 18px; border-radius: 0 0 20px 20px; margin: 0 -12px 15px -12px; color: white; box-shadow: 0 5px 15px rgba(0,0,0,0.15); position: sticky; top:0; z-index:1001; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; }
+        .brand-section { display: flex; align-items: center; gap: 10px; }
+        .chameleon-icon { font-size: 24px; animation: bounce 2s infinite ease-in-out; display: inline-block; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-5px) rotate(10deg); } }
+        .compact-info-row { display: flex; align-items: center; gap: 8px; font-size: 11px; background: rgba(0,0,0,0.2); padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); }
+        .header-stats { display: flex; align-items: center; gap: 6px; font-weight: 600; color: #00ff88; }
+        .countdown-box { font-family: monospace; font-weight: bold; color: white; opacity: 0.8; border-left: 1px solid rgba(255,255,255,0.2); padding-left: 8px; }
+
+        .toolbar-btns { display: flex; gap: 6px; }
+        .btn-round { width: 34px; height: 34px; border-radius: 10px; border: none; background: rgba(255,255,255,0.15); color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; font-size: 14px; }
+        .btn-round.active-green { background: var(--success); box-shadow: 0 0 10px var(--success); }
+        .btn-round.active-blue { background: #00e5ff; box-shadow: 0 0 10px #00e5ff; }
+
+        /* CANLI BORSA EFEKTLERİ (KART GENELİ) */
+        @keyframes full-row-up { 
+            0% { background: rgba(0, 200, 83, 0.1); border-color: var(--success); transform: scale(1.01); } 
+            50% { background: rgba(0, 200, 83, 0.2); border-color: var(--success); }
+            100% { background: var(--card); border-color: var(--border); transform: scale(1); } 
+        }
+        @keyframes full-row-down { 
+            0% { background: rgba(255, 82, 82, 0.1); border-color: var(--danger); transform: scale(1.01); } 
+            50% { background: rgba(255, 82, 82, 0.2); border-color: var(--danger); }
+            100% { background: var(--card); border-color: var(--border); transform: scale(1); } 
+        }
+        
+        .row-up { animation: full-row-up 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        .row-down { animation: full-row-down 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+
+        /* Fiyat Parlama Alt Efektleri */
+        @keyframes flash-green-text { 
+            0% { color: var(--success); transform: scale(1.1); font-weight: 900; } 
+            100% { color: var(--primary); transform: scale(1); } 
+        }
+        @keyframes flash-red-text { 
+            0% { color: var(--danger); transform: scale(1.1); font-weight: 900; } 
+            100% { color: var(--primary); transform: scale(1); } 
+        }
+        .price-up { animation: flash-green-text 1.5s forwards; }
+        .price-down { animation: flash-red-text 1.5s forwards; }
+        
+        /* Cards & Currency */
+        .currency-card { background: var(--card); border-radius: 15px; padding: 14px; margin-bottom: 10px; display: grid; grid-template-columns: auto auto 1fr auto auto; align-items: center; gap: 12px; border: 1px solid var(--border); cursor: pointer; transition: transform 0.2s, background 0.3s, border-color 0.3s; position: relative; overflow: hidden; }
+        .currency-card:active { transform: scale(0.98); }
+        .drag-handle { color: var(--secondary); cursor: grab; padding: 5px; opacity: 0.5; }
+        .flag-box { position: relative; width: 42px; height: 42px; }
+        .flag-anim { width: 100%; height: 100%; border-radius: 50%; border: 2px solid var(--primary); object-fit: cover; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .price-col { text-align: right; min-width: 85px; }
+        .price-val { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 800; color: var(--primary); display: inline-block; transition: color 0.3s; }
+        
+        .cc-price-box { margin-top: 4px; padding: 2px 4px; background: rgba(243, 156, 18, 0.1); border-radius: 4px; border: 1px solid rgba(243, 156, 18, 0.2); }
+        .cc-price-val { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 800; color: var(--warning); }
+        .cc-label { font-size: 8px; font-weight: bold; color: var(--warning); display: block; text-transform: uppercase; }
+        .margin-tag { font-size: 10px; color: var(--secondary); font-weight: 800; margin-top: 2px; font-family: monospace; }
+        
+        /* Diğer UI Elemanları */
+        #tv-settings-container { display: none; margin-bottom: 15px; }
+        #settings-panel, #tv-panel { background: var(--card); border-radius: 18px; padding: 18px; border: 1px solid var(--border); box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-top: 5px; }
+        .input-box { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 10px; font-size: 13px; }
+        .label-style { font-size: 10px; font-weight: 800; color: var(--secondary); margin-bottom: 4px; display: block; }
+        .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 22px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--success); }
+        input:checked + .slider:before { transform: translateX(22px); }
+
+        .internal-logs { background: #111; border-radius: 10px; padding: 10px; margin-top: 15px; max-height: 200px; overflow-y: auto; border: 1px solid #333; font-family: 'monospace'; }
+        .log-entry { display: flex; align-items: flex-start; gap: 8px; font-size: 10px; padding: 4px 0; border-bottom: 1px solid #222; }
+        .log-time { color: #888; white-space: nowrap; }
+        .log-tag { padding: 2px 4px; border-radius: 4px; font-weight: bold; font-size: 8px; text-transform: uppercase; }
+        .tag-info { background: #007bff; color: white; }
+        .tag-update { background: #00c853; color: white; }
+        .tag-error { background: #ff5252; color: white; }
+        .tag-warn { background: #ffa000; color: white; }
+        .log-msg { color: #eee; line-height: 1.3; }
+
+        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: var(--overlay); display: none; justify-content: center; align-items: center; z-index: 2000; padding: 20px; backdrop-filter: blur(4px); }
+        .modal-content { background: var(--card); width: 100%; max-width: 400px; border-radius: 20px; padding: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); padding: 8px 20px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; z-index: 1000; height: 60px; }
+        .lock-indicator { position: absolute; top: 5px; left: 5px; font-size: 10px; color: var(--secondary); }
+        .sortable-ghost { opacity: 0.3; background: var(--primary) !important; }
+        
+        .bottom-tv-control { display: flex; align-items: center; gap: 10px; background: var(--bg); padding: 5px 12px; border-radius: 12px; border: 1px solid var(--border); }
+        .tv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 10px; }
+        .tv-card-inner { background: var(--bg); padding: 10px; border-radius: 12px; border: 1px solid var(--border); }
+    </style>
+</head>
+<body data-theme="light">
+
+<div class="modal-overlay" id="update-modal">
+    <div class="modal-content">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px">
+            <h3 id="edit-title" style="margin:0; font-size:16px">Dövizi Düzenle</h3>
+            <button class="btn-round" onclick="closeModal()" style="background:var(--bg); color:var(--text)"><i class="fas fa-times"></i></button>
+        </div>
+        <input type="hidden" id="edit-id">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px">
+            <div><label class="label-style">GÜNCEL ALIŞ FİYATI</label><input type="number" id="edit-buy-price" class="input-box" step="0.0001"></div>
+            <div><label class="label-style">GÜNCEL SATIŞ FİYATI</label><input type="number" id="edit-sell-price" class="input-box" step="0.0001"></div>
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px">
+            <div><label class="label-style">ALIŞ MARJI (-)</label><input type="number" id="edit-buy-margin" class="input-box" step="0.0001"></div>
+            <div><label class="label-style">SATIŞ MARJI (+)</label><input type="number" id="edit-sell-margin" class="input-box" step="0.0001"></div>
+        </div>
+        
+        <div><label class="label-style">BAYRAK KODU (us, tr, gold, btc...)</label><input type="text" id="edit-flag" class="input-box"></div>
+
+        <div style="display:flex; align-items:center; gap:10px; margin: 10px 0; background: var(--bg); padding:10px; border-radius:8px">
+            <label class="switch"><input type="checkbox" id="edit-auto-sync"><span class="slider"></span></label>
+            <label for="edit-auto-sync" style="font-size:12px; font-weight:bold">Oto-Mod Aktif</label>
+        </div>
+
+        <div style="display:flex; gap:10px">
+            <button class="btn-round" style="flex:1; background:var(--danger); border-radius:8px; font-weight:bold" onclick="deleteCurrency()"><i class="fas fa-trash"></i> SİL</button>
+            <button class="btn-round" style="flex:3; background:var(--success); border-radius:8px; font-weight:bold" onclick="saveManualUpdate()">KAYDET</button>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <header class="header">
+        <div class="header-top">
+            <div class="brand-section">
+                <span class="chameleon-icon">🦎</span>
+                <div class="compact-info-row">
+                    <div class="header-stats"><i class="fas fa-layer-group"></i> <span id="stat-count">0</span></div>
+                    <div class="header-stats" style="color:#00e5ff; border-left: 1px solid rgba(255,255,255,0.2); padding-left: 8px;"><i class="fas fa-clock"></i> <span id="stat-sync">--:--</span></div>
+                    <div class="countdown-box" id="timer-box">--</div>
+                </div>
+            </div>
+            <div class="toolbar-btns">
+                <button class="btn-round" onclick="toggleAuto()" id="auto-btn" title="Oto-Bot"><i class="fas fa-robot"></i></button>
+                <button class="btn-round" onclick="toggleAllTv()" id="tv-master-btn" title="Yayını Başlat/Durdur"><i class="fas fa-broadcast-tower"></i></button>
+                <button class="btn-round" onclick="toggleSettingsArea()" id="tv-settings-btn"><i class="fas fa-tv"></i></button>
+                <button class="btn-round" onclick="toggleTheme()"><i class="fas fa-moon"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <div id="tv-settings-container">
+        <div id="tv-panel">
+            <div class="tv-grid">
+                <div class="tv-card-inner">
+                    <label class="label-style">1. MONİTÖR (TV)</label>
+                    <select id="tv-screen-select" class="input-box" onchange="saveTvSettings()">
+                        <option value="1">1. Bloomberg Tasarımı</option>
+                        <option value="2">2. Ekotürk Tasarımı</option>
+                        <option value="3">3. CNBC-e Tasarımı</option>
+                        <option value="4">4. Genel Bilgi Panosu</option>
+                        <option value="5">5. Geleneksel Pano</option>
+                        <option value="6">6. Modern Pro Pano</option>
+                    </select>
+                    <div style="display:flex; align-items:center; gap:8px">
+                         <label class="switch"><input type="checkbox" id="tv-master-switch" onchange="saveTvSettings()"><span class="slider"></span></label>
+                         <span style="font-size:10px; font-weight:bold">YAYIN</span>
+                    </div>
+                </div>
+                <div class="tv-card-inner">
+                    <label class="label-style">2. MONİTÖR (WEB)</label>
+                    <select id="tv-screen-select-2" class="input-box" onchange="saveTvSettings()">
+                        <option value="1">1.Karsilama Ekran</option>
+                        <option value="2">2.video veya resim Tasarımı</option>
+                        <option value="3">3.video veya resim Tasarımı</option>
+                        <option value="4">4.altin tasarim</option>
+                        <option value="5">5. Geleneksel Pano</option>
+                        <option value="6">6. Cnbce tasarim</option>
+                    </select>
+                    <div style="display:flex; align-items:center; gap:8px">
+                         <label class="switch"><input type="checkbox" id="tv-master-switch-2" onchange="saveTvSettings()"><span class="slider"></span></label>
+                         <span style="font-size:10px; font-weight:bold">YAYIN</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="settings-panel">
+            <div style="padding:15px; background:rgba(0, 123, 255, 0.1); border-radius:12px; border:1px solid var(--primary); margin-bottom:15px">
+                <label class="label-style" style="color:var(--primary)">GOOGLE SHEETS ID</label>
+                <input type="text" id="sheets-id-input" class="input-box" placeholder="15hEw-s-Zl...7x7Y" onchange="saveSheetsId()">
+                <small style="font-size:9px; color:var(--secondary)">Dosyanızı "Bağlantıya sahip olan herkes görüntüleyebilir" yapın.</small>
+            </div>
+
+            <div style="padding:15px; background:rgba(243, 156, 18, 0.1); border-radius:12px; border:1px solid var(--warning); margin-bottom:15px">
+                <label class="label-style" style="color:var(--warning)">KREDİ KARTI KOMİSYON (%)</label>
+                <input type="number" id="cc-commission-rate" class="input-box" value="3.5" step="0.1" onchange="updateCommissionRate()">
+                <small style="font-size:9px; color:var(--secondary)">Sadece altın kategorisindeki ürünlere otomatik eklenir.</small>
+            </div>
+
+            <span class="label-style">API KAYNAK YÖNETİMİ</span>
+            <select id="api-source-select" class="input-box" style="background: var(--primary); color: white; border: none; font-weight: bold;" onchange="saveApiSource()">
+                <option value="exchange-rate-v2">Exchange-Rate V2 (Yeni/Dinamik)</option>
+                <option value="hexarate">Hexarate API (Yedek)</option>
+                <option value="google-sheets">Google Sheets (Özel Liste)</option>
+            </select>
+
+            <label class="label-style">GÜNCELLEME HIZI (SANİYE)</label>
+            <input type="number" id="sync-interval" class="input-box" value="30">
+
+            <div style="padding:15px; background:var(--bg); border-radius:12px; border:1px solid var(--border)">
+                <span class="label-style" style="color:var(--primary)">YENİ VARLIK EKLE</span>
+                <input type="text" id="new-name" class="input-box" placeholder="Sembol (USD, GA, BTC, EUR...)">
+                
+                <label class="label-style">API KATEGORİSİ</label>
+                <select id="new-api-cat" class="input-box">
+                    <option value="doviz">Döviz</option>
+                    <option value="altin">Altın</option>
+                    <option value="kripto">Kripto</option>
+                </select>
+
+                <input type="text" id="new-flag" class="input-box" placeholder="Bayrak Kodu (us, gold, btc)">
+                
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px">
+                    <div><label class="label-style">ALIŞ MARJI (-)</label><input type="number" id="new-buy-margin" class="input-box" value="0.100"></div>
+                    <div><label class="label-style">SATIŞ MARJI (+)</label><input type="number" id="new-sell-margin" class="input-box" value="0.250"></div>
+                </div>
+                <button class="btn-round" style="width:100%; background:var(--primary); border-radius:8px; font-weight:bold" onclick="addNewCurrency()">VARLIĞI EKLE</button>
+            </div>
+            <div class="internal-logs">
+                <div id="log-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="currency-list"></div>
+</div>
+
+<div class="bottom-nav">
+    <div style="display:flex; align-items:center; gap:8px; overflow: hidden; white-space: nowrap; flex: 1; margin-right: 10px;">
+        <div id="status-dot" style="width:10px; height:10px; background:var(--success); border-radius:50%; flex-shrink: 0;"></div>
+        <small id="footer-status" style="font-size:11px; font-weight:bold; overflow: hidden; text-overflow: ellipsis;">Sistem Hazır</small>
+    </div>
+    
+    <div class="bottom-tv-control">
+        <small style="font-size:10px; font-weight:800; color:var(--secondary)">AKTİF YAYIN</small>
+        <div id="active-tv-badges" style="display:flex; gap:4px">
+            <div id="badge-tv1" style="width:8px; height:8px; border-radius:50%; background:#ccc"></div>
+            <div id="badge-tv2" style="width:8px; height:8px; border-radius:50%; background:#ccc"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCfcppc4rGYxmAj7fTzmYMZgcyBO4s8bFI",
+      authDomain: "doviz-kurlari-35554.firebaseapp.com",
+      databaseURL: "https://doviz-kurlari-35554-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "doviz-kurlari-35554",
+      storageBucket: "doviz-kurlari-35554.firebasestorage.app",
+      messagingSenderId: "822410580056",
+      appId: "1:822410580056:web:40d02d7729d7cf72aafa2d"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const GOLD_ICON = "https://img.icons8.com/?size=100&id=nTH8lhDLqpDI&format=png&color=000000";
+    const CRYPTO_ICON = "https://cdn-icons-png.flaticon.com/512/2091/2091665.png";
+    const DEFAULT_ICON = "https://cdn-icons-png.flaticon.com/512/197/197518.png";
+    
+    let currencies = [];
+    let isAutoMode = false;
+    let syncTimer = null;
+    let countdownTimer = null;
+    let secondsLeft = 0;
+    let ccRate = 3.5;
+    let sheetId = "";
+    let activeApiSource = "exchange-rate-v2";
+    let lastRenderedCurrencies = [];
+
+    function initApp() {
+        addLog("Sistem Başlatıldı.", "INFO");
+        
+        db.ref('terminal_data/config').on('value', (snapshot) => {
+            const config = snapshot.val();
+            if(config) {
+                ccRate = config.cc_rate || 3.5;
+                sheetId = config.sheet_id || "";
+                activeApiSource = config.api_source || "exchange-rate-v2";
+                document.getElementById('cc-commission-rate').value = ccRate;
+                document.getElementById('sheets-id-input').value = sheetId;
+                document.getElementById('api-source-select').value = activeApiSource;
+            }
+        });
+
+        db.ref('terminal_data/currencies').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) { 
+                const newData = Array.isArray(data) ? data : Object.values(data);
+                const sortedData = newData.sort((a,b) => (a.order || 0) - (b.order || 0));
+                
+                lastRenderedCurrencies = JSON.parse(JSON.stringify(currencies));
+                currencies = sortedData;
+                render(sortedData);
+            }
+        });
+
+        db.ref('terminal_data/tv_settings').on('value', (snapshot) => {
+            const tv = snapshot.val();
+            if(tv) {
+                document.getElementById('tv-master-switch').checked = tv.master || false;
+                document.getElementById('tv-screen-select').value = tv.screen || "1";
+                document.getElementById('tv-master-switch-2').checked = tv.master2 || false;
+                document.getElementById('tv-screen-select-2').value = tv.screen2 || "1";
+                updateTvButtonState(tv.master, tv.master2);
+            }
+        });
+
+        const el = document.getElementById('currency-list');
+        Sortable.create(el, {
+            handle: '.drag-handle',
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+            onEnd: function() { reorderCurrencies(); }
+        });
+    }
+
+    function toggleAuto() {
+        isAutoMode = !isAutoMode;
+        const btn = document.getElementById('auto-btn');
+        if (isAutoMode) {
+            btn.classList.add('active-green');
+            addLog("Oto-Mod Aktif.", "INFO");
+            startBotProcess();
+        } else {
+            btn.classList.remove('active-green');
+            stopBotProcess();
+            addLog("Oto-Mod Kapalı.", "WARN");
+        }
+    }
+
+    function startBotProcess() {
+        clearTimeout(syncTimer);
+        clearInterval(countdownTimer);
+        fetchMarketData();
+    }
+
+    function stopBotProcess() {
+        clearTimeout(syncTimer);
+        clearInterval(countdownTimer);
+        document.getElementById('timer-box').innerText = "--";
+    }
+
+    async function fetchMarketData() {
+        if (!isAutoMode) return;
+        try {
+            let hasGlobalChange = false;
+            let currentList = JSON.parse(JSON.stringify(currencies));
+
+            if (activeApiSource === "google-sheets") {
+                if(!sheetId) { toggleAuto(); return; }
+                const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
+                const resp = await fetch(url);
+                const text = await resp.text();
+                const json = JSON.parse(text.substr(47).slice(0, -2));
+                const rows = json.table.rows;
+
+                currentList.forEach((c, idx) => {
+                    if (c.autoSync) {
+                        const sheetRow = rows.find(r => r.c[0] && r.c[0].v.toString().toUpperCase() === c.name.toUpperCase());
+                        if (sheetRow) {
+                            const basePrice = parseFloat(sheetRow.c[1]?.v || 0);
+                            const newBuy = applyMargins(basePrice, c.buyMargin, 'buy', c.category);
+                            const newSell = applyMargins(basePrice, c.sellMargin, 'sell', c.category);
+                            if (Math.abs(c.buy - newBuy) > 0.0001 || Math.abs(c.sell - newSell) > 0.0001) {
+                                currentList[idx].buy = newBuy;
+                                currentList[idx].sell = newSell;
+                                hasGlobalChange = true;
+                            }
+                        }
+                    }
+                });
+            } else {
+                const tryResp = await fetch(`https://hexarate.paikama.co/api/rates/USD/TRY/latest`);
+                const tryJson = await tryResp.json();
+                const tryRate = parseFloat(tryJson?.data?.mid || 1);
+
+                for (let i = 0; i < currentList.length; i++) {
+                    let c = currentList[i];
+                    if (c.autoSync) {
+                        try {
+                            let base = c.name.toUpperCase() === "GA" ? "XAU" : c.name.toUpperCase();
+                            const resp = await fetch(`https://hexarate.paikama.co/api/rates/${base}/USD/latest`);
+                            const json = await resp.json();
+                            const midPrice = json?.data?.mid;
+                            if(midPrice) {
+                                const usdPrice = parseFloat(midPrice);
+                                let finalPrice = (base === "XAU" || base === "XAG") ? (usdPrice * tryRate / 31.1035) : (usdPrice * tryRate);
+                                let newBuy = applyMargins(finalPrice, c.buyMargin, 'buy', c.category);
+                                let newSell = applyMargins(finalPrice, c.sellMargin, 'sell', c.category);
+                                if(Math.abs(c.buy - newBuy) > 0.0001 || Math.abs(c.sell - newSell) > 0.0001) {
+                                    currentList[i].buy = newBuy;
+                                    currentList[i].sell = newSell;
+                                    hasGlobalChange = true;
+                                }
+                            }
+                        } catch (e) { }
+                    }
+                }
+            }
+
+            if (hasGlobalChange && isAutoMode) {
+                currencies = currentList;
+                saveToFirebase();
+            }
+            document.getElementById('stat-sync').innerText = new Date().toLocaleTimeString('tr-TR');
+            resetCountdown();
+            syncTimer = setTimeout(fetchMarketData, (parseInt(document.getElementById('sync-interval').value) || 30) * 1000);
+        } catch (e) {
+            if (isAutoMode) syncTimer = setTimeout(fetchMarketData, 5000);
+        }
+    }
+
+    function resetCountdown() {
+        clearInterval(countdownTimer);
+        if (!isAutoMode) return;
+        secondsLeft = parseInt(document.getElementById('sync-interval').value) || 30;
+        countdownTimer = setInterval(() => {
+            secondsLeft--; 
+            document.getElementById('timer-box').innerText = secondsLeft + "s";
+            if(secondsLeft <= 0) clearInterval(countdownTimer);
+        }, 1000);
+    }
+
+    function applyMargins(price, margin, type, category) {
+        let final = (type === 'sell') ? (price + (margin || 0)) : (price - (margin || 0));
+        if (category === 'altin') {
+            return Math.floor(final / 10) * 10;
+        } else {
+            let factor = 1000;
+            let temp = Math.floor(final * factor);
+            temp = Math.floor(temp / 10) * 10;
+            return temp / factor;
+        }
+    }
+
+    function formatPrice(val, category) {
+        if(category === "altin") return Math.floor(val).toString();
+        return val.toFixed(3);
+    }
+
+    function render(newList) {
+        const list = document.getElementById('currency-list');
+        list.innerHTML = '';
+        newList.forEach(c => {
+            const oldItem = lastRenderedCurrencies.find(o => o.id === c.id);
+            let buyClass = "";
+            let sellClass = "";
+            let cardClass = "";
+            
+            // CANLI BORSA TEPKİSİ: Tüm Kartı Etkiler
+            if (oldItem) {
+                if (c.sell > oldItem.sell) {
+                    cardClass = "row-up";
+                    sellClass = "price-up";
+                } else if (c.sell < oldItem.sell) {
+                    cardClass = "row-down";
+                    sellClass = "price-down";
+                }
+                
+                if (c.buy > oldItem.buy) buyClass = "price-up";
+                else if (c.buy < oldItem.buy) buyClass = "price-down";
+            }
+
+            let iconUrl;
+            if (c.category === 'altin' || c.flag === 'gold') iconUrl = GOLD_ICON;
+            else if (c.category === 'kripto' || c.flag === 'btc') iconUrl = CRYPTO_ICON;
+            else if (c.flag.length === 2) iconUrl = `https://flagcdn.com/w80/${c.flag}.png`;
+            else iconUrl = DEFAULT_ICON;
+            
+            let ccHtml = "";
+            if(c.category === 'altin') {
+                let rawCC = c.sell + (c.sell * (ccRate / 100));
+                const ccPrice = Math.floor(rawCC / 10) * 10;
+                ccHtml = `<div class="cc-price-box"><span class="cc-label">K. Kartı (%${ccRate})</span><div class="cc-price-val">${ccPrice}</div></div>`;
+            }
+
+            list.innerHTML += `
+                <div class="currency-card ${cardClass}" data-id="${c.id}" onclick="openUpdateModal(${c.id})">
+                    <div class="drag-handle"><i class="fas fa-grip-vertical"></i></div>
+                    <div class="lock-indicator">${c.autoSync ? '<i class="fas fa-sync-alt fa-spin"></i>' : '<i class="fas fa-lock"></i>'}</div>
+                    <div class="flag-box"><img src="${iconUrl}" class="flag-anim" onerror="this.src='${DEFAULT_ICON}'"></div>
+                    <div class="currency-meta"><b>${c.name}</b><br><span style="font-size:9px">${c.category.toUpperCase()}</span></div>
+                    <div class="price-col">
+                        <span class="label-style">ALIŞ</span>
+                        <div class="price-val ${buyClass}">${formatPrice(c.buy || 0, c.category)}</div>
+                        <div class="margin-tag">-${(c.buyMargin || 0).toFixed(2)}</div>
+                    </div>
+                    <div class="price-col">
+                        <span class="label-style">SATIŞ</span>
+                        <div class="price-val ${sellClass}">${formatPrice(c.sell || 0, c.category)}</div>
+                        <div class="margin-tag" style="color:var(--success)">+${(c.sellMargin || 0).toFixed(2)}</div>
+                        ${ccHtml}
+                    </div>
+                </div>`;
+        });
+        document.getElementById('stat-count').innerText = newList.length;
+    }
+
+    function toggleAllTv() {
+        const current1 = document.getElementById('tv-master-switch').checked;
+        const current2 = document.getElementById('tv-master-switch-2').checked;
+        const newState = !(current1 || current2); 
+        document.getElementById('tv-master-switch').checked = newState;
+        document.getElementById('tv-master-switch-2').checked = newState;
+        saveTvSettings();
+    }
+
+    function toggleSettingsArea() {
+        const area = document.getElementById('tv-settings-container');
+        const list = document.getElementById('currency-list');
+        const btn = document.getElementById('tv-settings-btn');
+        if (area.style.display === 'block') {
+            area.style.display = 'none';
+            list.style.display = 'block';
+            btn.classList.remove('active-blue');
+        } else {
+            area.style.display = 'block';
+            list.style.display = 'none';
+            btn.classList.add('active-blue');
+        }
+    }
+
+    function saveManualUpdate() {
+        const id = parseInt(document.getElementById('edit-id').value);
+        const bMargin = parseFloat(document.getElementById('edit-buy-margin').value) || 0;
+        const sMargin = parseFloat(document.getElementById('edit-sell-margin').value) || 0;
+        const isAuto = document.getElementById('edit-auto-sync').checked;
+        const mBuy = parseFloat(document.getElementById('edit-buy-price').value);
+        const mSell = parseFloat(document.getElementById('edit-sell-price').value);
+
+        currencies = currencies.map(c => c.id === id ? {
+            ...c, 
+            buy: mBuy, sell: mSell, buyMargin: bMargin, sellMargin: sMargin,
+            flag: document.getElementById('edit-flag').value.toLowerCase(),
+            autoSync: isAuto
+        } : c);
+
+        saveToFirebase(); closeModal();
+    }
+
+    function saveToFirebase() { db.ref('terminal_data/currencies').set(currencies); }
+    
+    function reorderCurrencies() {
+        const items = document.querySelectorAll('.currency-card');
+        const newOrderedList = [];
+        items.forEach((item, index) => {
+            const id = parseInt(item.getAttribute('data-id'));
+            const curr = currencies.find(c => c.id === id);
+            if(curr) { curr.order = index; newOrderedList.push(curr); }
+        });
+        currencies = newOrderedList;
+        saveToFirebase();
+    }
+
+    function saveTvSettings() {
+        const settings = {
+            master: document.getElementById('tv-master-switch').checked,
+            screen: document.getElementById('tv-screen-select').value,
+            master2: document.getElementById('tv-master-switch-2').checked,
+            screen2: document.getElementById('tv-screen-select-2').value,
+            lastUpdate: Date.now()
+        };
+        db.ref('terminal_data/tv_settings').set(settings);
+    }
+
+    function updateTvButtonState(m1, m2) {
+        const tvMasterBtn = document.getElementById('tv-master-btn');
+        const b1 = document.getElementById('badge-tv1');
+        const b2 = document.getElementById('badge-tv2');
+        (m1 || m2) ? tvMasterBtn.classList.add('active-green') : tvMasterBtn.classList.remove('active-green');
+        b1.style.background = m1 ? 'var(--success)' : '#ccc';
+        b2.style.background = m2 ? 'var(--success)' : '#ccc';
+    }
+
+    function openUpdateModal(id) {
+        const c = currencies.find(x => x.id === id);
+        if(!c) return;
+        document.getElementById('edit-id').value = c.id;
+        document.getElementById('edit-title').innerText = c.name;
+        document.getElementById('edit-buy-price').value = c.buy;
+        document.getElementById('edit-sell-price').value = c.sell;
+        document.getElementById('edit-buy-margin').value = c.buyMargin;
+        document.getElementById('edit-sell-margin').value = c.sellMargin;
+        document.getElementById('edit-flag').value = c.flag || "";
+        document.getElementById('edit-auto-sync').checked = c.autoSync;
+        document.getElementById('update-modal').style.display = 'flex';
+    }
+
+    function addNewCurrency() {
+        const name = document.getElementById('new-name').value.toUpperCase().trim();
+        const cat = document.getElementById('new-api-cat').value;
+        if(!name) return;
+        let flagInput = document.getElementById('new-flag').value.toLowerCase();
+        if(cat === 'altin' && !flagInput) flagInput = 'gold';
+        const newItem = {
+            id: Date.now(), name: name, category: cat, flag: flagInput || 'tr',
+            buy: 0, sell: 0, buyMargin: parseFloat(document.getElementById('new-buy-margin').value) || 0.1,
+            sellMargin: parseFloat(document.getElementById('new-sell-margin').value) || 0.2,
+            autoSync: true, order: currencies.length
+        };
+        currencies.push(newItem); saveToFirebase();
+        document.getElementById('new-name').value = '';
+    }
+
+    function deleteCurrency() {
+        if(!confirm("Silinsin mi?")) return;
+        const id = parseInt(document.getElementById('edit-id').value);
+        currencies = currencies.filter(c => c.id !== id);
+        saveToFirebase(); closeModal();
+    }
+
+    function closeModal() { document.getElementById('update-modal').style.display = 'none'; }
+    function toggleTheme() { document.body.setAttribute('data-theme', document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); }
+
+    function addLog(m, type) {
+        const l = document.getElementById('log-list');
+        const footerStatus = document.getElementById('footer-status');
+        if(!l) return;
+        const entry = document.createElement('div');
+        entry.className = 'log-entry';
+        let tagClass = 'tag-info';
+        if(type === 'UPDATE') tagClass = 'tag-update';
+        if(type === 'ERROR') tagClass = 'tag-error';
+        if(type === 'WARN') tagClass = 'tag-warn';
+        entry.innerHTML = `<span class="log-time">${new Date().toLocaleTimeString()}</span><span class="log-tag ${tagClass}">${type}</span><span class="log-msg">${m}</span>`;
+        l.prepend(entry);
+        footerStatus.innerText = m;
+        if(l.childNodes.length > 40) l.removeChild(l.lastChild);
+    }
+
+    function updateCommissionRate() {
+        const val = parseFloat(document.getElementById('cc-commission-rate').value) || 0;
+        db.ref('terminal_data/config/cc_rate').set(val);
+    }
+
+    function saveSheetsId() {
+        const val = document.getElementById('sheets-id-input').value.trim();
+        db.ref('terminal_data/config/sheet_id').set(val);
+        sheetId = val;
+    }
+
+    function saveApiSource() {
+        const val = document.getElementById('api-source-select').value;
+        db.ref('terminal_data/config/api_source').set(val);
+        activeApiSource = val;
+    }
+
+    initApp();
+</script>
+</body>
+</html>
