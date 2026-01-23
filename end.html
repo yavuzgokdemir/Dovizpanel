@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Terminal v17 - Ultimate</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="p-4 gap-4">
+
+    <div id="toast-container"></div>
+
+    <div id="calc-modal">
+        <div class="flex justify-between mb-2 cursor-move" id="calc-header">
+            <span class="text-xs font-bold text-zinc-500">HESAP MAKİNESİ</span>
+            <span class="text-xs text-red-500 cursor-pointer" onclick="toggleCalc()">✕</span>
+        </div>
+        <div class="calc-display" id="calc-screen">0</div>
+        <div class="grid grid-cols-4 gap-2">
+            <button class="calc-btn text-red-400" onclick="calcInput('C')">C</button>
+            <button class="calc-btn" onclick="calcInput('/')">/</button>
+            <button class="calc-btn" onclick="calcInput('*')">x</button>
+            <button class="calc-btn" onclick="calcInput('-')">-</button>
+            <button class="calc-btn" onclick="calcInput('7')">7</button>
+            <button class="calc-btn" onclick="calcInput('8')">8</button>
+            <button class="calc-btn" onclick="calcInput('9')">9</button>
+            <button class="calc-btn row-span-2" onclick="calcInput('+')">+</button>
+            <button class="calc-btn" onclick="calcInput('4')">4</button>
+            <button class="calc-btn" onclick="calcInput('5')">5</button>
+            <button class="calc-btn" onclick="calcInput('6')">6</button>
+            <button class="calc-btn" onclick="calcInput('1')">1</button>
+            <button class="calc-btn" onclick="calcInput('2')">2</button>
+            <button class="calc-btn" onclick="calcInput('3')">3</button>
+            <button class="calc-btn row-span-2 bg-amber-600 border-amber-500" onclick="calcInput('=')">=</button>
+            <button class="calc-btn col-span-2" onclick="calcInput('0')">0</button>
+            <button class="calc-btn" onclick="calcInput('.')">.</button>
+        </div>
+    </div>
+
+    <div id="receipt-modal" onclick="closeReceipt()">
+        <div class="receipt-paper rounded shadow-2xl" onclick="event.stopPropagation()">
+            <div class="text-center border-b-2 border-dashed border-zinc-300 pb-2 mb-2">
+                <h2 class="font-black text-xl italic uppercase">Terminal Receipt</h2>
+                <p class="text-[10px] opacity-70" id="r-date"></p>
+            </div>
+            <div id="r-items" class="text-[11px] space-y-2 py-4"></div>
+            <div class="border-t-2 border-dashed border-zinc-300 pt-2 mt-2">
+                <div class="flex justify-between font-black text-sm">
+                    <span>TOPLAM İŞLEM:</span>
+                    <span id="r-total">0.00 TL</span>
+                </div>
+            </div>
+            <button onclick="window.print()" class="w-full mt-6 bg-black text-white py-3 text-xs font-black uppercase no-print">Fişi Yazdır (Enter)</button>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-12 gap-4 shrink-0">
+        <div class="col-span-3 glass-panel p-4 flex flex-col justify-between border-l-4 border-l-amber-500 bg-gradient-to-br from-zinc-900 to-black relative overflow-hidden group">
+            <div class="absolute right-2 top-2 opacity-10 group-hover:opacity-30 transition"><i class="fas fa-wallet fa-3x"></i></div>
+            <span class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">KASA TOPLAM (TL)</span>
+            <div id="v-tl" class="text-3xl font-black mono text-white z-10">0,00 ₺</div>
+        </div>
+        <div class="col-span-3 glass-panel p-4 flex flex-col justify-between border-l-4 border-l-emerald-500 bg-gradient-to-br from-zinc-900 to-black">
+            <div class="flex justify-between items-start">
+                <span class="text-[10px] font-black text-zinc-500 uppercase tracking-widest italic">Anlık Tahmini Kar</span>
+                <i class="fas fa-chart-line text-emerald-500"></i>
+            </div>
+            <div id="v-profit" class="text-3xl font-black mono text-emerald-400">0,00 ₺</div>
+        </div>
+        <div class="col-span-4 glass-panel p-4 grid grid-cols-2 divide-x divide-zinc-800">
+            <div id="box-usd" class="px-2 flex flex-col justify-center items-center transition-all duration-500 rounded-lg relative">
+                <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-tighter mb-1">$ STOK</span>
+                <div id="v-usd" class="text-2xl font-black mono text-blue-400">0</div>
+                <div class="h-1 w-full bg-blue-900/30 mt-1 rounded-full overflow-hidden"><div id="bar-usd" class="h-full bg-blue-500 w-0 transition-all duration-1000"></div></div>
+            </div>
+            <div id="box-eur" class="px-2 flex flex-col justify-center items-center transition-all duration-500 rounded-lg relative">
+                <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-tighter mb-1">€ STOK</span>
+                <div id="v-eur" class="text-2xl font-black mono text-emerald-400">0</div>
+                <div class="h-1 w-full bg-emerald-900/30 mt-1 rounded-full overflow-hidden"><div id="bar-eur" class="h-full bg-emerald-500 w-0 transition-all duration-1000"></div></div>
+            </div>
+        </div>
+        <div class="col-span-2 glass-panel p-4 flex flex-col items-end justify-center">
+            <div id="clock" class="text-xl font-black mono text-zinc-400 tracking-tighter">00:00:00</div>
+            <div id="conn-status" class="text-[9px] font-bold text-green-500 uppercase italic flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> ONLINE
+            </div>
+        </div>
+    </div>
+
+    <div class="flex-grow grid grid-cols-12 gap-4 overflow-hidden relative">
+        <div class="col-span-8 glass-panel flex flex-col overflow-hidden relative">
+            <div class="grid grid-cols-12 bg-black/40 p-4 text-[10px] font-black text-zinc-500 uppercase border-b border-zinc-800 select-none">
+                <div class="col-span-1 text-center">FİŞ</div>
+                <div class="col-span-1 text-center">VZ</div>
+                <div class="col-span-2 px-2">İŞLEM</div>
+                <div class="col-span-2 px-2">BİRİM</div>
+                <div class="col-span-2 text-right">MİKTAR</div>
+                <div class="col-span-2 text-right">FİYAT</div>
+                <div class="col-span-2 text-right pr-4">TOPLAM</div>
+            </div>
+            <div id="ledger" class="flex-grow overflow-y-auto p-2 space-y-1"></div>
+            <div id="empty-state" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none opacity-0 transition-opacity duration-500">
+                <i class="fas fa-terminal text-zinc-800 text-6xl mb-4"></i>
+                <span class="text-zinc-700 font-black text-xs">SİSTEM HAZIR. İŞLEM BEKLENİYOR...</span>
+            </div>
+        </div>
+
+        <div class="col-span-4 flex flex-col gap-4">
+            <div class="glass-panel flex-grow flex flex-col overflow-hidden">
+                <div class="flex bg-black border-b border-zinc-800">
+                    <button onclick="openTab('controls')" id="tab-controls" class="tab-btn flex-1 active uppercase tracking-widest">Kısayollar</button>
+                    <button onclick="openTab('settings')" id="tab-settings" class="tab-btn flex-1 uppercase tracking-widest">Ayarlar</button>
+                </div>
+
+                <div id="controls-panel" class="sidebar-content active p-4 gap-3">
+                    <div class="grid grid-cols-2 gap-2">
+                        <div onclick="addRow()" class="p-3 bg-zinc-900 rounded border border-zinc-800 text-center cursor-pointer hover:bg-zinc-800 transition">
+                            <span class="block text-[10px] text-zinc-500 font-bold uppercase">YENİ FİŞ</span>
+                            <span class="text-amber-500 font-black">F2</span>
+                        </div>
+                        <div onclick="removeActiveRow()" class="p-3 bg-zinc-900 rounded border border-zinc-800 text-center cursor-pointer hover:bg-zinc-800 transition">
+                            <span class="block text-[10px] text-zinc-500 font-bold uppercase">SİL</span>
+                            <span class="text-red-500 font-black">F4</span>
+                        </div>
+                        <div onclick="generateReceipt()" class="p-3 bg-zinc-900 rounded border border-zinc-800 text-center cursor-pointer hover:bg-zinc-800 transition">
+                            <span class="block text-[10px] text-zinc-500 font-bold uppercase">YAZDIR</span>
+                            <span class="text-blue-500 font-black">F5</span>
+                        </div>
+                        <div onclick="saveAndClear()" class="p-3 bg-zinc-900 rounded border border-zinc-800 text-center cursor-pointer hover:bg-zinc-800 transition">
+                            <span class="block text-[10px] text-zinc-500 font-bold uppercase">KAYDET</span>
+                            <span class="text-green-500 font-black">F6</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-2">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-[10px] font-black text-zinc-600 tracking-widest uppercase italic">Hızlı Kur Seçimi</span>
+                            <button onclick="toggleCalc()" class="text-[10px] bg-zinc-800 px-2 py-1 rounded text-zinc-400 hover:text-white"><i class="fas fa-calculator mr-1"></i> F9</button>
+                        </div>
+                        <div id="quick-unit-grid" class="grid grid-cols-3 gap-2"></div>
+                    </div>
+
+                    <div id="log-terminal" class="mt-auto h-32 bg-black/40 rounded p-2 text-[9px] mono overflow-y-auto border border-zinc-900 flex flex-col-reverse"></div>
+                </div>
+
+                <div id="settings-panel" class="sidebar-content p-4 gap-4">
+                    <section>
+                        <h4 class="text-[10px] font-black text-amber-500 mb-2 uppercase italic tracking-widest">Vezne Ayarları</h4>
+                        <div class="space-y-2">
+                            <input type="text" id="set-v1-name" placeholder="Vezne 1 İsim" class="input-master w-full p-2 text-[10px]">
+                            <input type="text" id="set-v2-name" placeholder="Vezne 2 İsim" class="input-master w-full p-2 text-[10px]">
+                            <div class="flex items-center gap-2 mt-2">
+                                <input type="checkbox" id="sound-toggle" checked class="accent-amber-500">
+                                <label for="sound-toggle" class="text-[10px] text-zinc-400 cursor-pointer select-none">Ses Efektleri Aktif</label>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="mt-auto space-y-2">
+                        <button onclick="exportToCSV()" class="w-full p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 rounded text-[10px] font-bold transition">
+                            <i class="fas fa-file-csv mr-2"></i> GÜN SONU RAPORU (CSV)
+                        </button>
+                        <button onclick="localStorage.clear(); location.reload();" class="w-full p-2 bg-red-900/20 hover:bg-red-900/40 text-red-500 border border-red-900/50 rounded text-[10px] font-bold transition">
+                            <i class="fas fa-trash-alt mr-2"></i> LOKAL BELLEĞİ SIFIRLA
+                        </button>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="ticker-wrap shrink-0">
+        <div class="ticker" id="ticker-content">
+            <span class="ticker-item">SİSTEM BAŞLATILIYOR...</span>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
