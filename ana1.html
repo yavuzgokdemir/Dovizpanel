@@ -3,19 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Enterprise Currency Terminal v3.2 Pro</title>
+    <title>Enterprise Currency Terminal v3.2 Pro - Live</title>
 
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Döviz Terminal">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#0062cc">
-    <link rel="apple-touch-icon" href="https://img.icons8.com/?size=100&id=nTH8lhDLqpDI&format=png&color=000000">
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
     
-    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkVudGVycHJpc2UgQ3VycmVuY3kgVGVybWluYWwiLAogICJzaG9ydF9uYW1lIjogIkTDtnZpeiBUZXJtIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmMGYyZjUiLAogICJ0aGVtZV9jb2xvciI6ICIjMDA2MmNjIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly9pbWcuaWNvbnM4LmNvbS8/c2l6ZT0xMDAmaWQ9blRIOGxhRExxcERJJmZvcm1hdD1wbmcmY29sb3I9MDAwMDAwIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJzaXplcyI6ICI1MTJ4NTEyIiwKICAidHlwZSI6ICJpbWFnZS9wbmciCiAgICB9CiAgX ]Cn0=">
-
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -33,12 +26,16 @@
             --overlay: rgba(0,0,0,0.8);
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; display: flex; justify-content: center; transition: 0.3s; }
-        .container { width: 100%; max-width: 500px; padding: 0 12px 100px 12px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; display: flex; justify-content: center; transition: background 0.3s; overflow-x: hidden; min-height: 100vh; }
+        
+        #login-screen { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .login-card { background: var(--card); padding: 30px; border-radius: 20px; width: 100%; max-width: 400px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); text-align: center; border: 1px solid var(--border); }
+        .login-logo { font-size: 50px; margin-bottom: 10px; }
+
+        .container { width: 100%; max-width: 500px; padding: 0 12px 100px 12px; display: none; }
         
         .header { background: var(--header-gradient); padding: 12px 18px; border-radius: 0 0 20px 20px; margin: 0 -12px 15px -12px; color: white; box-shadow: 0 5px 15px rgba(0,0,0,0.15); position: sticky; top:0; z-index:1001; }
         .header-top { display: flex; justify-content: space-between; align-items: center; }
-        
         .brand-section { display: flex; align-items: center; gap: 10px; }
         .chameleon-icon { font-size: 24px; animation: bounce 2s infinite ease-in-out; display: inline-block; }
         @keyframes bounce { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-5px) rotate(10deg); } }
@@ -49,26 +46,37 @@
 
         .toolbar-btns { display: flex; gap: 6px; }
         .btn-round { width: 34px; height: 34px; border-radius: 10px; border: none; background: rgba(255,255,255,0.15); color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; font-size: 14px; }
+        .btn-round:hover { transform: translateY(-2px); background: rgba(255,255,255,0.25); }
         .btn-round.active-green { background: var(--success); box-shadow: 0 0 10px var(--success); }
         .btn-round.active-blue { background: #00e5ff; box-shadow: 0 0 10px #00e5ff; }
+        .btn-round.active-warn { background: var(--warning); box-shadow: 0 0 10px var(--warning); }
 
-        /* YENİ GELİŞMİŞ ANİMASYONLAR */
-        @keyframes flash-green-bg { 
-            0% { background-color: rgba(0, 200, 83, 0.4); color: #00c853; transform: scale(1.05); } 
-            100% { background-color: transparent; color: var(--primary); transform: scale(1); } 
-        }
-        @keyframes flash-red-bg { 
-            0% { background-color: rgba(255, 82, 82, 0.4); color: #ff5252; transform: scale(1.05); } 
-            100% { background-color: transparent; color: var(--primary); transform: scale(1); } 
-        }
-        .price-up { animation: flash-green-bg 2s cubic-bezier(0.23, 1, 0.32, 1); border-radius: 4px; padding: 0 4px; }
-        .price-down { animation: flash-red-bg 2s cubic-bezier(0.23, 1, 0.32, 1); border-radius: 4px; padding: 0 4px; }
+        @keyframes full-row-up { 0% { background: rgba(0, 200, 83, 0.1); transform: scale(1.01); } 100% { background: var(--card); transform: scale(1); } }
+        @keyframes full-row-down { 0% { background: rgba(255, 82, 82, 0.1); transform: scale(1.01); } 100% { background: var(--card); transform: scale(1); } }
+        .row-up { animation: full-row-up 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        .row-down { animation: full-row-down 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        @keyframes flash-green-text { 0% { color: var(--success); transform: scale(1.1); font-weight: 900; } 100% { color: var(--primary); transform: scale(1); } }
+        @keyframes flash-red-text { 0% { color: var(--danger); transform: scale(1.1); font-weight: 900; } 100% { color: var(--primary); transform: scale(1); } }
+        .price-up { animation: flash-green-text 1.5s forwards; }
+        .price-down { animation: flash-red-text 1.5s forwards; }
+        
+        .currency-card { background: var(--card); border-radius: 15px; padding: 14px; margin-bottom: 10px; display: grid; grid-template-columns: auto auto 1fr auto auto; align-items: center; gap: 12px; border: 1px solid var(--border); cursor: pointer; transition: transform 0.2s, background 0.3s; position: relative; }
+        .currency-card:active { transform: scale(0.98); }
+        .drag-handle { color: var(--secondary); cursor: grab; padding: 5px; opacity: 0.5; }
+        .flag-box { position: relative; width: 42px; height: 42px; }
+        .flag-anim { width: 100%; height: 100%; border-radius: 50%; border: 2px solid var(--primary); object-fit: cover; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .price-col { text-align: right; min-width: 85px; }
+        .price-val { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 800; color: var(--primary); }
+        
+        .cc-price-box { margin-top: 4px; padding: 2px 4px; background: rgba(243, 156, 18, 0.1); border-radius: 4px; border: 1px solid rgba(243, 156, 18, 0.2); }
+        .cc-price-val { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 800; color: var(--warning); }
+        .cc-label { font-size: 8px; font-weight: bold; color: var(--warning); display: block; text-transform: uppercase; }
         
         #tv-settings-container { display: none; margin-bottom: 15px; }
         #settings-panel, #tv-panel { background: var(--card); border-radius: 18px; padding: 18px; border: 1px solid var(--border); box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-top: 5px; }
-        .input-box { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 10px; font-size: 13px; }
+        .input-box { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 10px; font-size: 13px; outline: none; }
         .label-style { font-size: 10px; font-weight: 800; color: var(--secondary); margin-bottom: 4px; display: block; }
-
+        
         .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 22px; }
@@ -76,41 +84,36 @@
         input:checked + .slider { background-color: var(--success); }
         input:checked + .slider:before { transform: translateX(22px); }
 
-        .currency-card { background: var(--card); border-radius: 15px; padding: 14px; margin-bottom: 10px; display: grid; grid-template-columns: auto auto 1fr auto auto; align-items: center; gap: 12px; border: 1px solid var(--border); cursor: pointer; transition: 0.2s; position: relative; }
-        .currency-card:active { transform: scale(0.98); }
-        .drag-handle { color: var(--secondary); cursor: grab; padding: 5px; opacity: 0.5; }
-        .flag-box { position: relative; width: 42px; height: 42px; }
-        .flag-anim { width: 100%; height: 100%; border-radius: 50%; border: 2px solid var(--primary); object-fit: cover; }
-        .price-col { text-align: right; min-width: 85px; }
-        .price-val { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 800; color: var(--primary); transition: color 0.5s, background-color 0.5s; display: inline-block; padding: 2px 4px; }
-        
-        .cc-price-box { margin-top: 4px; padding: 2px 4px; background: rgba(243, 156, 18, 0.1); border-radius: 4px; border: 1px solid rgba(243, 156, 18, 0.2); }
-        .cc-price-val { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 800; color: var(--warning); }
-        .cc-label { font-size: 8px; font-weight: bold; color: var(--warning); display: block; text-transform: uppercase; }
-        .margin-tag { font-size: 10px; color: var(--secondary); font-weight: 800; margin-top: 2px; font-family: monospace; }
-        
-        .internal-logs { background: #111; border-radius: 10px; padding: 10px; margin-top: 15px; max-height: 200px; overflow-y: auto; border: 1px solid #333; font-family: 'monospace'; }
-        .log-entry { display: flex; align-items: flex-start; gap: 8px; font-size: 10px; padding: 4px 0; border-bottom: 1px solid #222; }
-        .log-time { color: #888; white-space: nowrap; }
-        .log-tag { padding: 2px 4px; border-radius: 4px; font-weight: bold; font-size: 8px; text-transform: uppercase; }
+        .internal-logs { background: #0b0c0d; border-radius: 12px; padding: 12px; margin-top: 15px; max-height: 250px; overflow-y: auto; font-family: 'JetBrains Mono', monospace; border: 1px solid var(--border); }
+        .log-entry { display: flex; align-items: flex-start; gap: 8px; font-size: 10px; padding: 6px 0; border-bottom: 1px solid #1e2022; }
+        .log-tag { padding: 2px 5px; border-radius: 4px; font-weight: 900; font-size: 8px; text-transform: uppercase; min-width: 55px; text-align: center; }
         .tag-info { background: #007bff; color: white; }
         .tag-update { background: #00c853; color: white; }
-        .tag-error { background: #ff5252; color: white; }
-        .tag-warn { background: #ffa000; color: white; }
-        .log-msg { color: #eee; line-height: 1.3; }
+        .tag-danger { background: #ff5252; color: white; }
+        .tag-sys { background: #6c757d; color: white; }
 
-        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: var(--overlay); display: none; justify-content: center; align-items: center; z-index: 2000; padding: 20px; backdrop-filter: blur(4px); }
-        .modal-content { background: var(--card); width: 100%; max-width: 400px; border-radius: 20px; padding: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: var(--overlay); display: none; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(4px); }
+        .modal-content { background: var(--card); width: 90%; max-width: 400px; border-radius: 20px; padding: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+        
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); padding: 8px 20px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; z-index: 1000; height: 60px; }
         .lock-indicator { position: absolute; top: 5px; left: 5px; font-size: 10px; color: var(--secondary); }
-        .sortable-ghost { opacity: 0.3; background: var(--primary) !important; }
         
-        .bottom-tv-control { display: flex; align-items: center; gap: 10px; background: var(--bg); padding: 5px 12px; border-radius: 12px; border: 1px solid var(--border); }
-        .tv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 10px; }
+        .tv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .tv-card-inner { background: var(--bg); padding: 10px; border-radius: 12px; border: 1px solid var(--border); }
     </style>
 </head>
 <body data-theme="light">
+
+<div id="login-screen">
+    <div class="login-card">
+        <div class="login-logo">🦎</div>
+        <h2 style="margin: 0 0 20px 0;">Terminal Pro Giriş</h2>
+        <input type="email" id="login-email" class="input-box" placeholder="E-posta">
+        <input type="password" id="login-password" class="input-box" placeholder="Şifre">
+        <button onclick="handleLogin()" id="login-btn" class="input-box" style="background: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer; margin-top: 10px;">GİRİŞ YAP</button>
+        <p id="login-error" style="color: var(--danger); font-size: 12px; margin-top: 10px; display: none;"></p>
+    </div>
+</div>
 
 <div class="modal-overlay" id="update-modal">
     <div class="modal-content">
@@ -120,26 +123,26 @@
         </div>
         <input type="hidden" id="edit-id">
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px">
-            <div><label class="label-style">GÜNCEL ALIŞ FİYATI</label><input type="number" id="edit-buy-price" class="input-box" step="0.0001"></div>
-            <div><label class="label-style">GÜNCEL SATIŞ FİYATI</label><input type="number" id="edit-sell-price" class="input-box" step="0.0001"></div>
+            <div><label class="label-style">ALIŞ FİYATI</label><input type="number" id="edit-buy-price" class="input-box" step="0.0001"></div>
+            <div><label class="label-style">SATIŞ FİYATI</label><input type="number" id="edit-sell-price" class="input-box" step="0.0001"></div>
         </div>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px">
             <div><label class="label-style">ALIŞ MARJI (-)</label><input type="number" id="edit-buy-margin" class="input-box" step="0.0001"></div>
             <div><label class="label-style">SATIŞ MARJI (+)</label><input type="number" id="edit-sell-margin" class="input-box" step="0.0001"></div>
         </div>
-        <div><label class="label-style">BAYRAK KODU (us, tr, gold, btc...)</label><input type="text" id="edit-flag" class="input-box"></div>
+        <div><label class="label-style">BAYRAK KODU</label><input type="text" id="edit-flag" class="input-box"></div>
         <div style="display:flex; align-items:center; gap:10px; margin: 10px 0; background: var(--bg); padding:10px; border-radius:8px">
             <label class="switch"><input type="checkbox" id="edit-auto-sync"><span class="slider"></span></label>
-            <label for="edit-auto-sync" style="font-size:12px; font-weight:bold">Oto-Mod Aktif (Kilit Açık)</label>
+            <label style="font-size:12px; font-weight:bold">Oto-Mod Aktif</label>
         </div>
         <div style="display:flex; gap:10px">
-            <button class="btn-round" style="flex:1; background:var(--danger); border-radius:8px; font-weight:bold" onclick="deleteCurrency()"><i class="fas fa-trash"></i> SİL</button>
+            <button class="btn-round" style="flex:1; background:var(--danger); border-radius:8px;" onclick="deleteCurrency()"><i class="fas fa-trash"></i></button>
             <button class="btn-round" style="flex:3; background:var(--success); border-radius:8px; font-weight:bold" onclick="saveManualUpdate()">KAYDET</button>
         </div>
     </div>
 </div>
 
-<div class="container">
+<div class="container" id="main-app">
     <header class="header">
         <div class="header-top">
             <div class="brand-section">
@@ -152,9 +155,11 @@
             </div>
             <div class="toolbar-btns">
                 <button class="btn-round" onclick="toggleAuto()" id="auto-btn" title="Oto-Bot"><i class="fas fa-robot"></i></button>
-                <button class="btn-round" onclick="toggleAllTv()" id="tv-master-btn" title="Yayını Başlat/Durdur"><i class="fas fa-broadcast-tower"></i></button>
-                <button class="btn-round" onclick="toggleSettingsArea()" id="tv-settings-btn"><i class="fas fa-tv"></i></button>
+                <button class="btn-round" onclick="toggleAllTv()" id="tv-master-btn" title="Yayınları Kapat"><i class="fas fa-broadcast-tower"></i></button>
+                <button class="btn-round" onclick="toggleLocalMode()" id="fb-sync-btn" title="Akış Dondur"><i class="fas fa-database"></i></button>
+                <button class="btn-round" onclick="toggleSettingsArea()" id="tv-settings-btn" title="Ayarlar"><i class="fas fa-tv"></i></button>
                 <button class="btn-round" onclick="toggleTheme()"><i class="fas fa-moon"></i></button>
+                <button class="btn-round" onclick="handleLogout()" style="background: rgba(255,82,82,0.3)" title="Çıkış"><i class="fas fa-sign-out-alt"></i></button>
             </div>
         </div>
     </header>
@@ -165,52 +170,56 @@
                 <div class="tv-card-inner">
                     <label class="label-style">1. MONİTÖR (TV)</label>
                     <select id="tv-screen-select" class="input-box" onchange="saveTvSettings()">
-                        <option value="1">1. Bloomberg Tasarımı</option>
-                        <option value="2">2. Ekotürk Tasarımı</option>
-                        <option value="3">3. CNBC-e Tasarımı</option>
-                        <option value="4">4. Genel Bilgi Panosu</option>
-                        <option value="5">5. Geleneksel Pano</option>
-                        <option value="6">6. Modern Pro Pano</option>
+                        <option value="1">Bloomberg Tasarımı</option>
+                        <option value="2">Ekotürk Tasarımı</option>
+                        <option value="3">CNBC-e Tasarımı</option>
                     </select>
-                    <div style="display:flex; align-items:center; gap:8px">
-                         <label class="switch"><input type="checkbox" id="tv-master-switch" onchange="saveTvSettings()"><span class="slider"></span></label>
-                         <span style="font-size:10px; font-weight:bold">YAYIN</span>
-                    </div>
+                    <label class="switch"><input type="checkbox" id="tv-master-switch" onchange="saveTvSettings()"><span class="slider"></span></label>
                 </div>
                 <div class="tv-card-inner">
                     <label class="label-style">2. MONİTÖR (WEB)</label>
                     <select id="tv-screen-select-2" class="input-box" onchange="saveTvSettings()">
-                        <option value="1">1.Karsilama Ekran</option>
-                        <option value="2">2.video veya resim Tasarımı</option>
-                        <option value="3">3.video veya resim Tasarımı</option>
-                        <option value="4">4.altin tasarim</option>
+                        <option value="1">Karşılama Ekranı</option>
+                        <option value="2">Video Tasarımı</option>
                     </select>
-                    <div style="display:flex; align-items:center; gap:8px">
-                         <label class="switch"><input type="checkbox" id="tv-master-switch-2" onchange="saveTvSettings()"><span class="slider"></span></label>
-                         <span style="font-size:10px; font-weight:bold">YAYIN</span>
-                    </div>
+                    <label class="switch"><input type="checkbox" id="tv-master-switch-2" onchange="saveTvSettings()"><span class="slider"></span></label>
                 </div>
             </div>
         </div>
 
         <div id="settings-panel">
-            <div style="padding:15px; background:rgba(0, 123, 255, 0.1); border-radius:12px; border:1px solid var(--primary); margin-bottom:15px">
-                <label class="label-style" style="color:var(--primary)">GOOGLE SHEETS ID</label>
-                <input type="text" id="sheets-id-input" class="input-box" onchange="saveSheetsId()">
-            </div>
-            <div style="padding:15px; background:rgba(243, 156, 18, 0.1); border-radius:12px; border:1px solid var(--warning); margin-bottom:15px">
-                <label class="label-style" style="color:var(--warning)">KREDİ KARTI KOMİSYON (%)</label>
-                <input type="number" id="cc-commission-rate" class="input-box" step="0.1" onchange="updateCommissionRate()">
-            </div>
-            <span class="label-style">API KAYNAK YÖNETİMİ</span>
-            <select id="api-source-select" class="input-box" style="background: var(--primary); color: white; border: none; font-weight: bold;" onchange="saveApiSource()">
-                <option value="exchange-rate-v2">Exchange-Rate V2 (Yeni)</option>
-                <option value="hexarate">Hexarate API (Yedek)</option>
+            <label class="label-style">GOOGLE SHEETS ID (Public olmalı)</label>
+            <input type="text" id="sheets-id-input" class="input-box" placeholder="Sheet ID..." onchange="saveSheetsId()">
+            
+            <label class="label-style">K. KARTI KOMİSYON (%)</label>
+            <input type="number" id="cc-commission-rate" class="input-box" value="3.5" step="0.1" onchange="updateCommissionRate()">
+
+            <label class="label-style">API KAYNAĞI</label>
+            <select id="api-source-select" class="input-box" onchange="saveApiSource()">
+                <option value="exchange-rate-v2">Exchange-Rate V2 (Global)</option>
                 <option value="google-sheets">Google Sheets (Özel)</option>
             </select>
-            <label class="label-style">GÜNCELLEME HIZI (SANİYE)</label>
-            <input type="number" id="sync-interval" class="input-box" value="30">
-            <div class="internal-logs"><div id="log-list"></div></div>
+
+            <label class="label-style">GÜNCELLEME SIKLIĞI (SANİYE)</label>
+            <input type="number" id="sync-interval" class="input-box" value="30" onchange="saveSyncInterval()">
+
+            <div style="padding:15px; background:var(--bg); border-radius:12px; border:1px solid var(--border)">
+                <span class="label-style" style="color:var(--primary)">YENİ VARLIK EKLE</span>
+                <input type="text" id="new-name" class="input-box" placeholder="Sembol (USD, GA...)">
+                <select id="new-api-cat" class="input-box">
+                    <option value="doviz">Döviz</option>
+                    <option value="altin">Altın</option>
+                    <option value="kripto">Kripto</option>
+                </select>
+                <button class="btn-round" style="width:100%; background:var(--primary); border-radius:8px; font-weight:bold" onclick="addNewCurrency()">EKLE</button>
+            </div>
+            <div class="internal-logs">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px">
+                    <span style="font-size:10px; font-weight:bold; color:var(--primary)">SİSTEM GÜNLÜĞÜ (SON 50)</span>
+                    <i class="fas fa-terminal" style="font-size:10px; color:var(--secondary)"></i>
+                </div>
+                <div id="log-list"></div>
+            </div>
         </div>
     </div>
 
@@ -218,359 +227,372 @@
 </div>
 
 <div class="bottom-nav">
-    <div style="display:flex; align-items:center; gap:8px; overflow: hidden; flex: 1;">
+    <div style="display:flex; align-items:center; gap:8px;">
         <div id="status-dot" style="width:10px; height:10px; background:var(--success); border-radius:50%;"></div>
-        <small id="footer-status" style="font-size:11px; font-weight:bold;">Sistem Hazır</small>
+        <small id="footer-status" style="font-size:11px; font-weight:bold;">Firebase Aktif</small>
     </div>
-    <div class="bottom-tv-control">
-        <small style="font-size:10px; font-weight:800; color:var(--secondary)">AKTİF YAYIN</small>
-        <div id="active-tv-badges" style="display:flex; gap:4px">
-            <div id="badge-tv1" style="width:8px; height:8px; border-radius:50%; background:#ccc"></div>
-            <div id="badge-tv2" style="width:8px; height:8px; border-radius:50%; background:#ccc"></div>
-        </div>
+    <div style="display:flex; align-items:center; gap:10px;">
+        <small style="font-size:10px; font-weight:800; color:var(--secondary)">TV STATUS</small>
+        <div id="badge-tv1" style="width:8px; height:8px; border-radius:50%; background:#ccc"></div>
+        <div id="badge-tv2" style="width:8px; height:8px; border-radius:50%; background:#ccc"></div>
     </div>
 </div>
 
 <script>
-    // Firebase Config
+    // --- FIREBASE CONFIG ---
     const firebaseConfig = {
-      apiKey: "AIzaSyCfcppc4rGYxmAj7fTzmYMZgcyBO4s8bFI",
-      authDomain: "doviz-kurlari-35554.firebaseapp.com",
-      databaseURL: "https://doviz-kurlari-35554-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "doviz-kurlari-35554",
-      storageBucket: "doviz-kurlari-35554.firebasestorage.app",
-      messagingSenderId: "822410580056",
-      appId: "1:822410580056:web:40d02d7729d7cf72aafa2d"
+        apiKey: "AIzaSyCCWZ1-gcFkNcBIX5RLbDAXsUZ66_-yu18",
+        authDomain: "portal-ef933.firebaseapp.com",
+        databaseURL: "https://portal-ef933-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "portal-ef933",
+        storageBucket: "portal-ef933.firebasestorage.app",
+        messagingSenderId: "953039059036",
+        appId: "1:953039059036:web:0210be2f48cbddfb308e99",
+        measurementId: "G-58B5MKVRGR"
     };
+
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
+    const auth = firebase.auth();
 
-    const GOLD_ICON = "https://img.icons8.com/?size=100&id=nTH8lhDLqpDI&format=png&color=000000";
-    const CRYPTO_ICON = "https://cdn-icons-png.flaticon.com/512/2091/2091665.png";
-    const DEFAULT_ICON = "https://cdn-icons-png.flaticon.com/512/197/197518.png";
-    
     let currencies = [];
     let isAutoMode = false;
+    let isPaused = false; 
     let syncTimer = null;
     let countdownTimer = null;
     let secondsLeft = 0;
     let ccRate = 3.5;
+    let currentApiSource = "exchange-rate-v2";
     let sheetId = "";
-    let activeApiSource = "exchange-rate-v2";
     let lastRenderedCurrencies = [];
 
+    const GOLD_ICON = "https://img.icons8.com/?size=100&id=nTH8xhDLqpDI&format=png&color=000000";
+    const CRYPTO_ICON = "https://cdn-icons-png.flaticon.com/512/2091/2091665.png";
+    const DEFAULT_ICON = "https://cdn-icons-png.flaticon.com/512/197/197518.png";
+
+    // --- AUTH ---
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+            initApp();
+        } else {
+            document.getElementById('login-screen').style.display = 'flex';
+            document.getElementById('main-app').style.display = 'none';
+        }
+    });
+
+    async function handleLogin() {
+        const email = document.getElementById('login-email').value;
+        const pass = document.getElementById('login-password').value;
+        const btn = document.getElementById('login-btn');
+        if(!email || !pass) return;
+        btn.innerText = "GİRİŞ YAPILIYOR...";
+        try {
+            await auth.signInWithEmailAndPassword(email, pass);
+            addLog("Kullanıcı girişi başarılı.", "SYS");
+        } catch (e) {
+            document.getElementById('login-error').innerText = "Hatalı giriş!";
+            document.getElementById('login-error').style.display = 'block';
+            btn.innerText = "GİRİŞ YAP";
+        }
+    }
+
+    function handleLogout() {
+        addLog("Oturum kapatıldı.", "SYS");
+        auth.signOut();
+    }
+
+    // --- CORE ---
     function initApp() {
-        addLog("Sistem Başlatıldı.", "INFO");
+        addLog("Terminal çekirdeği hazır.", "INFO");
         
-        db.ref('terminal_data/config').on('value', (snapshot) => {
-            const config = snapshot.val();
-            if(config) {
-                ccRate = config.cc_rate || 3.5;
-                sheetId = config.sheet_id || "";
-                activeApiSource = config.api_source || "exchange-rate-v2";
+        db.ref('config').on('value', snap => {
+            const c = snap.val();
+            if(c) {
+                ccRate = c.cc_rate || 3.5;
+                currentApiSource = c.api_source || "exchange-rate-v2";
+                sheetId = c.sheet_id || "";
                 document.getElementById('cc-commission-rate').value = ccRate;
+                document.getElementById('api-source-select').value = currentApiSource;
                 document.getElementById('sheets-id-input').value = sheetId;
-                document.getElementById('api-source-select').value = activeApiSource;
+                document.getElementById('sync-interval').value = c.sync_interval || 30;
             }
         });
 
-        db.ref('terminal_data/currencies').on('value', (snapshot) => {
-            const data = snapshot.val();
-            if (data) { 
-                const newData = Array.isArray(data) ? data : Object.values(data);
-                const sortedData = newData.sort((a,b) => (a.order || 0) - (b.order || 0));
-                
-                render(sortedData);
-                lastRenderedCurrencies = JSON.parse(JSON.stringify(sortedData));
-                currencies = sortedData;
+        db.ref('currencies').on('value', snap => {
+            const data = snap.val();
+            if(data) {
+                const list = Object.values(data).sort((a,b) => (a.order || 0) - (b.order || 0));
+                lastRenderedCurrencies = [...currencies];
+                currencies = list;
+                render(currencies);
             }
         });
 
-        db.ref('terminal_data/tv_settings').on('value', (snapshot) => {
-            const tv = snapshot.val();
+        db.ref('tv_settings').on('value', snap => {
+            const tv = snap.val();
             if(tv) {
                 document.getElementById('tv-master-switch').checked = tv.master || false;
-                document.getElementById('tv-screen-select').value = tv.screen || "1";
                 document.getElementById('tv-master-switch-2').checked = tv.master2 || false;
-                document.getElementById('tv-screen-select-2').value = tv.screen2 || "1";
                 updateTvButtonState(tv.master, tv.master2);
             }
         });
 
-        const el = document.getElementById('currency-list');
-        Sortable.create(el, {
+        Sortable.create(document.getElementById('currency-list'), {
             handle: '.drag-handle', animation: 150,
-            onEnd: function() { reorderCurrencies(); }
+            onEnd: () => {
+                reorderCurrencies();
+                addLog("Liste sıralaması güncellendi.", "INFO");
+            }
         });
     }
 
-    async function fetchMarketData() {
-        if (!isAutoMode) {
-            clearTimeout(syncTimer);
-            return;
-        }
-        
-        try {
-            let hasGlobalChange = false;
-            let updatedList = JSON.parse(JSON.stringify(currencies));
-            let marketRates = {};
-
-            if (activeApiSource === "google-sheets") {
-                if(!sheetId) { toggleAuto(); return; }
-                const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
-                const resp = await fetch(url);
-                const text = await resp.text();
-                const json = JSON.parse(text.substr(47).slice(0, -2));
-                json.table.rows.forEach(r => {
-                    if(r.c[0] && r.c[1]) marketRates[r.c[0].v.toString().toUpperCase()] = parseFloat(r.c[1].v);
-                });
-            } else {
-                const tryResp = await fetch(`https://hexarate.paikama.co/api/rates/USD/TRY/latest`);
-                const tryJson = await tryResp.json();
-                const tryRate = parseFloat(tryJson?.data?.mid || 1);
-                marketRates["_USDTRY"] = tryRate;
+    function render(list) {
+        const container = document.getElementById('currency-list');
+        container.innerHTML = '';
+        list.forEach(c => {
+            const old = lastRenderedCurrencies.find(o => o.id === c.id);
+            let buyAnim = "", sellAnim = "", rowAnim = "";
+            if (old) {
+                if (c.sell > old.sell) { rowAnim = "row-up"; sellAnim = "price-up"; } 
+                else if (c.sell < old.sell) { rowAnim = "row-down"; sellAnim = "price-down"; }
+                if (c.buy > old.buy) buyAnim = "price-up"; else if (c.buy < old.buy) buyAnim = "price-down";
             }
+            let icon = c.category === 'altin' ? GOLD_ICON : (c.category === 'kripto' ? CRYPTO_ICON : `https://flagcdn.com/w80/${c.flag || 'us'}.png`);
+            let ccHtml = c.category === 'altin' ? `<div class="cc-price-box"><span class="cc-label">K.KARTI (%${ccRate})</span><div class="cc-price-val">${(Math.floor((c.sell * (1 + ccRate/100)) / 10) * 10)}</div></div>` : "";
 
-            for (let i = 0; i < updatedList.length; i++) {
-                let c = updatedList[i];
-                if (c.autoSync === false) continue; 
-
-                let basePrice = 0;
-                if (activeApiSource === "google-sheets") {
-                    basePrice = marketRates[c.name] || 0;
-                } else {
-                    let sym = c.name === "GA" ? "XAU" : (c.name === "GR" ? "XAG" : c.name);
-                    const resp = await fetch(`https://hexarate.paikama.co/api/rates/${sym}/USD/latest`);
-                    const json = await resp.json();
-                    const mid = parseFloat(json?.data?.mid || 0);
-                    const usdTry = marketRates["_USDTRY"];
-                    basePrice = (sym === "XAU" || sym === "XAG") ? (mid * usdTry / 31.1035) : (mid * usdTry);
-                }
-
-                if (basePrice > 0) {
-                    const newBuy = applyMargins(basePrice, c.buyMargin, 'buy', c.category);
-                    const newSell = applyMargins(basePrice, c.sellMargin, 'sell', c.category);
-                    
-                    if (Math.abs(c.buy - newBuy) > 0.0001 || Math.abs(c.sell - newSell) > 0.0001) {
-                        updatedList[i].buy = newBuy;
-                        updatedList[i].sell = newSell;
-                        hasGlobalChange = true;
-                    }
-                }
-            }
-
-            if(hasGlobalChange && isAutoMode) { 
-                currencies = updatedList; 
-                saveToFirebase(); 
-            }
-            
-            document.getElementById('stat-sync').innerText = new Date().toLocaleTimeString('tr-TR');
-            resetCountdown();
-            syncTimer = setTimeout(fetchMarketData, (parseInt(document.getElementById('sync-interval').value) || 30) * 1000);
-        } catch (e) { 
-            addLog("Bağlantı Hatası!", "ERROR");
-            syncTimer = setTimeout(fetchMarketData, 5000); 
-        }
-    }
-
-    function applyMargins(price, margin, type, category) {
-        let final = (type === 'sell') ? (price + (margin || 0)) : (price - (margin || 0));
-        return (category === 'altin') ? Math.floor(final) : Math.round(final * 1000) / 1000;
-    }
-
-    function formatPrice(val, category) {
-        if(!val) return "0.00";
-        return category === "altin" ? Math.floor(val).toLocaleString('tr-TR') : val.toFixed(3);
-    }
-
-    function render(newList) {
-        const list = document.getElementById('currency-list');
-        list.innerHTML = '';
-        newList.forEach(c => {
-            const oldItem = lastRenderedCurrencies.find(o => o.id === c.id);
-            let buyClass = "", sellClass = "";
-            
-            // Parlama Efekti Mantığı
-            if (oldItem) {
-                if (c.buy > oldItem.buy) buyClass = "price-up";
-                else if (c.buy < oldItem.buy) buyClass = "price-down";
-                if (c.sell > oldItem.sell) sellClass = "price-up";
-                else if (c.sell < oldItem.sell) sellClass = "price-down";
-            }
-
-            let iconUrl = (c.category === 'altin' || c.flag === 'gold') ? GOLD_ICON : 
-                          (c.category === 'kripto' || c.flag === 'btc') ? CRYPTO_ICON : 
-                          (c.flag?.length === 2) ? `https://flagcdn.com/w80/${c.flag}.png` : DEFAULT_ICON;
-            
-            let ccHtml = (c.category === 'altin') ? 
-                `<div class="cc-price-box"><span class="cc-label">K. Kartı (%${ccRate})</span><div class="cc-price-val">${Math.floor(c.sell * (1 + ccRate/100))}</div></div>` : "";
-
-            list.innerHTML += `
-                <div class="currency-card" data-id="${c.id}" onclick="openUpdateModal(${c.id})">
+            container.innerHTML += `
+                <div class="currency-card ${rowAnim}" data-id="${c.id}" onclick="openUpdateModal(${c.id})">
                     <div class="drag-handle"><i class="fas fa-grip-vertical"></i></div>
-                    <div class="lock-indicator">${c.autoSync ? '<i class="fas fa-sync-alt fa-spin" style="color:var(--success)"></i>' : '<i class="fas fa-lock" style="color:var(--danger)"></i>'}</div>
-                    <div class="flag-box"><img src="${iconUrl}" class="flag-anim" onerror="this.src='${DEFAULT_ICON}'"></div>
-                    <div class="currency-meta"><b>${c.name}</b><br><span style="font-size:9px">${c.category.toUpperCase()}</span></div>
-                    <div class="price-col">
-                        <span class="label-style">ALIŞ</span>
-                        <div class="price-val ${buyClass}">${formatPrice(c.buy, c.category)}</div>
-                        <div class="margin-tag">-${(c.buyMargin || 0).toFixed(2)}</div>
-                    </div>
-                    <div class="price-col">
-                        <span class="label-style">SATIŞ</span>
-                        <div class="price-val ${sellClass}">${formatPrice(c.sell, c.category)}</div>
-                        <div class="margin-tag" style="color:var(--success)">+${(c.sellMargin || 0).toFixed(2)}</div>
-                        ${ccHtml}
-                    </div>
+                    <div class="lock-indicator">${c.autoSync ? '<i class="fas fa-sync fa-spin"></i>' : '<i class="fas fa-lock"></i>'}</div>
+                    <div class="flag-box"><img src="${icon}" class="flag-anim" onerror="this.src='${DEFAULT_ICON}'"></div>
+                    <div class="meta"><b>${c.name}</b><br><small>${c.category}</small></div>
+                    <div class="price-col"><span class="label-style">ALIŞ</span><div class="price-val ${buyAnim}">${(c.buy || 0).toFixed(c.category === 'altin' ? 0 : 3)}</div></div>
+                    <div class="price-col"><span class="label-style">SATIŞ</span><div class="price-val ${sellAnim}">${(c.sell || 0).toFixed(c.category === 'altin' ? 0 : 3)}</div>${ccHtml}</div>
                 </div>`;
         });
-        document.getElementById('stat-count').innerText = newList.length;
+        document.getElementById('stat-count').innerText = list.length;
     }
 
-    function toggleAuto() {
-        isAutoMode = !isAutoMode;
-        document.getElementById('auto-btn').classList.toggle('active-green', isAutoMode);
-        clearTimeout(syncTimer);
-        if(isAutoMode) { 
-            fetchMarketData(); 
-            addLog("Genel Bot Başlatıldı.", "INFO"); 
-        } else { 
-            document.getElementById('timer-box').innerText = "--"; 
-            addLog("Genel Bot Durduruldu.", "WARN"); 
-        }
-    }
-
-    function saveManualUpdate() {
-        const id = parseInt(document.getElementById('edit-id').value);
-        const bPrice = parseFloat(document.getElementById('edit-buy-price').value) || 0;
-        const sPrice = parseFloat(document.getElementById('edit-sell-price').value) || 0;
-        const bMargin = parseFloat(document.getElementById('edit-buy-margin').value) || 0;
-        const sMargin = parseFloat(document.getElementById('edit-sell-margin').value) || 0;
-        const isAuto = document.getElementById('edit-auto-sync').checked;
-
-        currencies = currencies.map(c => c.id === id ? {
-            ...c, buy: bPrice, sell: sPrice, buyMargin: bMargin, sellMargin: sMargin,
-            flag: document.getElementById('edit-flag').value.toLowerCase(),
-            autoSync: isAuto
-        } : c);
-        
-        saveToFirebase(); 
-        closeModal();
-        addLog(`Manuel Güncelleme: ${id}`, "UPDATE");
-    }
-
-    function saveToFirebase() { db.ref('terminal_data/currencies').set(currencies); }
-    
-    function reorderCurrencies() {
-        const items = document.querySelectorAll('.currency-card');
-        items.forEach((item, index) => {
-            const id = parseInt(item.getAttribute('data-id'));
-            const curr = currencies.find(c => c.id === id);
-            if(curr) curr.order = index;
-        });
-        saveToFirebase();
-    }
-
-    function openUpdateModal(id) {
-        const c = currencies.find(x => x.id === id);
-        if(!c) return;
-        document.getElementById('edit-id').value = c.id;
-        document.getElementById('edit-title').innerText = c.name;
-        document.getElementById('edit-buy-price').value = c.buy;
-        document.getElementById('edit-sell-price').value = c.sell;
-        document.getElementById('edit-buy-margin').value = c.buyMargin;
-        document.getElementById('edit-sell-margin').value = c.sellMargin;
-        document.getElementById('edit-flag').value = c.flag || "";
-        document.getElementById('edit-auto-sync').checked = c.autoSync;
-        document.getElementById('update-modal').style.display = 'flex';
-    }
-
-    function closeModal() { document.getElementById('update-modal').style.display = 'none'; }
-    
-    function toggleSettingsArea() {
-        const area = document.getElementById('tv-settings-container');
-        const list = document.getElementById('currency-list');
-        const btn = document.getElementById('tv-settings-btn');
-        const isOpen = area.style.display === 'block';
-        area.style.display = isOpen ? 'none' : 'block';
-        list.style.display = isOpen ? 'block' : 'none';
-        btn.classList.toggle('active-blue', !isOpen);
-    }
-
-    function saveTvSettings() {
-        db.ref('terminal_data/tv_settings').set({
-            master: document.getElementById('tv-master-switch').checked,
-            screen: document.getElementById('tv-screen-select').value,
-            master2: document.getElementById('tv-master-switch-2').checked,
-            screen2: document.getElementById('tv-screen-select-2').value,
-            lastUpdate: Date.now()
-        });
-    }
-
+    // --- TV CONTROLS ---
     function toggleAllTv() {
-        const s1 = document.getElementById('tv-master-switch');
-        const s2 = document.getElementById('tv-master-switch-2');
-        const newState = !(s1.checked || s2.checked);
-        s1.checked = newState; s2.checked = newState;
-        saveTvSettings();
+        const m1 = document.getElementById('tv-master-switch').checked;
+        const m2 = document.getElementById('tv-master-switch-2').checked;
+        const targetState = !(m1 || m2);
+        db.ref('tv_settings').update({ master: targetState, master2: targetState }).then(() => {
+            addLog(`Tüm TV yayınları ${targetState ? 'AÇILDI' : 'KAPATILDI'}`, targetState ? "UPDATE" : "DANGER");
+        });
     }
 
     function updateTvButtonState(m1, m2) {
         const btn = document.getElementById('tv-master-btn');
-        (m1 || m2) ? btn.classList.add('active-green') : btn.classList.remove('active-green');
         document.getElementById('badge-tv1').style.background = m1 ? 'var(--success)' : '#ccc';
         document.getElementById('badge-tv2').style.background = m2 ? 'var(--success)' : '#ccc';
+        if(m1 || m2) { btn.classList.add('active-green'); btn.innerHTML = '<i class="fas fa-broadcast-tower"></i>'; }
+        else { btn.classList.remove('active-green'); btn.innerHTML = '<i class="fas fa-power-off"></i>'; }
     }
 
-    function updateCommissionRate() {
-        const val = parseFloat(document.getElementById('cc-commission-rate').value) || 0;
-        db.ref('terminal_data/config/cc_rate').set(val);
+    // --- LOGIC & SYNC ---
+    async function fetchMarketData() {
+        if (!isAutoMode || isPaused) return;
+        
+        try {
+            let hasChange = false;
+            let newList = JSON.parse(JSON.stringify(currencies));
+
+            if (currentApiSource === "google-sheets" && sheetId) {
+                // GOOGLE SHEETS MODE
+                const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
+                const resp = await fetch(url);
+                const text = await resp.text();
+                const json = JSON.parse(text.substring(47, text.length - 2));
+                const rows = json.table.rows;
+
+                rows.forEach(row => {
+                    const symbol = row.c[0]?.v?.toString().toUpperCase();
+                    const buyVal = parseFloat(row.c[1]?.v || 0);
+                    const sellVal = parseFloat(row.c[2]?.v || 0);
+
+                    const idx = newList.findIndex(c => c.name === symbol && c.autoSync);
+                    if (idx !== -1) {
+                        let nb = buyVal - (newList[idx].buyMargin || 0);
+                        let ns = sellVal + (newList[idx].sellMargin || 0);
+                        if(newList[idx].category === 'altin') { nb = Math.floor(nb/10)*10; ns = Math.floor(ns/10)*10; }
+                        
+                        if (Math.abs(newList[idx].buy - nb) > 0.001 || Math.abs(newList[idx].sell - ns) > 0.001) {
+                            newList[idx].buy = nb;
+                            newList[idx].sell = ns;
+                            hasChange = true;
+                        }
+                    }
+                });
+                addLog("Google Sheets verileri senkronize edildi.", "UPDATE");
+            } else {
+                // GLOBAL API MODE
+                const tryResp = await fetch(`https://hexarate.paikama.co/api/rates/USD/TRY/latest`);
+                const tryJson = await tryResp.json();
+                const tryRate = parseFloat(tryJson?.data?.mid || 1);
+
+                for (let i = 0; i < newList.length; i++) {
+                    let c = newList[i];
+                    if (c.autoSync) {
+                        let base = c.name === "GA" ? "XAU" : c.name;
+                        const resp = await fetch(`https://hexarate.paikama.co/api/rates/${base}/USD/latest`);
+                        const json = await resp.json();
+                        if(json?.data?.mid) {
+                            let price = parseFloat(json.data.mid) * tryRate;
+                            if(base === "XAU") price = price / 31.1035;
+                            let nb = price - (c.buyMargin || 0);
+                            let ns = price + (c.sellMargin || 0);
+                            if(c.category === 'altin') { nb = Math.floor(nb/10)*10; ns = Math.floor(ns/10)*10; }
+                            if(Math.abs(c.buy - nb) > 0.001) { newList[i].buy = nb; newList[i].sell = ns; hasChange = true; }
+                        }
+                    }
+                }
+                addLog("Küresel piyasa verileri güncellendi.", "UPDATE");
+            }
+
+            if(hasChange) saveAllCurrencies(newList);
+            
+            document.getElementById('stat-sync').innerText = new Date().toLocaleTimeString();
+            resetCountdown();
+            syncTimer = setTimeout(fetchMarketData, (parseInt(document.getElementById('sync-interval').value) || 30) * 1000);
+        } catch (e) {
+            addLog("Veri Çekme Hatası: " + e.message, "DANGER");
+            syncTimer = setTimeout(fetchMarketData, 5000);
+        }
     }
 
-    function saveSheetsId() {
-        const val = document.getElementById('sheets-id-input').value.trim();
-        db.ref('terminal_data/config/sheet_id').set(val);
+    function addLog(msg, type) {
+        const list = document.getElementById('log-list');
+        const entry = document.createElement('div');
+        entry.className = 'log-entry';
+        const time = new Date().toLocaleTimeString('tr-TR', {hour12:false, hour:'2-digit', minute:'2-digit', second:'2-digit'});
+        const tagClass = type === 'UPDATE' ? 'tag-update' : (type === 'DANGER' ? 'tag-danger' : (type === 'SYS' ? 'tag-sys' : 'tag-info'));
+        entry.innerHTML = `<span class="log-tag ${tagClass}">${type}</span> <span style="color:var(--secondary); font-weight:bold">${time}</span> <span style="color:#ddd">${msg}</span>`;
+        list.prepend(entry);
+        if(list.childNodes.length > 50) list.lastChild.remove();
     }
 
-    function saveApiSource() {
-        const val = document.getElementById('api-source-select').value;
-        db.ref('terminal_data/config/api_source').set(val);
+    function toggleAuto() {
+        isAutoMode = !isAutoMode;
+        const btn = document.getElementById('auto-btn');
+        if(isAutoMode) { btn.classList.add('active-green'); fetchMarketData(); addLog("Bot başlatıldı.", "SYS"); } 
+        else { btn.classList.remove('active-green'); clearTimeout(syncTimer); clearInterval(countdownTimer); addLog("Bot durduruldu.", "SYS"); }
+    }
+
+    function toggleLocalMode() {
+        isPaused = !isPaused;
+        const btn = document.getElementById('fb-sync-btn');
+        isPaused ? btn.classList.add('active-warn') : btn.classList.remove('active-warn');
+        addLog(isPaused ? "Akış donduruldu (Manuel Mod)." : "Akış aktif edildi.", "INFO");
+    }
+
+    function saveManualUpdate() {
+        const id = document.getElementById('edit-id').value;
+        const old = currencies.find(x => x.id == id);
+        const data = {
+            ...old,
+            buy: parseFloat(document.getElementById('edit-buy-price').value),
+            sell: parseFloat(document.getElementById('edit-sell-price').value),
+            buyMargin: parseFloat(document.getElementById('edit-buy-margin').value),
+            sellMargin: parseFloat(document.getElementById('edit-sell-margin').value),
+            flag: document.getElementById('edit-flag').value,
+            autoSync: document.getElementById('edit-auto-sync').checked
+        };
+        db.ref('currencies/' + id).set(data);
+        addLog(`${data.name} manuel olarak güncellendi.`, "UPDATE");
+        closeModal();
+    }
+
+    function addNewCurrency() {
+        const name = document.getElementById('new-name').value.toUpperCase();
+        if(!name) return;
+        const id = Date.now();
+        db.ref('currencies/' + id).set({
+            id: id, name: name, category: document.getElementById('new-api-cat').value,
+            buy: 0, sell: 0, buyMargin: 0, sellMargin: 0, autoSync: true, order: currencies.length
+        });
+        addLog(`Yeni varlık eklendi: ${name}`, "INFO");
+        document.getElementById('new-name').value = '';
+    }
+
+    function deleteCurrency() {
+        if(confirm("Silmek istediğinize emin misiniz?")) {
+            const id = document.getElementById('edit-id').value;
+            db.ref('currencies/' + id).remove();
+            addLog(`Varlık silindi: ID ${id}`, "DANGER");
+            closeModal();
+        }
     }
 
     function resetCountdown() {
         clearInterval(countdownTimer);
         secondsLeft = parseInt(document.getElementById('sync-interval').value) || 30;
         countdownTimer = setInterval(() => {
-            secondsLeft--; 
+            secondsLeft--;
             document.getElementById('timer-box').innerText = secondsLeft + "s";
             if(secondsLeft <= 0) clearInterval(countdownTimer);
         }, 1000);
     }
 
-    function addLog(m, type) {
-        const l = document.getElementById('log-list');
-        const entry = document.createElement('div');
-        entry.className = 'log-entry';
-        let tc = type === 'UPDATE' ? 'tag-update' : (type === 'ERROR' ? 'tag-error' : (type === 'WARN' ? 'tag-warn' : 'tag-info'));
-        entry.innerHTML = `<span class="log-time">${new Date().toLocaleTimeString()}</span><span class="log-tag ${tc}">${type}</span><span class="log-msg">${m}</span>`;
-        l.prepend(entry);
-        document.getElementById('footer-status').innerText = m;
-        if(l.childNodes.length > 30) l.removeChild(l.lastChild);
+    function saveAllCurrencies(list) {
+        const updates = {};
+        list.forEach(c => updates['/currencies/' + c.id] = c);
+        db.ref().update(updates);
+    }
+
+    function reorderCurrencies() {
+        const cards = document.querySelectorAll('.currency-card');
+        const updates = {};
+        cards.forEach((c, i) => updates['/currencies/' + c.dataset.id + '/order'] = i);
+        db.ref().update(updates);
     }
 
     function toggleTheme() {
-        const cur = document.body.getAttribute('data-theme');
-        document.body.setAttribute('data-theme', cur === 'dark' ? 'light' : 'dark');
+        const body = document.body;
+        const current = body.getAttribute('data-theme');
+        body.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
     }
 
-    function deleteCurrency() {
-        if(!confirm("Emin misiniz?")) return;
-        const id = parseInt(document.getElementById('edit-id').value);
-        currencies = currencies.filter(c => c.id !== id);
-        saveToFirebase(); closeModal();
+    function toggleSettingsArea() {
+        const el = document.getElementById('tv-settings-container');
+        const isHidden = el.style.display === 'none' || !el.style.display;
+        el.style.display = isHidden ? 'block' : 'none';
+        document.getElementById('tv-settings-btn').classList.toggle('active-blue', isHidden);
     }
 
-    initApp();
+    function openUpdateModal(id) {
+        const c = currencies.find(x => x.id == id);
+        document.getElementById('edit-id').value = c.id;
+        document.getElementById('edit-title').innerText = c.name;
+        document.getElementById('edit-buy-price').value = c.buy;
+        document.getElementById('edit-sell-price').value = c.sell;
+        document.getElementById('edit-buy-margin').value = c.buyMargin || 0;
+        document.getElementById('edit-sell-margin').value = c.sellMargin || 0;
+        document.getElementById('edit-flag').value = c.flag || "";
+        document.getElementById('edit-auto-sync').checked = c.autoSync;
+        document.getElementById('update-modal').style.display = 'flex';
+    }
+
+    function closeModal() { document.getElementById('update-modal').style.display = 'none'; }
+
+    function saveTvSettings() {
+        db.ref('tv_settings').set({
+            master: document.getElementById('tv-master-switch').checked,
+            master2: document.getElementById('tv-master-switch-2').checked,
+            screen: document.getElementById('tv-screen-select').value,
+            screen2: document.getElementById('tv-screen-select-2').value
+        });
+        addLog("TV ayarları güncellendi.", "INFO");
+    }
+
+    function updateCommissionRate() { db.ref('config/cc_rate').set(parseFloat(document.getElementById('cc-commission-rate').value)); addLog("Komisyon oranı güncellendi.", "INFO"); }
+    function saveSheetsId() { db.ref('config/sheet_id').set(document.getElementById('sheets-id-input').value); sheetId = document.getElementById('sheets-id-input').value; addLog("Google Sheets ID güncellendi.", "INFO"); }
+    function saveApiSource() { db.ref('config/api_source').set(document.getElementById('api-source-select').value); currentApiSource = document.getElementById('api-source-select').value; addLog("API kaynağı değiştirildi.", "INFO"); }
+    function saveSyncInterval() { db.ref('config/sync_interval').set(parseInt(document.getElementById('sync-interval').value)); addLog("Güncelleme sıklığı güncellendi.", "INFO"); }
+
 </script>
 </body>
 </html>
