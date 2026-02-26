@@ -2770,16 +2770,20 @@ function _sheetsShowGuide() {
         html: `
             <div style="text-align:left; font-size:13px; line-height:1.7;">
                 <p><b>1. Google Sheets dosyasını hazırlayın:</b><br>
-                Sütunlar: <code>KOD | ALIŞ | SATIŞ</code><br>
-                Örnek: <code>USD | 38.50 | 39.00</code></p>
+                Sütun düzeni: <code>A: KOD | B: ALIŞ | C: SATIŞ</code><br>
+                Örnek: <code>USD | 43.500 | 44.900</code></p>
                 <hr style="border-color:var(--border); margin:8px 0;">
-                <p><b>2. Dosyayı herkese açık yapın:</b><br>
+                <p><b>2. Komisyon nasıl çalışır?</b><br>
+                Komisyon kuru üzerine <b>eklenerek</b> uygulanır.<br>
+                Örn: Sheets 43,500 + Komisyon 0,300 = <b>43,800</b> olarak gösterilir.</p>
+                <hr style="border-color:var(--border); margin:8px 0;">
+                <p><b>3. Dosyayı herkese açık yapın:</b><br>
                 Paylaş → <i>"Bağlantıya sahip herkes"</i> → <i>Görüntüleyici</i></p>
                 <hr style="border-color:var(--border); margin:8px 0;">
-                <p><b>3. URL'yi kopyalayın:</b><br>
+                <p><b>4. URL'yi kopyalayın:</b><br>
                 Tarayıcı adres çubuğundan tam URL'yi kopyalayıp yapıştırın.</p>
                 <hr style="border-color:var(--border); margin:8px 0;">
-                <p><b>4. GID (sayfa ID):</b><br>
+                <p><b>5. GID (sayfa ID):</b><br>
                 URL'deki <code>gid=</code> kısmını girin. İlk sayfa için <code>0</code> yazın.</p>
                 <hr style="border-color:var(--border); margin:8px 0;">
                 <p style="color:var(--accent);"><b>⚠️ Desteklenen para kodu isimleri:</b><br>
@@ -2962,9 +2966,8 @@ const app = {
             localStorage.setItem('dovizx_data', JSON.stringify(dataToSave));
             localStorage.setItem('dovizx_active_vezne', this.data.activeVezneId);
             
-            // Firebase'e de yaz (db bağlıysa ve auth aktifse)
-            if (typeof firebaseService !== 'undefined' && firebaseService._db &&
-                firebaseService._auth && firebaseService._auth.currentUser) {
+            // Firebase'e de yaz (db bağlıysa — giriş zorunlu değil)
+            if (typeof firebaseService !== 'undefined' && firebaseService._db) {
                 firebaseService.write(dataToSave).catch(e => console.warn('Firebase yazma hatası:', e));
             }
             
@@ -3750,7 +3753,7 @@ const app = {
                 const cat = r.category || 'doviz';
                 const catClass = cat === 'altin' ? 'cat-altin' : '';
                 html += `
-                    <div class="rate-item-responsive ${catClass}">
+                    <div class="rate-item-responsive ${catClass}" data-code="${r.code}">
                         <div class="rate-item-header">
                             <div class="curr-code">
                                 <span style="font-size:20px; cursor:pointer;" 
@@ -3781,6 +3784,33 @@ const app = {
         }
         
         grid.innerHTML = html;
+
+        // Masa üstü modunda sürükle-bırak ile kur satırı sıralama
+        if (typeof desktop !== 'undefined' && desktop.IS_DESKTOP && typeof Sortable !== 'undefined') {
+            const pages = grid.querySelectorAll('.rate-page');
+            if (this._rateSortables) this._rateSortables.forEach(s => s.destroy());
+            this._rateSortables = [];
+            pages.forEach(page => {
+                const s = new Sortable(page, {
+                    animation: 150,
+                    ghostClass: 'sortable-ghost',
+                    dragClass: 'sortable-drag',
+                    group: 'rate-items',
+                    onEnd: () => {
+                        // DOM sıralamasından yeni kur sırasını oluştur
+                        const allItems = grid.querySelectorAll('[data-code]');
+                        const newOrder = [...allItems].map(el => el.getAttribute('data-code')).filter(Boolean);
+                        const sorted = newOrder.map(code => app.data.rates.find(r => r.code === code)).filter(Boolean);
+                        // Listede olmayanları sona ekle
+                        app.data.rates.forEach(r => { if (!newOrder.includes(r.code)) sorted.push(r); });
+                        app.data.rates = sorted;
+                        app.saveData();
+                        Swal.fire({ toast:true, position:'top-end', icon:'success', title:'Kur sırası güncellendi', showConfirmButton:false, timer:1200 });
+                    }
+                });
+                this._rateSortables.push(s);
+            });
+        }
     },
     
     getRateInfo(code) {
@@ -5576,7 +5606,7 @@ const pano = {
                     <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:4px;">Satış Komisyon (Sabit ₺)</label>
                     <input type="number" id="swal-commission-sell" step="0.01" min="0" value="${r.commissionSell || 0}"
                         style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border); background:var(--input); color:var(--text); box-sizing:border-box; font-size:16px;">
-                    <p style="font-size:11px; color:var(--muted); margin-top:6px;">Komisyon alışta müşteriden, satışta vezneden sabit olarak kesilir.</p>
+                    <p style="font-size:11px; color:var(--muted); margin-top:6px;">Komisyon alış ve satış kuruna eklenerek uygulanır. Örn: Sheets 43,500 + Komisyon 0,300 = 43,800 gösterilir.</p>
                 </div>`,
             showCancelButton: true,
             confirmButtonText: 'Kaydet',
@@ -5777,7 +5807,8 @@ const pano = {
                 if (idx !== -1) {
                     const rate = app.data.rates[idx];
                     if (rate.mode === 'auto') {
-                        app.data.rates[idx].buy  = parseFloat((rawBuy  - (rate.commissionBuy  || 0)).toFixed(4));
+                        // Komisyon EKLENEREK kur hesaplanır (örn: 43.500 + 0.300 = 43.800)
+                        app.data.rates[idx].buy  = parseFloat((rawBuy  + (rate.commissionBuy  || 0)).toFixed(4));
                         app.data.rates[idx].sell = parseFloat((rawSell + (rate.commissionSell || 0)).toFixed(4));
                         updated++;
                     }
@@ -5811,7 +5842,7 @@ const pano = {
             // Sadece 'auto' moddaki currency'leri güncelle
             if (r.mode === 'auto') {
                 const change = 1 + (Math.random() * 0.004 - 0.002);
-                r.buy  = parseFloat((r.buy  * change - (r.commissionBuy  || 0)).toFixed(4));
+                r.buy  = parseFloat((r.buy  * change + (r.commissionBuy  || 0)).toFixed(4));
                 r.sell = parseFloat((r.sell * change + (r.commissionSell || 0)).toFixed(4));
                 if (r.buy >= r.sell) r.sell = parseFloat((r.buy * 1.005).toFixed(4));
             }
@@ -6204,18 +6235,27 @@ const pos = {
         const amount = parseFloat(this.state.amountStr.replace(',', '.')) || 0;
         const rate = this.getCurrentRate();
         const total = amount * rate;
+        // Mevcut kalemin işaretli değeri (SATIŞ → pozitif, ALIŞ → negatif)
+        const signedCurrent = this.state.type === 'sell' ? total : -total;
 
         document.getElementById('displayAmount').innerText = app.fmt(amount, 2);
         document.getElementById('currentTotalTL').innerText = app.fmt(total) + ' ₺';
 
-        const overallTotal = this.calculateTotalLockedTL() + total;
-        document.getElementById('displayTotal').innerText = 'SEPET TOPLAMI: ' + app.fmt(overallTotal) + ' ₺';
+        // Sepet neti = önceki kilitli kalemlerin neti + mevcut kalemin işaretli değeri
+        const overallNet = this.calculateTotalLockedTL() + signedCurrent;
+        const absNet = Math.abs(overallNet);
+        const netLabel = overallNet >= 0 ? 'MÜŞTERİ ÖDER: ' : 'VEZNE ÖDER: ';
+        document.getElementById('displayTotal').innerText = netLabel + app.fmt(absNet) + ' ₺';
 
         this.updateInputModeDisplay();
     },
 
     calculateTotalLockedTL() {
-        return this.transactionList.reduce((sum, tx) => sum + tx.total, 0);
+        // ALIŞ (büro alıyor): müşteri TL alır → vezneden çıkış → negatif
+        // SATIŞ (büro satıyor): müşteri TL öder → vezneye giriş → pozitif
+        return this.transactionList.reduce((sum, tx) => {
+            return sum + (tx.type === 'sell' ? tx.total : -tx.total);
+        }, 0);
     },
 
     addTransactionItem() {
@@ -7140,12 +7180,6 @@ const firebaseService = {
         }
         if (!this._db) {
             Swal.fire('Uyarı', 'Firebase yapılandırılmamış. Ayarlar → Firebase bölümünden "Kaydet & Bağlan" butonuna basın.', 'warning');
-            return;
-        }
-        // Auth kontrolü
-        const user = this._auth ? this._auth.currentUser : null;
-        if (!user) {
-            Swal.fire('Uyarı', 'Firebase yazma için giriş yapılmış olmalı. Vezne girişi yapın.', 'warning');
             return;
         }
         Swal.fire({ title: 'Senkronize ediliyor...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
