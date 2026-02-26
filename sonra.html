@@ -8,6 +8,7 @@
 <!-- Firebase SDK - Opsiyonel, ayarlar bölümünden yapılandırılır -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
@@ -217,6 +218,41 @@ header { padding: 15px 20px; background: rgba(30, 41, 59, 0.95); border-bottom: 
 .brand { font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
 .brand i { color: var(--success); }
 .badge-demo { background: var(--accent); color: #000; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 800; }
+
+/* ── BRAND-X Animasyonu ── */
+#brand-x {
+    display: inline-block;
+    transition: color 0.4s ease;
+    color: inherit;
+}
+
+/* Firebase veri okunuyor/yazılıyor → pulse */
+@keyframes fbPulse {
+    0%   { transform: scale(1);    color: #10b981; text-shadow: 0 0 6px #10b981; }
+    25%  { transform: scale(1.55); color: #3b82f6; text-shadow: 0 0 14px #3b82f6; }
+    50%  { transform: scale(1.1);  color: #06b6d4; text-shadow: 0 0 10px #06b6d4; }
+    75%  { transform: scale(1.45); color: #10b981; text-shadow: 0 0 14px #10b981; }
+    100% { transform: scale(1);    color: #3b82f6; text-shadow: 0 0 6px #3b82f6; }
+}
+
+/* Firebase bağlı — sürekli hafif nefes */
+@keyframes fbBreath {
+    0%,100% { transform: scale(1);    color: #10b981; text-shadow: 0 0 4px rgba(16,185,129,0.6); }
+    50%      { transform: scale(1.15); color: #3b82f6; text-shadow: 0 0 10px rgba(59,130,246,0.8); }
+}
+
+#brand-x.fb-pulse {
+    animation: fbPulse 0.7s ease-in-out;
+}
+#brand-x.fb-connected {
+    animation: fbBreath 2.4s ease-in-out infinite;
+}
+#brand-x.fb-error {
+    animation: none;
+    color: #ef4444;
+    text-shadow: 0 0 8px rgba(239,68,68,0.7);
+    transform: scale(1);
+}
 
 /* Ana Görünümler Kapsayıcısı */
 #views {
@@ -1214,320 +1250,349 @@ header { padding: 15px 20px; background: rgba(30, 41, 59, 0.95); border-bottom: 
 
 
 /* ============================================================ */
-/*  DESKTOP LAYOUT  ≥1024px  — DövizX Enterprise Desktop Mode  */
+/*  DövizX Enterprise Pro — DESKTOP DASHBOARD ENGINE v5        */
+/*  Layout: [KUR(top-left)] [KASA(bottom-left)] | [GEÇMİŞ] | [PANO] | [HAREKETLER] */
 /* ============================================================ */
-@media (min-width: 1024px) {
 
-  /* viewport fix for desktop */
-  html, body {
-    height: 100%; overflow: hidden;
-    font-family: 'Manrope', sans-serif;
-  }
-
-  /* ── TITLEBAR AREA (drag region for Electron / PWA) ── */
-  body::before {
-    content: '';
-    display: block;
-    height: 0;
-    /* Could be used for native titlebar integration */
-  }
-
-  /* ── TOP HEADER ── */
-  header {
-    height: 52px;
-    padding: 0 20px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    gap: 0;
-    background: var(--card);
-    border-bottom: 1px solid var(--border);
-    z-index: 200;
-    position: relative;
-  }
-  header .brand {
-    font-size: 17px;
-    font-weight: 900;
-    margin-right: 16px;
-    white-space: nowrap;
-  }
-
-  /* desktop top nav pills */
-  .dt-topnav {
-    display: flex;
-    gap: 2px;
-    flex: 1;
-    align-items: center;
-  }
-  .dt-topnav .nav-item {
-    flex: none;
-    flex-direction: row;
-    gap: 6px;
-    padding: 6px 14px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 700;
-    height: auto;
-    white-space: nowrap;
-  }
-  .dt-topnav .nav-item i { font-size: 15px; margin-bottom: 0; }
-  .dt-topnav .nav-item.active { background: var(--primary); color: white; }
-  .dt-topnav .nav-item:hover:not(.active) { background: var(--input); color: var(--text); }
-
-  /* Header right actions */
-  .dt-header-right {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-left: auto;
-    flex-shrink: 0;
-  }
-  .dt-kasa-badge {
-    background: rgba(16,185,129,0.12);
-    border: 1px solid rgba(16,185,129,0.3);
-    border-radius: 8px;
-    padding: 5px 12px;
-    font-size: 13px;
-    font-weight: 800;
-    color: var(--success);
-    white-space: nowrap;
-  }
-  .dt-clock {
-    font-size: 14px; font-weight: 800; color: var(--muted);
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-  }
-  .dt-shortcut-hint {
-    font-size: 10px; color: var(--muted); background: var(--input);
-    border-radius: 4px; padding: 2px 6px; font-weight: 700;
-    border: 1px solid var(--border);
-  }
-
-  /* ── HIDE MOBILE BOTTOM NAV ── */
-  .bottom-nav {
-    display: none !important;
-  }
-
-  /* ── BODY LAYOUT: header + workspace ── */
-  body {
-    display: flex;
-    flex-direction: column;
-  }
-  #views {
-    flex: 1;
-    overflow: hidden;
-    display: flex !important;
-    flex-direction: row;
-    position: static;
-  }
-
-  /* ── SIDEBAR (optional left panel slot) ── */
-  .dt-sidebar {
-    width: 260px;
-    flex-shrink: 0;
-    background: var(--card);
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-  .dt-sidebar-section {
-    padding: 10px 14px 6px;
-    font-size: 10px;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--muted);
-    border-bottom: 1px solid var(--border);
-  }
-  .dt-sidebar-body { flex: 1; overflow-y: auto; padding: 8px; }
-
-  /* ── MAIN PANEL ── */
-  .dt-main {
-    flex: 1;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* ── TAB CONTENT AREAS ── */
-  .main-container {
-    position: static !important;
-    inset: auto !important;
-    padding: 16px 20px !important;
-    padding-bottom: 16px !important;
-    flex: 1;
-    overflow-y: auto;
-    height: 100%;
-    box-sizing: border-box;
-  }
-  /* Two-column layout for settings/market */
-  #view-market.dt-two-col {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: auto 1fr;
-    gap: 0 20px;
-    padding: 16px 20px !important;
-    overflow-y: auto;
-  }
-  #view-market.dt-two-col #vezne-durumu-card {
-    grid-column: 1 / -1;
-  }
-  #view-market.dt-two-col #rateGridContainer {
-    grid-column: 1 / -1;
-  }
-  #view-market.dt-two-col #settings {
-    grid-column: 1 / -1;
-  }
-
-  /* Rate grid — larger cards on desktop */
-  .rate-grid {
-    display: grid !important;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important;
-    gap: 12px !important;
-  }
-  .rate-item-responsive {
-    padding: 14px 16px !important;
-    border-radius: 14px !important;
-  }
-
-  /* Pano + History side-by-side layout */
-  .dt-split {
-    display: flex !important;
-    gap: 0;
-    height: 100%;
-    overflow: hidden;
-  }
-  .dt-split-left {
-    flex: 1.1;
-    overflow-y: auto;
-    border-right: 1px solid var(--border);
-    padding: 0;
-  }
-  .dt-split-right {
-    flex: 0.9;
-    overflow-y: auto;
-    padding: 14px 16px;
-  }
-
-  /* POS + Payment panels */
-  .pos-screen, .payment-screen {
-    position: fixed !important;
-    top: 52px !important; /* below header */
-    left: 280px !important; /* not full screen */
-    right: 0 !important;
-    bottom: 0 !important;
-    width: auto !important;
-    border-radius: 0 !important;
-    box-shadow: -4px 0 30px rgba(0,0,0,0.4);
-  }
-  .pos-body, .pos-screen > .pos-body {
-    max-width: 480px;
-    margin: 0 auto;
-    padding: 16px;
-  }
-  .payment-screen .pos-body {
-    max-width: 420px;
-    margin: 0 auto;
-  }
-
-  /* Numpad bigger keys on desktop */
-  .pos-screen .num-btn,
-  .payment-screen .num-btn {
-    min-height: 56px;
-    font-size: 20px;
-  }
-
-  /* History — full height list */
-  #view-history {
-    padding: 12px 16px 12px 16px !important;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-  #historyList {
-    flex: 1;
-    overflow-y: auto;
-    padding-bottom: 0 !important;
-    margin-top: 8px;
-  }
-
-  /* Pano — full height */
-  #view-pano {
-    padding: 0 0 0 0 !important;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-  }
-  #view-pano #panoRateList {
-    flex: 1;
-    overflow-y: auto;
-  }
-
-  /* Hareketler */
-  #view-hareketler {
-    padding: 16px 20px !important;
-  }
-
-  /* Cards wider on desktop */
-  .card {
-    border-radius: 12px !important;
-  }
-
-  /* Keyboard shortcut overlay panel */
-  #dt-shortcut-panel {
-    position: fixed;
-    top: 60px; right: 16px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 16px;
-    z-index: 9999;
-    min-width: 280px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-    display: none;
-    animation: fadeInDown 0.2s ease;
-  }
-  #dt-shortcut-panel.open { display: block; }
-  @keyframes fadeInDown {
-    from { opacity: 0; transform: translateY(-8px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  .dt-sc-row {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 12px;
-  }
-  .dt-sc-row:last-child { border-bottom: none; }
-  .dt-sc-keys { display: flex; gap: 4px; }
-  .dt-sc-key {
-    background: var(--input); border: 1px solid var(--border); border-radius: 5px;
-    padding: 2px 7px; font-size: 11px; font-weight: 800; font-family: monospace;
-    color: var(--primary);
-  }
-
-  /* Status bar at bottom of screen */
-  .dt-statusbar {
-    height: 26px;
-    background: var(--card);
-    border-top: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    padding: 0 16px;
-    gap: 16px;
-    font-size: 11px;
-    color: var(--muted);
-    flex-shrink: 0;
-    z-index: 100;
-  }
-  .dt-statusbar-item { display: flex; align-items: center; gap: 4px; }
-  .dt-statusbar-sep { width: 1px; height: 14px; background: var(--border); }
-
-  /* Day mode tweaks */
-  .day-mode header { background: #ffffff; }
-  .day-mode .dt-topnav .nav-item.active { background: var(--primary); color: white; }
-  .day-mode .dt-sidebar { background: #f8fafc; }
-  .day-mode .dt-statusbar { background: #f8fafc; }
+/* ── BODY RESET ── */
+body.dt-active {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100vh !important;
+  overflow: hidden !important;
+  font-family: 'Manrope', sans-serif !important;
 }
+html { height: 100%; overflow: hidden; }
+
+body.dt-active #views       { display: none !important; }
+body.dt-active .bottom-nav  { display: none !important; }
+
+/* ── HEADER ── */
+body.dt-active header {
+  display: flex !important;
+  align-items: center !important;
+  height: 50px !important;
+  min-height: 50px !important;
+  padding: 0 14px !important;
+  flex-shrink: 0 !important;
+  background: var(--card) !important;
+  border-bottom: 1px solid var(--border) !important;
+  z-index: 200 !important;
+  gap: 0 !important;
+  position: relative !important;
+}
+body.dt-active header .brand {
+  font-size: 15px !important; font-weight: 900 !important;
+  margin-right: 10px !important; white-space: nowrap !important; gap: 5px !important;
+}
+
+/* ── TOP NAV PILLS ── */
+.dt-topnav {
+  display: flex; gap: 2px; align-items: center;
+  flex: 1; overflow: hidden; padding: 0 4px;
+}
+.dt-pill {
+  padding: 5px 11px; border-radius: 7px;
+  border: 1px solid transparent; background: transparent;
+  color: var(--muted); font-size: 11.5px; font-weight: 700;
+  cursor: pointer; display: flex; align-items: center; gap: 5px;
+  transition: all 0.12s; white-space: nowrap; flex-shrink: 0;
+  font-family: 'Manrope', sans-serif;
+}
+.dt-pill:hover { background: var(--input); color: var(--text); }
+.dt-pill.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+.dt-pill.pill-cart { color: var(--success); border-color: rgba(16,185,129,0.35); }
+.dt-pill.pill-cart:hover { background: rgba(16,185,129,0.12); }
+.dt-pill.pill-settings { color: var(--accent); border-color: rgba(245,158,11,0.3); }
+.dt-pill.pill-settings:hover { background: rgba(245,158,11,0.12); }
+.dt-pill.pill-exit { color: var(--danger); border-color: rgba(239,68,68,0.3); }
+.dt-pill.pill-exit:hover { background: rgba(239,68,68,0.12); }
+.dt-vsep { width: 1px; height: 18px; background: var(--border); margin: 0 3px; flex-shrink: 0; }
+
+/* ── HEADER RIGHT ── */
+.dt-hdr-right {
+  display: flex; align-items: center; gap: 8px;
+  margin-left: auto; flex-shrink: 0; padding-left: 8px;
+}
+.dt-kasa-badge {
+  background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.28);
+  border-radius: 7px; padding: 4px 9px; font-size: 12px; font-weight: 800;
+  color: var(--success); white-space: nowrap; letter-spacing: -0.3px;
+}
+.dt-clock {
+  font-size: 12px; font-weight: 800; color: var(--muted);
+  font-variant-numeric: tabular-nums; white-space: nowrap; letter-spacing: -0.3px;
+}
+.dt-hint-btn {
+  font-size: 10px; color: var(--muted); background: var(--input);
+  border-radius: 5px; padding: 3px 7px; font-weight: 700;
+  border: 1px solid var(--border); cursor: pointer;
+  font-family: 'Manrope', sans-serif;
+}
+.dt-hint-btn:hover { background: var(--card); color: var(--text); }
+
+/* ── WORKSPACE ── */
+#dt-workspace {
+  display: flex !important;
+  flex: 1 !important;
+  overflow: hidden !important;
+  min-height: 0 !important;
+}
+
+/* ── LEFT COLUMN (KUR + KASA stacked) ── */
+#dt-col-left {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow: hidden;
+  min-width: 220px;
+  max-width: 600px;
+  width: 320px;
+}
+
+/* ── RIGHT COLUMNS AREA ── */
+#dt-col-right {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* ── PANEL BASE ── */
+.dt-panel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+  min-height: 0;
+  position: relative;
+  transition: box-shadow 0.2s;
+}
+
+/* Panel collapsed */
+.dt-panel.dt-collapsed > .dt-panel-body { display: none !important; }
+.dt-panel.dt-collapsed > .dt-panel-foot { display: none !important; }
+.dt-panel.dt-collapsed > .dt-panel-bar  { border-bottom: none !important; }
+
+/* Panel maximized — overlay entire workspace */
+.dt-panel.dt-maximized {
+  position: fixed !important;
+  top: 50px !important; left: 0 !important; right: 0 !important; bottom: 26px !important;
+  z-index: 800 !important; width: 100% !important; flex: none !important;
+  border-radius: 0 !important;
+}
+body.dt-active.has-max > #dt-workspace > *:not(.dt-maximized),
+body.dt-active.has-max > #dt-workspace #dt-col-left > *:not(.dt-maximized),
+body.dt-active.has-max > #dt-workspace #dt-col-right > *:not(.dt-maximized) {
+  display: none !important;
+}
+
+/* Focus flash */
+@keyframes dtFocusFlash {
+  0%   { box-shadow: inset 0 0 0 2px var(--primary); }
+  60%  { box-shadow: inset 0 0 0 2px var(--primary), 0 0 18px rgba(59,130,246,0.4); }
+  100% { box-shadow: none; }
+}
+.dt-panel.dt-flash { animation: dtFocusFlash 1s ease-out; }
+
+/* ── PANEL TITLE BAR ── */
+.dt-panel-bar {
+  display: flex; align-items: center; gap: 7px;
+  padding: 0 9px; height: 34px; flex-shrink: 0;
+  background: var(--card); border-bottom: 1px solid var(--border);
+  user-select: none;
+}
+.dt-panel-bar-icon { font-size: 13px; color: var(--muted); flex-shrink: 0; }
+.dt-panel-bar-title {
+  font-size: 11.5px; font-weight: 800; color: var(--text);
+  flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.dt-panel-bar-acts { display: flex; gap: 2px; margin-left: auto; }
+.dt-pbtn {
+  width: 22px; height: 22px; border-radius: 5px;
+  border: none; background: transparent; color: var(--muted);
+  cursor: pointer; font-size: 11px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.1s;
+}
+.dt-pbtn:hover { background: var(--primary); color: #fff; }
+
+/* ── PANEL BODY ── */
+.dt-panel-body {
+  flex: 1; overflow-y: auto; overflow-x: hidden; min-height: 0;
+}
+.dt-panel-body::-webkit-scrollbar { width: 4px; }
+.dt-panel-body::-webkit-scrollbar-track { background: transparent; }
+.dt-panel-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.dt-panel-body::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+/* ── PANEL FOOTER (sepet) ── */
+.dt-panel-foot {
+  flex-shrink: 0; padding: 7px 9px;
+  background: var(--card); border-top: 1px solid var(--border);
+}
+.dt-sepet-btn {
+  width: 100%; padding: 9px; border-radius: 9px;
+  background: var(--success); color: #fff; border: none;
+  font-weight: 800; font-size: 13px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  transition: background 0.15s; font-family: 'Manrope', sans-serif;
+}
+.dt-sepet-btn:hover { background: #059669; }
+.dt-sepet-btn:active { transform: scale(0.98); }
+
+/* ── RESIZERS ── */
+.dt-res {
+  flex-shrink: 0; position: relative; z-index: 10;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--border); transition: background 0.12s;
+}
+.dt-res-v { width: 5px; cursor: col-resize; flex-direction: column; }
+.dt-res-h { height: 5px; cursor: row-resize; flex-direction: row; }
+.dt-res:hover, .dt-res.dt-dragging { background: var(--primary); }
+.dt-res-dot {
+  width: 3px; height: 20px; border-radius: 2px;
+  background: rgba(255,255,255,0.3);
+}
+.dt-res-h .dt-res-dot { width: 20px; height: 3px; }
+
+/* ── CONTENT INSIDE PANELS ── */
+/* KUR panel */
+#dt-panel-kur .dt-panel-body .rate-grid-container {
+  border: none !important; border-radius: 0 !important;
+  margin: 0 !important; background: transparent !important;
+  overflow-x: hidden !important;
+}
+#dt-panel-kur .dt-panel-body .rate-grid {
+  flex-direction: column !important;
+  padding-bottom: 0 !important;
+}
+#dt-panel-kur .dt-panel-body .rate-page {
+  display: flex !important; flex-direction: column !important;
+  flex: none !important; gap: 7px !important;
+  scroll-snap-align: none !important; padding-right: 0 !important;
+  padding: 8px !important;
+}
+#dt-panel-kur .dt-panel-body .rate-item-responsive {
+  border-radius: 10px !important;
+}
+
+/* KASA panel */
+#dt-panel-kasa .dt-panel-body .main-container {
+  padding: 10px !important;
+  height: auto !important; overflow: visible !important;
+  position: static !important; inset: auto !important;
+}
+#dt-panel-kasa .dt-panel-body .stat-grid {
+  grid-template-columns: repeat(auto-fill, minmax(130px,1fr)) !important;
+}
+
+/* GEÇMİŞ panel */
+#dt-panel-gecmis .dt-panel-body .main-container {
+  padding: 9px !important; height: auto !important;
+  position: static !important; inset: auto !important; overflow: visible !important;
+}
+#dt-panel-gecmis .dt-panel-body #historyList { max-height: none !important; }
+
+/* PANO panel */
+#dt-panel-pano .dt-panel-body .main-container {
+  padding: 0 !important; height: auto !important;
+  position: static !important; inset: auto !important; overflow: visible !important;
+}
+#dt-panel-pano .dt-panel-body #panoRateList { overflow: visible !important; }
+
+/* HAREKETLER panel */
+#dt-panel-hareketler .dt-panel-body .main-container {
+  padding: 10px !important; height: auto !important;
+  position: static !important; inset: auto !important; overflow: visible !important;
+}
+
+/* POS / Payment overlay on top of dashboard */
+body.dt-active .pos-screen,
+body.dt-active .payment-screen {
+  position: fixed !important;
+  top: 50px !important; left: 0 !important; right: 0 !important; bottom: 26px !important;
+  border-radius: 0 !important; z-index: 700 !important;
+  box-shadow: none !important;
+}
+body.dt-active .pos-body,
+body.dt-active .pos-screen > .pos-body { max-width: 480px; margin: 0 auto; padding: 16px; }
+body.dt-active .payment-screen .pos-body { max-width: 420px; margin: 0 auto; }
+body.dt-active .pos-screen .num-btn,
+body.dt-active .payment-screen .num-btn { min-height: 56px; font-size: 20px; }
+body.dt-active .pos-screen.active,
+body.dt-active .payment-screen.active { display: flex !important; }
+
+/* ── SETTINGS OVERLAY (sağdan kayar panel) ── */
+#dt-settings-overlay {
+  position: fixed; top: 50px; right: -540px; bottom: 26px;
+  width: 520px; max-width: 92vw;
+  background: var(--card); border-left: 1px solid var(--border);
+  z-index: 900; transition: right 0.26s cubic-bezier(0.4,0,0.2,1);
+  display: flex; flex-direction: column;
+  box-shadow: -6px 0 28px rgba(0,0,0,0.35);
+}
+#dt-settings-overlay.open { right: 0; }
+#dt-settings-overlay-hdr {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 11px 15px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+  background: var(--card);
+}
+#dt-settings-overlay-body {
+  flex: 1; overflow-y: auto; padding: 12px 14px 20px;
+}
+#dt-settings-overlay-body::-webkit-scrollbar { width: 5px; }
+#dt-settings-overlay-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+#dt-settings-backdrop {
+  position: fixed; inset: 0; z-index: 899;
+  background: rgba(0,0,0,0.28); display: none;
+}
+
+/* ── STATUS BAR ── */
+#dt-statusbar {
+  height: 26px; background: var(--card); border-top: 1px solid var(--border);
+  display: flex; align-items: center; padding: 0 14px; gap: 14px;
+  font-size: 11px; color: var(--muted); flex-shrink: 0; z-index: 100;
+  font-family: 'Manrope', sans-serif;
+}
+.dt-sb-item { display: flex; align-items: center; gap: 4px; }
+.dt-sb-sep  { width: 1px; height: 13px; background: var(--border); }
+
+/* ── KEYBOARD SHORTCUT PANEL ── */
+#dt-shortcut-panel {
+  position: fixed; top: 58px; right: 14px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 13px; z-index: 9999;
+  min-width: 265px; box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+  display: none;
+}
+#dt-shortcut-panel.open { display: block; animation: dtSCFadeIn 0.18s ease; }
+@keyframes dtSCFadeIn {
+  from { opacity:0; transform:translateY(-6px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.dt-sc-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 4px 0; border-bottom: 1px solid var(--border); font-size: 11.5px;
+}
+.dt-sc-row:last-child { border-bottom: none; }
+.dt-sc-keys { display: flex; gap: 3px; }
+.dt-sc-key {
+  background: var(--input); border: 1px solid var(--border); border-radius: 4px;
+  padding: 2px 6px; font-size: 10px; font-weight: 800; font-family: monospace; color: var(--primary);
+}
+
+/* ── DAY MODE ── */
+.day-mode.dt-active header      { background: #ffffff !important; }
+.day-mode .dt-panel-bar         { background: #f8fafc !important; }
+.day-mode #dt-statusbar         { background: #f8fafc; }
+.day-mode #dt-settings-overlay  { background: #f8fafc; }
+.day-mode .dt-res               { background: rgba(0,0,0,0.1); }
+.day-mode .dt-res:hover,
+.day-mode .dt-res.dt-dragging   { background: var(--primary); }
+
+/* Scrollbar genel */
+.dt-panel-body::-webkit-scrollbar { width: 4px; }
 
 </style>
 </head>
@@ -1543,27 +1608,59 @@ header { padding: 15px 20px; background: rgba(30, 41, 59, 0.95); border-bottom: 
         <div class="brand" style="justify-content:center; font-size:24px; margin-bottom:20px;">
             <i class="ri-exchange-dollar-line"></i> DövizX Vezne Girişi
         </div>
+
+        <!-- Depolama Modu Göstergesi -->
+        <div id="loginStorageMode" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; padding:8px 12px; border-radius:8px; background:var(--input); border:1px solid var(--border); font-size:11px; font-weight:700;">
+            <span id="loginStorageModeLabel" style="color:var(--muted);">💾 Yerel Depolama</span>
+            <button onclick="app.changeStorageMode()" style="background:none; border:none; color:var(--primary); font-size:11px; font-weight:800; cursor:pointer; text-decoration:underline;">Değiştir</button>
+        </div>
+
+        <!-- Firebase Auth Durum Göstergesi -->
+        <div id="loginFbStatus" style="display:none; align-items:center; justify-content:center; gap:6px; margin-bottom:14px; padding:7px 12px; border-radius:8px; background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.25); font-size:11px; font-weight:700; color:#10b981;">
+            <span id="loginFbDot" style="width:7px; height:7px; border-radius:50%; background:#10b981; display:inline-block; flex-shrink:0;"></span>
+            <span id="loginFbLabel">Firebase Bağlı ☁️</span>
+        </div>
         
         <label style="display:block; text-align:left; margin-bottom:5px; color:var(--muted)">Vezne Seçin:</label>
         <select id="vezneSelect"></select>
-        
-        <label style="display:block; text-align:left; margin-top:15px; margin-bottom:5px; color:var(--muted)">Email:</label>
-        <input type="email" id="emailInput" placeholder="test@test.com" 
-            style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--border); background:var(--input); color:var(--text); font-size:16px;"/>
-        
-        <label style="display:block; text-align:left; margin-top:15px; margin-bottom:5px; color:var(--muted)">Şifre:</label>
-        <input type="password" id="passwordInput" placeholder="Şifre girin"
-            style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--border); background:var(--input); color:var(--text); font-size:16px;"/>
+
+        <!-- Firebase modunda görünür: Email + Şifre -->
+        <div id="loginEmailPasswordSection" style="display:none;">
+            <label style="display:block; text-align:left; margin-top:15px; margin-bottom:5px; color:var(--muted)">Email:</label>
+            <input type="email" id="emailInput" placeholder="vezne@example.com" 
+                style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--border); background:var(--input); color:var(--text); font-size:16px;"
+                onkeydown="if(event.key==='Enter') document.getElementById('passwordInput').focus()"/>
+            
+            <label style="display:block; text-align:left; margin-top:15px; margin-bottom:5px; color:var(--muted)">Şifre:</label>
+            <div style="position:relative;">
+                <input type="password" id="passwordInput" placeholder="Firebase şifresi"
+                    style="width:100%; padding:12px; padding-right:44px; border-radius:8px; border:1px solid var(--border); background:var(--input); color:var(--text); font-size:16px;"
+                    onkeydown="if(event.key==='Enter') app.login()"/>
+                <button onclick="app._togglePasswordVisibility()" 
+                    style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--muted); cursor:pointer; font-size:18px;"
+                    title="Şifreyi göster/gizle">
+                    <i id="passwordEyeIcon" class="ri-eye-line"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Local modunda görünür: sadece vezne seçimi -->
+        <div id="loginLocalNote" style="display:block; margin-top:12px; padding:10px 12px; border-radius:8px; background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.2); font-size:12px; color:#10b981; font-weight:600;">
+            <i class="ri-shield-check-line"></i> Yerel mod — şifre gerekmez, doğrudan giriş yapabilirsiniz.
+        </div>
         
         <button class="login-button" onclick="app.login()" style="margin-top:20px;">
             <i class="ri-login-box-line"></i> GİRİŞ YAP
         </button>
+
+        <!-- Hata mesajı -->
+        <div id="loginErrorMsg" style="display:none; margin-top:10px; padding:10px; border-radius:8px; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); color:var(--danger); font-size:13px; font-weight:700; text-align:center;"></div>
     </div>
 </div>
 
 <header>
     <div class="brand">
-        <i class="ri-exchange-dollar-line"></i> DövizX
+        <i class="ri-exchange-dollar-line"></i> Döviz<span id="brand-x">X</span>
         <span class="badge-demo" id="activeVezneBadge">VEZNE ?</span>
     </div>
     <div style="display: flex; align-items: center; gap: 10px;">
@@ -1576,6 +1673,15 @@ header { padding: 15px 20px; background: rgba(30, 41, 59, 0.95); border-bottom: 
         <div style="font-size:12px; font-weight:600; color:var(--muted)">
             Kasa: <span id="headerTotal">0.00 ₺</span>
         </div>
+        <button onclick="app.exitApp()" title="Güvenli Çıkış"
+            style="background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.3); 
+                   color:var(--danger); border-radius:8px; padding:5px 10px; 
+                   font-size:11px; font-weight:800; cursor:pointer; 
+                   display:flex; align-items:center; gap:4px; transition:background 0.15s;"
+            onmouseover="this.style.background='rgba(239,68,68,0.25)'"
+            onmouseout="this.style.background='rgba(239,68,68,0.12)'">
+            <i class="ri-shut-down-line"></i> ÇIKIŞ
+        </button>
     </div>
 </header>
 
@@ -1640,72 +1746,107 @@ header { padding: 15px 20px; background: rgba(30, 41, 59, 0.95); border-bottom: 
             
             <div class="card">
                 <div class="settings-card-header" onclick="toggleSettingsCard(this)">
-                    <h4 style="margin:0; font-size:16px;" class="settings-header-firebase"><i class="ri-database-2-line"></i> Veri Depolama</h4>
+                    <h4 style="margin:0; font-size:16px;" class="settings-header-firebase"><i class="ri-firebase-line"></i> Firebase Ayarları</h4>
                     <i class="ri-arrow-down-s-line collapse-icon"></i>
                 </div>
                 <div class="settings-card-body">
-                <p style="font-size:13px; color:var(--muted);">Veriler yerel depolama (localStorage) ve opsiyonel olarak Firebase'de saklanmaktadır.</p>
-                <div style="background:var(--input); padding:10px; border-radius:8px; margin:10px 0;">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-size:12px; color:var(--muted);">Depolama Türü:</span>
-                        <span id="storageTypeLabel" style="font-size:14px; font-weight:bold; color:var(--success);">Yerel (LocalStorage)</span>
+
+                <!-- Durum bandı -->
+                <div id="firebaseStatusBadge" style="display:flex; align-items:center; justify-content:space-between; padding:10px 14px; border-radius:10px; background:var(--input); border:1px solid var(--border); margin-bottom:14px;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span id="firebaseStatusDot" style="width:10px; height:10px; border-radius:50%; background:var(--muted); display:inline-block; flex-shrink:0;"></span>
+                        <span id="firebaseStatusLabel" style="font-size:12px; font-weight:700;">Bağlı Değil — Yerel Depolama</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                        <span id="fbAuthStatusBadge" style="font-size:10px; font-weight:800; padding:2px 8px; border-radius:10px; background:var(--input); border:1px solid var(--border); color:var(--muted);">AUTH: —</span>
                     </div>
                 </div>
 
-                <!-- FİREBASE AYARLARI — Veri Depolama içinde -->
-                <div style="margin-top:12px; border-top:1px solid var(--border); padding-top:12px;">
-                    <h5 style="margin:0 0 8px 0; font-size:14px; color:var(--primary);"><i class="ri-firebase-line"></i> Firebase Realtime Database</h5>
-                    <p style="font-size:12px; color:var(--muted); margin:0 0 10px 0;">
-                        Firebase yapılandırmanızı buraya girerek verilerinizi bulutta yedekleyin. 
-                        Boş bırakırsanız yalnızca yerel depolama kullanılır.
-                    </p>
-                    <div id="firebaseStatusBadge" style="display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:20px; background:var(--input); border:1px solid var(--border); margin-bottom:12px; font-size:12px; font-weight:700;">
-                        <span id="firebaseStatusDot" style="width:8px; height:8px; border-radius:50%; background:var(--muted); display:inline-block;"></span>
-                        <span id="firebaseStatusLabel">Bağlı Değil — Yerel Depolama</span>
+                <!-- Tüm alanlar — her zaman görünür -->
+                <div style="display:flex; flex-direction:column; gap:8px;">
+
+                    <div>
+                        <label style="font-size:11px; color:var(--muted); font-weight:700; display:block; margin-bottom:3px;">🔑 API Key</label>
+                        <div style="position:relative;">
+                            <input type="password" id="fb_apiKey" placeholder="AIzaSy..."
+                                style="width:100%; padding:9px 36px 9px 9px; border-radius:8px; border:1px solid var(--border); background:var(--input); color:var(--text); box-sizing:border-box; font-size:12px; font-family:monospace;"/>
+                            <button onclick="toggleFbFieldVisibility('fb_apiKey',this)" style="position:absolute; right:6px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--muted); cursor:pointer; font-size:14px; padding:2px;"><i class="ri-eye-line"></i></button>
+                        </div>
                     </div>
-                    <div style="margin-bottom:8px;">
-                        <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:4px;">API Key</label>
-                        <input type="text" id="fb_apiKey" placeholder="AIzaSy..." style="width:100%; padding:9px; border-radius:8px; border:1px solid var(--border); background:var(--input); color:var(--text); box-sizing:border-box; font-size:13px;"/>
+
+                    <div>
+                        <label style="font-size:11px; color:var(--muted); font-weight:700; display:block; margin-bottom:3px;">🌐 Auth Domain</label>
+                        <input type="text" id="fb_authDomain" placeholder="proje-adi.firebaseapp.com"
+                            style="width:100%; padding:9px; border-radius:8px; border:1px solid var(--border); background:var(--input); color:var(--text); box-sizing:border-box; font-size:12px; font-family:monospace;"/>
                     </div>
-                    <div style="margin-bottom:8px;">
-                        <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:4px;">Auth Domain</label>
-                        <input type="text" id="fb_authDomain" placeholder="proje-adi.firebaseapp.com" style="width:100%; padding:9px; border-radius:8px; border:1px solid var(--border); background:var(--input); color:var(--text); box-sizing:border-box; font-size:13px;"/>
+
+                    <div>
+                        <label style="font-size:11px; color:var(--muted); font-weight:700; display:block; margin-bottom:3px;">🗄️ Database URL <span style="color:var(--danger);">*</span></label>
+                        <input type="text" id="fb_databaseURL" placeholder="https://proje-adi-default-rtdb.firebaseio.com"
+                            style="width:100%; padding:9px; border-radius:8px; border:1px solid var(--border); background:var(--input); color:var(--text); box-sizing:border-box; font-size:12px; font-family:monospace;"/>
                     </div>
-                    <div style="margin-bottom:8px;">
-                        <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:4px;">Database URL <span style="color:var(--danger);">*</span></label>
-                        <input type="text" id="fb_databaseURL" placeholder="https://proje-adi-default-rtdb.firebaseio.com" style="width:100%; padding:9px; border-radius:8px; border:1px solid var(--border); background:var(--input); color:var(--text); box-sizing:border-box; font-size:13px;"/>
+
+                    <div>
+                        <label style="font-size:11px; color:var(--muted); font-weight:700; display:block; margin-bottom:3px;">📁 Project ID</label>
+                        <input type="text" id="fb_projectId" placeholder="proje-adi"
+                            style="width:100%; padding:9px; border-radius:8px; border:1px solid var(--border); background:var(--input); color:var(--text); box-sizing:border-box; font-size:12px; font-family:monospace;"/>
                     </div>
-                    <div style="margin-bottom:8px;">
-                        <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:4px;">Project ID</label>
-                        <input type="text" id="fb_projectId" placeholder="proje-adi" style="width:100%; padding:9px; border-radius:8px; border:1px solid var(--border); background:var(--input); color:var(--text); box-sizing:border-box; font-size:13px;"/>
+
+                    <div>
+                        <label style="font-size:11px; color:var(--muted); font-weight:700; display:block; margin-bottom:3px;">🪣 Storage Bucket</label>
+                        <input type="text" id="fb_storageBucket" placeholder="proje-adi.firebasestorage.app"
+                            style="width:100%; padding:9px; border-radius:8px; border:1px solid var(--border); background:var(--input); color:var(--text); box-sizing:border-box; font-size:12px; font-family:monospace;"/>
                     </div>
-                    <div style="margin-bottom:8px;">
-                        <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:4px;">Storage Bucket</label>
-                        <input type="text" id="fb_storageBucket" placeholder="proje-adi.appspot.com" style="width:100%; padding:9px; border-radius:8px; border:1px solid var(--border); background:var(--input); color:var(--text); box-sizing:border-box; font-size:13px;"/>
+
+                    <div>
+                        <label style="font-size:11px; color:var(--muted); font-weight:700; display:block; margin-bottom:3px;">📨 Messaging Sender ID</label>
+                        <input type="text" id="fb_messagingSenderId" placeholder="271972503606"
+                            style="width:100%; padding:9px; border-radius:8px; border:1px solid var(--border); background:var(--input); color:var(--text); box-sizing:border-box; font-size:12px; font-family:monospace;"/>
                     </div>
-                    <div style="margin-bottom:8px;">
-                        <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:4px;">Messaging Sender ID</label>
-                        <input type="text" id="fb_messagingSenderId" placeholder="123456789" style="width:100%; padding:9px; border-radius:8px; border:1px solid var(--border); background:var(--input); color:var(--text); box-sizing:border-box; font-size:13px;"/>
+
+                    <div>
+                        <label style="font-size:11px; color:var(--muted); font-weight:700; display:block; margin-bottom:3px;">📱 App ID</label>
+                        <div style="position:relative;">
+                            <input type="password" id="fb_appId" placeholder="1:123...:web:abc..."
+                                style="width:100%; padding:9px 36px 9px 9px; border-radius:8px; border:1px solid var(--border); background:var(--input); color:var(--text); box-sizing:border-box; font-size:12px; font-family:monospace;"/>
+                            <button onclick="toggleFbFieldVisibility('fb_appId',this)" style="position:absolute; right:6px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--muted); cursor:pointer; font-size:14px; padding:2px;"><i class="ri-eye-line"></i></button>
+                        </div>
                     </div>
-                    <div style="margin-bottom:12px;">
-                        <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:4px;">App ID</label>
-                        <input type="text" id="fb_appId" placeholder="1:123...:web:abc..." style="width:100%; padding:9px; border-radius:8px; border:1px solid var(--border); background:var(--input); color:var(--text); box-sizing:border-box; font-size:13px;"/>
+
+                    <div>
+                        <label style="font-size:11px; color:var(--muted); font-weight:700; display:block; margin-bottom:3px;">📊 Measurement ID <span style="font-weight:400;">(Analytics, isteğe bağlı)</span></label>
+                        <input type="text" id="fb_measurementId" placeholder="G-XXXXXXXXXX"
+                            style="width:100%; padding:9px; border-radius:8px; border:1px solid var(--border); background:var(--input); color:var(--text); box-sizing:border-box; font-size:12px; font-family:monospace;"/>
                     </div>
-                    <p style="font-size:11px; color:var(--muted); margin:0 0 10px 0;">
-                        <i class="ri-information-line"></i> Firebase Console → Proje Ayarları → Genel sekmesinden bu bilgileri alabilirsiniz.
-                        Realtime Database kurallarını <code style="background:var(--input); padding:1px 4px; border-radius:3px;">read:true, write:true</code> olarak ayarlayın.
-                    </p>
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-                        <button onclick="firebaseService.saveConfig()" style="padding:10px; background:var(--primary); color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">
-                            <i class="ri-save-line"></i> Kaydet & Bağlan
-                        </button>
-                        <button onclick="firebaseService.disconnect()" style="padding:10px; background:var(--input); color:var(--text); border:1px solid var(--border); border-radius:8px; font-weight:bold; cursor:pointer;">
-                            <i class="ri-link-unlink"></i> Bağlantıyı Kes
-                        </button>
-                    </div>
-                    <button onclick="firebaseService.syncNow()" style="width:100%; margin-top:8px; padding:10px; background:var(--success); color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">
-                        <i class="ri-refresh-line"></i> Şimdi Senkronize Et
+
+                </div>
+
+                <p style="font-size:11px; color:var(--muted); margin:10px 0 12px 0;">
+                    <i class="ri-information-line"></i> Firebase Console → Proje Ayarları → Genel → Uygulamanız bölümünden alabilirsiniz. Ayarlar kaydedilince <b>localStorage'da</b> saklanır.
+                </p>
+
+                <!-- Butonlar -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+                    <button onclick="firebaseService.saveConfig()"
+                        style="padding:10px; background:var(--primary); color:white; border:none; border-radius:8px; font-weight:800; cursor:pointer; font-size:12px;">
+                        <i class="ri-save-line"></i> Kaydet & Bağlan
                     </button>
+                    <button onclick="firebaseService.disconnect()"
+                        style="padding:10px; background:var(--input); color:var(--text); border:1px solid var(--border); border-radius:8px; font-weight:800; cursor:pointer; font-size:12px;">
+                        <i class="ri-link-unlink"></i> Bağlantıyı Kes
+                    </button>
+                </div>
+                <button onclick="firebaseService.syncNow()"
+                    style="width:100%; padding:10px; background:var(--success); color:white; border:none; border-radius:8px; font-weight:800; cursor:pointer; font-size:12px;">
+                    <i class="ri-refresh-line"></i> Şimdi Senkronize Et
+                </button>
+
+                <!-- Depolama türü -->
+                <div style="background:var(--input); padding:10px; border-radius:8px; margin-top:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:12px; color:var(--muted);">Aktif Depolama:</span>
+                        <span id="storageTypeLabel" style="font-size:13px; font-weight:800; color:var(--success);">Yerel (LocalStorage)</span>
+                    </div>
                 </div>
 
                 </div><!-- end settings-card-body -->
@@ -2000,7 +2141,7 @@ header { padding: 15px 20px; background: rgba(30, 41, 59, 0.95); border-bottom: 
                     <i class="ri-arrow-down-s-line collapse-icon"></i>
                 </div>
                 <div class="settings-card-body">
-                <p style="font-size:13px; color:var(--muted); margin:0 0 10px 0;">Otomatik kur güncellemesi için Google Sheets URL'si girin. <b>Düzenleme veya paylaşım linkini direkt yapıştırabilirsiniz</b> — sistem otomatik dönüştürür.</p>
+                <p style="font-size:13px; color:var(--muted); margin:0 0 10px 0;">Otomatik kur güncellemesi için Google Sheets URL'si girin. <b>Düzenleme veya paylaşım linkini direkt yapıştırabilirsiniz</b> — sistem otomatik dönüştürür. <button onclick="_sheetsShowGuide()" style="background:none; border:none; color:var(--primary); font-size:12px; font-weight:700; cursor:pointer; text-decoration:underline;">📖 Kurulum Rehberi</button></p>
                 <div style="background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.3); border-radius:8px; padding:10px; margin-bottom:10px; font-size:12px; color:var(--text);">
                     <b>📋 Tablo Formatı (A sütunu: KOD, B: ALIŞ, C: SATIŞ):</b><br>
                     <code style="display:block; margin-top:5px; background:var(--input); padding:5px; border-radius:4px; font-size:11px;">USD &nbsp; 38.50 &nbsp; 39.20<br>EUR &nbsp; 41.10 &nbsp; 42.00<br>GBP &nbsp; 47.80 &nbsp; 48.90</code>
@@ -2604,11 +2745,51 @@ function _sheetsConvertUrl(rawUrl, gid) {
     gid = gid || '0';
     // Zaten pub CSV formatında ise direkt kullan
     if (rawUrl.includes('/pub') && rawUrl.includes('output=csv')) return rawUrl;
-    // ID'yi çıkar
-    const match = rawUrl.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
-    if (!match) return rawUrl; // tanınmıyorsa değiştirme
+    // Zaten export formatında ise gid ekle/güncelle
+    if (rawUrl.includes('/export?format=csv')) {
+        const base = rawUrl.split('&gid=')[0];
+        return `${base}&gid=${gid}`;
+    }
+    // ID'yi çıkar (/d/ formatı)
+    let match = rawUrl.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
+    if (!match) {
+        // Sadece ID girilmişse (hiç URL yoksa)
+        if (/^[a-zA-Z0-9_-]{20,}$/.test(rawUrl.trim())) {
+            return `https://docs.google.com/spreadsheets/d/${rawUrl.trim()}/export?format=csv&gid=${gid}`;
+        }
+        return rawUrl; // tanınmıyorsa değiştirme
+    }
     const sheetId = match[1];
     return `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
+}
+
+// Google Sheets kurulum rehberi
+function _sheetsShowGuide() {
+    Swal.fire({
+        title: '📊 Google Sheets Kurulum Rehberi',
+        html: `
+            <div style="text-align:left; font-size:13px; line-height:1.7;">
+                <p><b>1. Google Sheets dosyasını hazırlayın:</b><br>
+                Sütunlar: <code>KOD | ALIŞ | SATIŞ</code><br>
+                Örnek: <code>USD | 38.50 | 39.00</code></p>
+                <hr style="border-color:var(--border); margin:8px 0;">
+                <p><b>2. Dosyayı herkese açık yapın:</b><br>
+                Paylaş → <i>"Bağlantıya sahip herkes"</i> → <i>Görüntüleyici</i></p>
+                <hr style="border-color:var(--border); margin:8px 0;">
+                <p><b>3. URL'yi kopyalayın:</b><br>
+                Tarayıcı adres çubuğundan tam URL'yi kopyalayıp yapıştırın.</p>
+                <hr style="border-color:var(--border); margin:8px 0;">
+                <p><b>4. GID (sayfa ID):</b><br>
+                URL'deki <code>gid=</code> kısmını girin. İlk sayfa için <code>0</code> yazın.</p>
+                <hr style="border-color:var(--border); margin:8px 0;">
+                <p style="color:var(--accent);"><b>⚠️ Desteklenen para kodu isimleri:</b><br>
+                USD, EUR, GBP, CHF, JPY, CAD, AUD, DOLAR, EURO, STERLIN, FRANK, ALTIN, vb.</p>
+            </div>
+        `,
+        icon: 'info',
+        confirmButtonText: 'Anladım',
+        background: 'var(--card)', color: 'var(--text)'
+    });
 }
 
 function _sheetsPreviewUrl(rawUrl, gid) {
@@ -2648,7 +2829,7 @@ const app = {
         isLocked: false,
         isDayMode: false,
         vezneler: [
-            { id: 'VZN01', name: 'Ayşe Yılmaz', email: 'test@test.com', password: 'admin' },
+            { id: 'VZN01', name: 'Ayşe Yılmaz', email: 'test@test.com', password: 'admin1234' },
             { id: 'VZN02', name: 'Mehmet Kaya', email: 'mehmet@test.com', password: 'admin' },
             { id: 'VZN03', name: 'Admin', email: 'admin@test.com', password: 'admin' }
         ],
@@ -2658,7 +2839,7 @@ const app = {
         autoRateService: 'https://api.example.com/live/rates',
         panoSettings: {
             mode: 'auto',
-            sheetsUrl: '',
+            sheetsUrl: 'https://docs.google.com/spreadsheets/d/15hEw-s-Zl-E8ZGvzF7KeRQb8VPivdTmX12mBydA7x7Y/edit?usp=drivesdk',
             sheetsGid: '0',
             updateInterval: 5,
         },
@@ -2710,6 +2891,7 @@ const app = {
     async init() {
         await this.loadData();
         this.renderVezneSelect();
+        this._applyLoginMode(); // login ekranı modunu ayarla (local/firebase)
         
         if (this.data.activeVezneId) {
             this.loginSuccess(this.data.activeVezneId);
@@ -2731,8 +2913,18 @@ const app = {
         if (typeof telegramService !== 'undefined') telegramService.fillForm();
         // StorageType badge güncelle
         const stl = document.getElementById('storageTypeLabel');
-        if (stl) stl.innerText = (typeof firebaseService !== 'undefined' && firebaseService._isConnected)
-            ? 'LocalStorage + Firebase ☁️' : 'Yerel (LocalStorage)';
+        if (stl) {
+            const choice = localStorage.getItem('dovizx_storage_choice') || 'local';
+            if (choice === 'firebase' && typeof firebaseService !== 'undefined' && firebaseService._isConnected) {
+                stl.innerText = 'LocalStorage + Firebase ☁️';
+            } else if (choice === 'firebase') {
+                stl.innerText = 'Firebase (Bağlanıyor...)';
+            } else {
+                stl.innerText = 'Yerel (LocalStorage)';
+            }
+        }
+        // Login ekranı modunu güncelle
+        this._applyLoginMode();
     },
 
     async loadData() {
@@ -2770,13 +2962,15 @@ const app = {
             localStorage.setItem('dovizx_data', JSON.stringify(dataToSave));
             localStorage.setItem('dovizx_active_vezne', this.data.activeVezneId);
             
-            // Firebase'e de yaz (bağlıysa)
-            if (typeof firebaseService !== 'undefined' && firebaseService._isConnected) {
+            // Firebase'e de yaz (db bağlıysa ve auth aktifse)
+            if (typeof firebaseService !== 'undefined' && firebaseService._db &&
+                firebaseService._auth && firebaseService._auth.currentUser) {
                 firebaseService.write(dataToSave).catch(e => console.warn('Firebase yazma hatası:', e));
             }
             
+            const activeFilterBtn = document.querySelector('.filter-btn.active') || document.querySelector('.filter-btn[data-filter="today"]');
+            if (activeFilterBtn) this.filterHistory(activeFilterBtn);
             this.renderBalances();
-            this.renderHistory(document.querySelector('.filter-btn.active'));
             this.updateCartCount();
             // Hareketler sekmesi açıksa güncelle
             const harEl = document.getElementById('view-hareketler');
@@ -2872,23 +3066,152 @@ const app = {
         // PIN girişi kaldırıldı - artık kullanılmıyor
     },
 
-    login() {
-        const vezneId = document.getElementById('vezneSelect').value;
-        const email = document.getElementById('emailInput').value.trim();
-        const password = document.getElementById('passwordInput').value.trim();
-        const vezne = this.data.vezneler.find(v => v.id === vezneId);
-
-        if (vezne && vezne.email === email && vezne.password === password) {
-            this.loginSuccess(vezneId);
+    // Şifre göster/gizle toggle
+    _togglePasswordVisibility() {
+        const input = document.getElementById('passwordInput');
+        const icon  = document.getElementById('passwordEyeIcon');
+        if (!input) return;
+        if (input.type === 'password') {
+            input.type = 'text';
+            if (icon) { icon.classList.remove('ri-eye-line'); icon.classList.add('ri-eye-off-line'); }
         } else {
-            Swal.fire('Hata', 'Email veya şifre yanlış.', 'error');
-            document.getElementById('passwordInput').value = '';
+            input.type = 'password';
+            if (icon) { icon.classList.remove('ri-eye-off-line'); icon.classList.add('ri-eye-line'); }
+        }
+    },
+
+    // Login ekranındaki hata mesajını göster/gizle
+    _showLoginError(msg) {
+        const el = document.getElementById('loginErrorMsg');
+        if (!el) return;
+        if (msg) {
+            el.innerText = '⚠️ ' + msg;
+            el.style.display = 'block';
+        } else {
+            el.style.display = 'none';
+        }
+    },
+
+    // Depolama modunu değiştir (LocalStorage ↔ Firebase)
+    changeStorageMode() {
+        const current = localStorage.getItem('dovizx_storage_choice') || 'local';
+        Swal.fire({
+            title: '🗄️ Veri Kaynağı Değiştir',
+            html: `
+                <p style="font-size:13px; color:#94a3b8; margin:0 0 14px 0;">Şu an: <b>${current === 'firebase' ? '☁️ Firebase' : '💾 Yerel Depolama'}</b></p>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                    <button id="chooseLocal2"
+                        style="padding:16px 8px; border-radius:12px; border:2px solid ${current === 'local' ? '#3b82f6' : '#334155'};
+                               background:${current === 'local' ? 'rgba(59,130,246,0.15)' : '#1e293b'}; color:#f8fafc; font-size:13px; font-weight:800; cursor:pointer;">
+                        <div style="font-size:24px; margin-bottom:6px;">💾</div>
+                        <div>Yerel Depolama</div>
+                        <div style="font-size:10px; color:#64748b; margin-top:3px;">Şifresiz giriş</div>
+                    </button>
+                    <button id="chooseFirebase2"
+                        style="padding:16px 8px; border-radius:12px; border:2px solid ${current === 'firebase' ? '#f97316' : '#334155'};
+                               background:${current === 'firebase' ? 'rgba(249,115,22,0.15)' : '#1e293b'}; color:#f8fafc; font-size:13px; font-weight:800; cursor:pointer;">
+                        <div style="font-size:24px; margin-bottom:6px;">☁️</div>
+                        <div>Firebase</div>
+                        <div style="font-size:10px; color:#64748b; margin-top:3px;">Email + Şifre</div>
+                    </button>
+                </div>
+            `,
+            background: '#0f172a', color: '#f8fafc',
+            showConfirmButton: false, showCancelButton: true, cancelButtonText: 'Vazgeç',
+            didOpen: () => {
+                document.getElementById('chooseLocal2')?.addEventListener('click', () => {
+                    localStorage.setItem('dovizx_storage_choice', 'local');
+                    Swal.close();
+                    this._applyLoginMode();
+                }, { once: true });
+                document.getElementById('chooseFirebase2')?.addEventListener('click', () => {
+                    localStorage.setItem('dovizx_storage_choice', 'firebase');
+                    Swal.close();
+                    this._applyLoginMode();
+                    // Firebase bağlı değilse uyar
+                    if (typeof firebaseService === 'undefined' || !firebaseService._isConnected) {
+                        setTimeout(() => Swal.fire('Uyarı', 'Firebase henüz yapılandırılmamış. Ayarlar → Firebase bölümünden yapılandırın.', 'warning'), 300);
+                    }
+                }, { once: true });
+            }
+        });
+    },
+
+    // Login ekranı modunu (local/firebase) uygula
+    _applyLoginMode() {
+        const mode  = localStorage.getItem('dovizx_storage_choice') || 'local';
+        const isFirebase = mode === 'firebase';
+
+        const emailSection = document.getElementById('loginEmailPasswordSection');
+        const localNote    = document.getElementById('loginLocalNote');
+        const modeLabel    = document.getElementById('loginStorageModeLabel');
+
+        if (emailSection) emailSection.style.display = isFirebase ? 'block' : 'none';
+        if (localNote)    localNote.style.display    = isFirebase ? 'none'  : 'block';
+        if (modeLabel)    modeLabel.innerText        = isFirebase ? '☁️ Firebase' : '💾 Yerel Depolama';
+
+        this._showLoginError(null);
+    },
+
+    async login() {
+        const vezneId  = document.getElementById('vezneSelect')?.value;
+        const mode     = localStorage.getItem('dovizx_storage_choice') || 'local';
+        const isFirebase = mode === 'firebase';
+
+        this._showLoginError(null);
+
+        if (!vezneId) {
+            this._showLoginError('Lütfen bir vezne seçin.');
+            return;
+        }
+
+        // ── YEREL MOD: şifre yok, doğrudan giriş ──
+        if (!isFirebase) {
+            this.loginSuccess(vezneId);
+            return;
+        }
+
+        // ── FİREBASE MODU: Email + Firebase Auth şifresi ──
+        const email    = (document.getElementById('emailInput')?.value || '').trim();
+        const password = (document.getElementById('passwordInput')?.value || '').trim();
+
+        if (!email || !password) {
+            this._showLoginError('Email ve şifre boş bırakılamaz.');
+            return;
+        }
+
+        // Firebase bağlı mı?
+        if (typeof firebaseService === 'undefined' || !firebaseService._auth) {
+            this._showLoginError('Firebase yapılandırılmamış. Ayarlar → Firebase bölümünden yapılandırın.');
+            return;
+        }
+
+        // Giriş butonunu devre dışı bırak
+        const loginBtn = document.querySelector('.login-button');
+        if (loginBtn) { loginBtn.disabled = true; loginBtn.innerText = 'Giriş yapılıyor...'; }
+
+        try {
+            const ok = await firebaseService.signIn(email, password);
+            if (ok) {
+                this.loginSuccess(vezneId);
+            } else {
+                this._showLoginError('Email veya şifre yanlış. Firebase Authentication ile giriş başarısız.');
+                if (document.getElementById('passwordInput')) document.getElementById('passwordInput').value = '';
+            }
+        } catch(e) {
+            this._showLoginError('Giriş hatası: ' + (e.message || e));
+        } finally {
+            if (loginBtn) { loginBtn.disabled = false; loginBtn.innerHTML = '<i class="ri-login-box-line"></i> GİRİŞ YAP'; }
         }
     },
 
     loginSuccess(vezneId) {
         this.data.activeVezneId = vezneId;
         const vezne = this.data.vezneler.find(v => v.id === vezneId);
+        if (!vezne) {
+            Swal.fire('Hata', 'Vezne bulunamadı: ' + vezneId, 'error');
+            return;
+        }
         
         document.getElementById('activeVezneBadge').innerText = vezneId;
         document.getElementById('currentVezneInfo').innerText = `${vezne.id} - ${vezne.name}`;
@@ -2924,11 +3247,199 @@ const app = {
             if (result.isConfirmed) {
                 this.data.activeVezneId = null;
                 localStorage.removeItem('dovizx_active_vezne');
-                document.getElementById('emailInput').value = '';
-                document.getElementById('passwordInput').value = '';
+                // Firebase Auth çıkışı
+                if (typeof firebaseService !== 'undefined') firebaseService.signOut();
+                const emailEl = document.getElementById('emailInput');
+                const passEl  = document.getElementById('passwordInput');
+                if (emailEl) emailEl.value = '';
+                if (passEl)  passEl.value  = '';
+                this._showLoginError(null);
+                this._applyLoginMode();
                 this.showLoginScreen();
             }
         });
+    },
+
+    // =================================================
+    // GÜVENLİ ÇIKIŞ — Kaydet + Telegram + WhatsApp
+    // =================================================
+    async exitApp() {
+        const result = await Swal.fire({
+            title: '🔴 Güvenli Çıkış',
+            html: `
+                <p style="font-size:13px; color:#94a3b8; margin:0 0 12px 0;">
+                    Çıkmadan önce ne yapmak istersiniz?
+                </p>
+                <div style="display:flex; flex-direction:column; gap:8px; text-align:left;">
+                    <label style="display:flex; align-items:center; gap:10px; padding:9px; border-radius:8px; background:rgba(255,255,255,0.06); cursor:pointer;">
+                        <input type="checkbox" id="exit_firebase" checked style="width:16px;height:16px; accent-color:#3b82f6;">
+                        <span style="font-size:13px; font-weight:700; color:#f8fafc;">☁️ Firebase'e kaydet</span>
+                    </label>
+                    <label style="display:flex; align-items:center; gap:10px; padding:9px; border-radius:8px; background:rgba(255,255,255,0.06); cursor:pointer;">
+                        <input type="checkbox" id="exit_telegram" checked style="width:16px;height:16px; accent-color:#3b82f6;">
+                        <span style="font-size:13px; font-weight:700; color:#f8fafc;">📱 Telegram'a hareket dökümü gönder</span>
+                    </label>
+                    <label style="display:flex; align-items:center; gap:10px; padding:9px; border-radius:8px; background:rgba(255,255,255,0.06); cursor:pointer;">
+                        <input type="checkbox" id="exit_whatsapp" style="width:16px;height:16px; accent-color:#3b82f6;">
+                        <span style="font-size:13px; font-weight:700; color:#f8fafc;">💬 WhatsApp'a hareket dökümü gönder</span>
+                    </label>
+                </div>
+            `,
+            background: '#1e293b',
+            color: '#f8fafc',
+            showCancelButton: true,
+            confirmButtonText: '🔴 Çıkış Yap',
+            confirmButtonColor: '#ef4444',
+            cancelButtonText: 'Vazgeç',
+            cancelButtonColor: '#475569',
+            allowOutsideClick: false,
+            // ✅ Checkbox değerlerini Swal kapanmadan ÖNCE oku
+            preConfirm: () => ({
+                doFirebase: document.getElementById('exit_firebase')?.checked ?? true,
+                doTelegram: document.getElementById('exit_telegram')?.checked ?? true,
+                doWhatsApp: document.getElementById('exit_whatsapp')?.checked ?? false,
+            }),
+        });
+
+        if (!result.isConfirmed) return;
+
+        const { doFirebase, doTelegram, doWhatsApp } = result.value;
+
+        Swal.fire({ title: 'İşlemler tamamlanıyor...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+        // 1. LocalStorage'a her zaman kaydet
+        try { this.saveData(); } catch(e) {}
+
+        // 2. Firebase senkronizasyonu
+        if (doFirebase && typeof firebaseService !== 'undefined' && firebaseService._db) {
+            try {
+                const dataToSave = {
+                    balances: this.data.balances, rates: this.data.rates,
+                    transactions: this.data.transactions, rateInputMode: this.data.rateInputMode,
+                    printerSettings: this.data.printerSettings, panoSettings: this.data.panoSettings,
+                    panoTv: this.data.panoTv, vezneler: this.data.vezneler,
+                };
+                await firebaseService.write(dataToSave);
+            } catch(e) { console.warn('Çıkış Firebase hatası:', e); }
+        }
+
+        // 3. Hareket dökümü oluştur
+        const summary = this._buildExitSummary();
+
+        // 4. Telegram — _enabled bypass, doğrudan API çağrısı
+        if (doTelegram && typeof telegramService !== 'undefined') {
+            try {
+                const token  = telegramService._botToken;
+                const chatId = telegramService._chatId;
+                if (token && chatId) {
+                    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ chat_id: chatId, text: summary.telegram, parse_mode: 'HTML' })
+                    });
+                }
+            } catch(e) { console.warn('Çıkış Telegram hatası:', e); }
+        }
+
+        Swal.close();
+
+        // 5. WhatsApp (yeni sekme)
+        if (doWhatsApp) {
+            try {
+                window.open(`https://wa.me/?text=${encodeURIComponent(summary.whatsapp)}`, '_blank');
+                await new Promise(r => setTimeout(r, 600));
+            } catch(e) {}
+        }
+
+        // 6. Oturumu temizle
+        this.data.activeVezneId = null;
+        localStorage.removeItem('dovizx_active_vezne');
+        localStorage.removeItem('dovizx_storage_choice');
+        if (typeof firebaseService !== 'undefined') firebaseService.signOut();
+
+        Swal.fire({ toast:true, position:'top-end', icon:'success', title:'Güvenli çıkış yapıldı ✅', showConfirmButton:false, timer:1800 });
+        setTimeout(() => {
+            const emailEl = document.getElementById('emailInput');
+            const passEl  = document.getElementById('passwordInput');
+            if (emailEl) emailEl.value = '';
+            if (passEl)  passEl.value  = '';
+            this._showLoginError(null);
+            this._applyLoginMode();
+            this.showLoginScreen();
+        }, 1000);
+    },
+
+    _buildExitSummary() {
+        const now    = new Date().toLocaleString('tr-TR');
+        const vezne  = this.data.activeVezneId || '—';
+        const today  = new Date(); today.setHours(0,0,0,0);
+        const todayTs = today.getTime();
+
+        // null güvenli işlem listesi
+        const allTx = Array.isArray(this.data.transactions) ? this.data.transactions : [];
+
+        const todayTx = allTx.filter(tx =>
+            tx && !tx.isCancelled && tx.date >= todayTs
+        );
+        const buyTL  = todayTx.filter(t => t.type === 'buy' ).reduce((s,t) => s + (t.total || 0), 0);
+        const sellTL = todayTx.filter(t => t.type === 'sell').reduce((s,t) => s + (t.total || 0), 0);
+        const netTL  = sellTL - buyTL;
+        const receipts = new Set(todayTx.map(t => t.receiptId).filter(Boolean)).size;
+
+        // Kasa
+        const balances = this.data.balances || {};
+        const tryBal   = balances.TRY     || 0;
+        const posBal   = balances.POSKASA || 0;
+        const sgkBal   = balances.SGKUSD  || 0;
+
+        // Döviz satırları
+        const currLines = Object.keys(balances)
+            .filter(c => c !== 'TRY' && c !== 'POSKASA' && c !== 'SGKUSD')
+            .map(c => `  ${c}: ${this.fmt(balances[c] || 0, 2)}`)
+            .join('\n');
+
+        // İptal sayısı — cancellationDate olmayan eski kayıtları atla
+        const cancelCount = allTx.filter(t =>
+            t && t.isCancelled && t.cancellationDate && t.cancellationDate >= todayTs
+        ).length;
+
+        // ── Telegram (HTML) ──
+        const tg = [
+            `<b>🔴 DövizX — Gün Sonu Raporu</b>`,
+            `<b>Vezne:</b> ${vezne}`,
+            `<b>Tarih:</b> ${now}`,
+            `━━━━━━━━━━━━━━━`,
+            `📥 <b>Alış TL:</b> ${this.fmt(buyTL)} ₺`,
+            `📤 <b>Satış TL:</b> ${this.fmt(sellTL)} ₺`,
+            `💰 <b>Net Hareket:</b> ${netTL >= 0 ? '+' : ''}${this.fmt(netTL)} ₺`,
+            `🧾 <b>Fiş Sayısı:</b> ${receipts}`,
+            cancelCount > 0 ? `❌ İptal: ${cancelCount}` : null,
+            `━━━━━━━━━━━━━━━`,
+            `💵 TL Kasa: <b>${this.fmt(tryBal)} ₺</b>`,
+            `💳 POS Kasa: <b>${this.fmt(posBal)} ₺</b>`,
+            sgkBal !== 0 ? `🪙 SGKUSD: <b>${this.fmt(sgkBal, 2)} USD</b>` : null,
+            currLines ? `\n<b>Döviz Kasaları:</b>\n<code>${currLines}</code>` : null,
+        ].filter(Boolean).join('\n');
+
+        // ── WhatsApp (düz metin) ──
+        const wa = [
+            `🔴 DövizX — Gün Sonu Raporu`,
+            `Vezne: ${vezne}`,
+            `Tarih: ${now}`,
+            `─────────────────`,
+            `📥 Alış TL: ${this.fmt(buyTL)} ₺`,
+            `📤 Satış TL: ${this.fmt(sellTL)} ₺`,
+            `💰 Net: ${netTL >= 0 ? '+' : ''}${this.fmt(netTL)} ₺`,
+            `🧾 Fiş: ${receipts}`,
+            cancelCount > 0 ? `❌ İptal: ${cancelCount}` : null,
+            `─────────────────`,
+            `💵 TL Kasa: ${this.fmt(tryBal)} ₺`,
+            `💳 POS: ${this.fmt(posBal)} ₺`,
+            sgkBal !== 0 ? `🪙 SGKUSD: ${this.fmt(sgkBal, 2)} USD` : null,
+            currLines ? `\nDövizler:\n${currLines}` : null,
+        ].filter(Boolean).join('\n');
+
+        return { telegram: tg, whatsapp: wa };
     },
 
     // =================================================
@@ -3658,7 +4169,7 @@ const app = {
         document.getElementById('receiptIdToDelete').value = '';
         this.filterHistory(document.querySelector('.filter-btn.active')); 
         
-        Swal.fire('Başarılı!', `Fiş **${receiptId}** iptal edildi. Kasa bakiyeleri güncellendi.`, 'success');
+        Swal.fire({ title: 'Başarılı!', html: `Fiş <b>${receiptId}</b> iptal edildi. Kasa bakiyeleri güncellendi.`, icon: 'success' });
     },
 
     // =================================================
@@ -4003,8 +4514,20 @@ const app = {
         this.renderVezneList();
         // StorageType label
         const stl = document.getElementById('storageTypeLabel');
-        if (stl) stl.innerText = (typeof firebaseService !== 'undefined' && firebaseService._isConnected)
-            ? 'LocalStorage + Firebase ☁️' : 'Yerel (LocalStorage)';
+        if (stl) {
+            const sc = localStorage.getItem('dovizx_storage_choice') || 'local';
+            const fbOk = typeof firebaseService !== 'undefined' && firebaseService._db;
+            if (sc === 'firebase' && fbOk) {
+                stl.innerText = 'LocalStorage + Firebase ☁️';
+                stl.style.color = 'var(--success)';
+            } else if (sc === 'firebase') {
+                stl.innerText = 'Firebase (Bağlanıyor...)';
+                stl.style.color = '#f59e0b';
+            } else {
+                stl.innerText = 'Yerel (LocalStorage)';
+                stl.style.color = 'var(--success)';
+            }
+        }
     },
 
     _applyDividerStyle(style) {
@@ -6345,6 +6868,19 @@ const telegramService = {
     }
 };
 
+// Firebase alan gizle/göster (göz ikonu)
+function toggleFbFieldVisibility(inputId, btn) {
+    const el = document.getElementById(inputId);
+    if (!el) return;
+    if (el.type === 'password') {
+        el.type = 'text';
+        btn.innerHTML = '<i class="ri-eye-off-line"></i>';
+    } else {
+        el.type = 'password';
+        btn.innerHTML = '<i class="ri-eye-line"></i>';
+    }
+}
+
 /**
  * =================================================
  * FİREBASE SERVİSİ — Opsiyonel Bulut Senkronizasyonu
@@ -6355,14 +6891,30 @@ const telegramService = {
 const firebaseService = {
     _app: null,
     _db: null,
+    _auth: null,
     _config: null,
     _isConnected: false,
+
+    // ⚙️ VARSAYILAN CONFIG — Ayarlar ekranından değiştirilebilir
+    _DEFAULT_CONFIG: {
+        apiKey:            "AIzaSyCqsgIgXsF1YfbeUjA-fYtH_mTLa9zihZo",
+        authDomain:        "karsi-abc05.firebaseapp.com",
+        databaseURL:       "https://karsi-abc05-default-rtdb.firebaseio.com",
+        projectId:         "karsi-abc05",
+        storageBucket:     "karsi-abc05.firebasestorage.app",
+        messagingSenderId: "271972503606",
+        appId:             "1:271972503606:web:965325fabc4d5d2b614897",
+        measurementId:     "G-YTVLHVBKJ5",
+    },
 
     loadConfig() {
         try {
             const saved = localStorage.getItem('dovizx_firebase_config');
-            if (saved) this._config = JSON.parse(saved);
-        } catch(e) {}
+            // Kaydedilmiş config varsa onu kullan, yoksa varsayilan config'i yukle
+            this._config = saved ? JSON.parse(saved) : { ...this._DEFAULT_CONFIG };
+        } catch(e) {
+            this._config = { ...this._DEFAULT_CONFIG };
+        }
         return this._config;
     },
 
@@ -6375,6 +6927,7 @@ const firebaseService = {
             storageBucket:     document.getElementById('fb_storageBucket')?.value.trim(),
             messagingSenderId: document.getElementById('fb_messagingSenderId')?.value.trim(),
             appId:             document.getElementById('fb_appId')?.value.trim(),
+            measurementId:     document.getElementById('fb_measurementId')?.value.trim(),
         };
         if (!cfg.databaseURL) {
             Swal.fire('Hata', 'Database URL zorunludur!', 'error');
@@ -6391,13 +6944,17 @@ const firebaseService = {
             return;
         }
         try {
-            // Önceki uygulamayı temizle
+            // Önceki uygulamayı ve listener'ı temizle
             if (this._app) {
-                try { firebase.app(this._app.name).delete(); } catch(e) {}
+                try {
+                    if (this._db) this._db.ref('.info/connected').off(); // ✅ listener temizle
+                    firebase.app(this._app.name).delete();
+                } catch(e) {}
             }
-            const appName = 'dovizx_' + Date.now();
-            this._app = firebase.initializeApp(this._config, appName);
-            this._db  = firebase.database(this._app);
+            const appName  = 'dovizx_' + Date.now();
+            this._app  = firebase.initializeApp(this._config, appName);
+            this._db   = firebase.database(this._app);
+            this._auth = firebase.auth(this._app);
 
             // Bağlantı testi
             this._db.ref('.info/connected').on('value', snap => {
@@ -6406,26 +6963,80 @@ const firebaseService = {
                 this._updateStatus(connected, connected ? 'Firebase Bağlı ✅' : 'Bağlanıyor...');
             });
 
+            // Auth durum değişikliğini izle
+            this._auth.onAuthStateChanged(user => {
+                if (user) {
+                    console.log('[Firebase Auth] Oturum açık:', user.email);
+                } else {
+                    console.log('[Firebase Auth] Oturum kapalı');
+                }
+                const authBadge = document.getElementById('fbAuthStatusBadge');
+                if (authBadge) {
+                    authBadge.innerText = user ? `AUTH: ${user.email}` : 'AUTH: —';
+                    authBadge.style.color = user ? 'var(--success)' : 'var(--muted)';
+                }
+                this._updateLoginFbStatus();
+            });
+
             Swal.fire({ toast:true, position:'top-end', icon:'success', title:'Firebase bağlantısı kuruldu!', showConfirmButton:false, timer:2500 });
         } catch(e) {
             console.error('Firebase connect error:', e);
             this._updateStatus(false, 'Bağlantı Hatası: ' + e.message);
+            this._setXState('error');
             Swal.fire('Firebase Hatası', e.message, 'error');
         }
     },
 
+    // Firebase Authentication ile giriş yap
+    async signIn(email, password) {
+        if (!this._auth) return false;
+        try {
+            await this._auth.signInWithEmailAndPassword(email, password);
+            console.log('[Firebase Auth] Giriş başarılı:', email);
+            return true;
+        } catch(e) {
+            console.warn('[Firebase Auth] Giriş hatası:', e.code, e.message);
+            // Hata koduna göre Türkçe mesaj
+            const errMap = {
+                'auth/user-not-found':       'Bu email ile kayıtlı kullanıcı bulunamadı.',
+                'auth/wrong-password':        'Şifre yanlış.',
+                'auth/invalid-email':         'Geçersiz email formatı.',
+                'auth/user-disabled':         'Bu hesap devre dışı bırakılmış.',
+                'auth/too-many-requests':     'Çok fazla başarısız deneme. Lütfen bekleyin.',
+                'auth/network-request-failed':'Ağ hatası. İnternet bağlantınızı kontrol edin.',
+                'auth/invalid-credential':    'Email veya şifre hatalı.',
+                'auth/operation-not-allowed': 'Email/şifre girişi Firebase\'de etkin değil.',
+            };
+            const msg = errMap[e.code] || ('Giriş hatası: ' + e.message);
+            throw new Error(msg);
+        }
+    },
+
+    // Firebase Authentication'dan çıkış yap
+    async signOut() {
+        if (!this._auth) return;
+        try {
+            await this._auth.signOut();
+            console.log('[Firebase Auth] Çıkış yapıldı');
+        } catch(e) {
+            console.warn('[Firebase Auth] Çıkış hatası:', e.message);
+        }
+    },
+
     disconnect() {
+        this.signOut();
         if (this._app) {
             try { firebase.app(this._app.name).delete(); } catch(e) {}
         }
-        this._app = null;
-        this._db  = null;
+        this._app  = null;
+        this._db   = null;
+        this._auth = null;
         this._isConnected = false;
         localStorage.removeItem('dovizx_firebase_config');
         this._config = null;
         this._updateStatus(false, 'Bağlantı Kesildi — Yerel Depolama');
         // Input'ları temizle
-        ['fb_apiKey','fb_authDomain','fb_databaseURL','fb_projectId','fb_storageBucket','fb_messagingSenderId','fb_appId'].forEach(id => {
+        ['fb_apiKey','fb_authDomain','fb_databaseURL','fb_projectId','fb_storageBucket','fb_messagingSenderId','fb_appId','fb_measurementId'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.value = '';
         });
@@ -6437,10 +7048,56 @@ const firebaseService = {
         const lbl   = document.getElementById('firebaseStatusLabel');
         if (dot) dot.style.background = connected ? 'var(--success)' : 'var(--muted)';
         if (lbl) lbl.innerText = label;
+        // Auth badge güncelle
+        const authBadge = document.getElementById('fbAuthStatusBadge');
+        if (authBadge) {
+            const user = this._auth ? this._auth.currentUser : null;
+            authBadge.innerText = user ? `AUTH: ${user.email}` : 'AUTH: —';
+            authBadge.style.color = user ? 'var(--success)' : 'var(--muted)';
+        }
+        // X animasyonu — bağlantı durumuna göre
+        this._setXState(connected ? 'connected' : 'idle');
+        // Login ekranı durum bandı
+        this._updateLoginFbStatus();
+    },
+
+    // brand-x durumunu ayarla: 'pulse' | 'connected' | 'error' | 'idle'
+    _setXState(state) {
+        const x = document.getElementById('brand-x');
+        if (!x) return;
+        x.classList.remove('fb-pulse', 'fb-connected', 'fb-error');
+        if (state === 'pulse') {
+            x.classList.add('fb-pulse');
+        } else if (state === 'connected') {
+            x.classList.add('fb-connected');
+        } else if (state === 'error') {
+            x.classList.add('fb-error');
+            // 3 sn sonra connected'a dön (bağlıysa)
+            setTimeout(() => {
+                if (this._isConnected) this._setXState('connected');
+                else this._setXState('idle');
+            }, 3000);
+        }
+        // idle = class yok → normal görünüm
+    },
+
+    // Veri yazma/okuma anında kısa pulse tetikle
+    _triggerXPulse() {
+        const x = document.getElementById('brand-x');
+        if (!x) return;
+        x.classList.remove('fb-pulse');
+        void x.offsetWidth; // reflow — animasyonu yeniden başlat
+        x.classList.add('fb-pulse');
+        // Pulse bittikten sonra connected state'e geri dön
+        setTimeout(() => {
+            x.classList.remove('fb-pulse');
+            if (this._isConnected) x.classList.add('fb-connected');
+        }, 720);
     },
 
     _getRef() {
-        if (!this._db || !this._isConnected) return null;
+        // _isConnected bazen gecikmeli güncellenir; _db varsa ve auth aktifse devam et
+        if (!this._db) return null;
         const vezneId = app.data.activeVezneId || 'DEFAULT';
         return this._db.ref(`dovizx/${vezneId}/data`);
     },
@@ -6451,9 +7108,11 @@ const firebaseService = {
         if (!ref) return false;
         try {
             await ref.set({ ...data, _ts: Date.now() });
+            this._triggerXPulse(); // ✅ Yazma başarılı → X animasyonu
             return true;
         } catch(e) {
             console.error('Firebase write error:', e);
+            this._setXState('error'); // ❌ Hata → X kırmızı
             return false;
         }
     },
@@ -6464,16 +7123,29 @@ const firebaseService = {
         if (!ref) return null;
         try {
             const snap = await ref.once('value');
+            if (snap.val()) this._triggerXPulse(); // ✅ Okuma başarılı → X animasyonu
             return snap.val();
         } catch(e) {
             console.error('Firebase read error:', e);
+            this._setXState('error');
             return null;
         }
     },
 
     async syncNow() {
-        if (!this._isConnected) {
-            Swal.fire('Uyarı', 'Firebase bağlı değil. Önce yapılandırın ve bağlanın.', 'warning');
+        // _db yoksa config'den bağlan
+        if (!this._db && this._config && this._config.databaseURL) {
+            this.connect();
+            await new Promise(r => setTimeout(r, 1500));
+        }
+        if (!this._db) {
+            Swal.fire('Uyarı', 'Firebase yapılandırılmamış. Ayarlar → Firebase bölümünden "Kaydet & Bağlan" butonuna basın.', 'warning');
+            return;
+        }
+        // Auth kontrolü
+        const user = this._auth ? this._auth.currentUser : null;
+        if (!user) {
+            Swal.fire('Uyarı', 'Firebase yazma için giriş yapılmış olmalı. Vezne girişi yapın.', 'warning');
             return;
         }
         Swal.fire({ title: 'Senkronize ediliyor...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
@@ -6490,9 +7162,9 @@ const firebaseService = {
             const ok = await this.write(dataToSave);
             Swal.close();
             if (ok) {
-                Swal.fire({ toast:true, position:'top-end', icon:'success', title:'Firebase senkronizasyonu tamam!', showConfirmButton:false, timer:2000 });
+                Swal.fire({ toast:true, position:'top-end', icon:'success', title:'Firebase senkronizasyonu tamam! ☁️', showConfirmButton:false, timer:2000 });
             } else {
-                Swal.fire('Hata', 'Yazma işlemi başarısız.', 'error');
+                Swal.fire('Hata', 'Yazma başarısız — Firebase kurallarını kontrol edin (auth != null).', 'error');
             }
         } catch(e) {
             Swal.close();
@@ -6502,19 +7174,61 @@ const firebaseService = {
 
     fillSettingsForm() {
         const cfg = this._config || {};
-        const fields = { fb_apiKey:'apiKey', fb_authDomain:'authDomain', fb_databaseURL:'databaseURL', fb_projectId:'projectId', fb_storageBucket:'storageBucket', fb_messagingSenderId:'messagingSenderId', fb_appId:'appId' };
+        const def = this._DEFAULT_CONFIG;
+        const fields = {
+            fb_apiKey:            'apiKey',
+            fb_authDomain:        'authDomain',
+            fb_databaseURL:       'databaseURL',
+            fb_projectId:         'projectId',
+            fb_storageBucket:     'storageBucket',
+            fb_messagingSenderId: 'messagingSenderId',
+            fb_appId:             'appId',
+            fb_measurementId:     'measurementId',
+        };
         Object.entries(fields).forEach(([id, key]) => {
             const el = document.getElementById(id);
-            if (el) el.value = cfg[key] || '';
+            if (el) el.value = cfg[key] || def[key] || '';
         });
-        this._updateStatus(this._isConnected, this._isConnected ? 'Firebase Bağlı ✅' : (cfg.databaseURL ? 'Yapılandırıldı (Bağlanılıyor...)' : 'Bağlı Değil — Yerel Depolama'));
+        this._updateStatus(
+            this._isConnected,
+            this._isConnected ? 'Firebase Bağlı ✅' : (cfg.databaseURL ? 'Yapılandırıldı (Bağlanılıyor...)' : 'Bağlı Değil — Yerel Depolama')
+        );
+        // Login ekranı Firebase durum bandı
+        this._updateLoginFbStatus();
+    },
+
+    // Login ekranındaki Firebase durum göstergesini güncelle
+    _updateLoginFbStatus() {
+        const el  = document.getElementById('loginFbStatus');
+        const dot = document.getElementById('loginFbDot');
+        const lbl = document.getElementById('loginFbLabel');
+        if (!el) return;
+        if (this._isConnected) {
+            el.style.display = 'flex';
+            el.style.borderColor = 'rgba(16,185,129,0.3)';
+            el.style.background  = 'rgba(16,185,129,0.08)';
+            if (dot) { dot.style.background = '#10b981'; }
+            if (lbl) lbl.innerText = 'Firebase Bağlı — Giriş doğrulanacak ☁️';
+        } else if (this._config && this._config.databaseURL) {
+            el.style.display = 'flex';
+            el.style.borderColor = 'rgba(245,158,11,0.3)';
+            el.style.background  = 'rgba(245,158,11,0.06)';
+            if (dot) { dot.style.background = '#f59e0b'; }
+            if (lbl) lbl.innerText = 'Firebase Bağlanıyor...';
+        } else {
+            el.style.display = 'none';
+        }
     },
 
     init() {
         this.loadConfig();
+        // Config varsa (varsayilan veya kaydedilmis) otomatik baglan
         if (this._config && this._config.databaseURL) {
             this.connect();
         }
+        // Ayarlar formu daha sonra açıldığında dolu gelsin diye şimdi de doldur
+        // (DOM hazır olduktan sonra çağrılacak şekilde defer)
+        setTimeout(() => this.fillSettingsForm(), 800);
     }
 };
 
@@ -6522,397 +7236,722 @@ const firebaseService = {
 document.addEventListener('DOMContentLoaded', async () => {
     telegramService.init();
     firebaseService.init();
+
+    // ─── DEPOLAMA SEÇİMİ ───────────────────────────────────────
+    // İlk kez çalıştırılıyorsa sor (localStorage'da kalıcı sakla)
+    const storageChoice = localStorage.getItem('dovizx_storage_choice');
+
+    if (!storageChoice) {
+        await Swal.fire({
+            title: '🗄️ Veri Kaynağı Seçin',
+            html: `
+                <p style="font-size:13px; color:#94a3b8; margin:0 0 18px 0;">
+                    Uygulama hangi kaynaktan veri yüklesin?<br>
+                    <span style="font-size:11px; color:#64748b;">Bu seçim kaydedilir, login ekranından değiştirebilirsiniz.</span>
+                </p>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:6px;">
+                    <button id="chooseLocal"
+                        style="padding:18px 10px; border-radius:14px; border:2px solid #334155;
+                               background:#1e293b; color:#f8fafc; font-size:13px; font-weight:800;
+                               cursor:pointer; transition:border-color 0.2s;"
+                        onmouseover="this.style.borderColor='#3b82f6'"
+                        onmouseout="this.style.borderColor='#334155'">
+                        <div style="font-size:28px; margin-bottom:8px;">💾</div>
+                        <div>Yerel Depolama</div>
+                        <div style="font-size:10px; color:#64748b; font-weight:600; margin-top:4px;">Şifresiz hızlı giriş</div>
+                    </button>
+                    <button id="chooseFirebase"
+                        style="padding:18px 10px; border-radius:14px; border:2px solid #334155;
+                               background:#1e293b; color:#f8fafc; font-size:13px; font-weight:800;
+                               cursor:pointer; transition:border-color 0.2s;"
+                        onmouseover="this.style.borderColor='#f97316'"
+                        onmouseout="this.style.borderColor='#334155'">
+                        <div style="font-size:28px; margin-bottom:8px;">☁️</div>
+                        <div>Firebase</div>
+                        <div style="font-size:10px; color:#64748b; font-weight:600; margin-top:4px;">Email + Şifre girişi</div>
+                    </button>
+                </div>
+            `,
+            background: '#0f172a',
+            color: '#f8fafc',
+            showConfirmButton: false,
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => {
+                document.getElementById('chooseLocal').addEventListener('click', () => {
+                    localStorage.setItem('dovizx_storage_choice', 'local');
+                    Swal.close();
+                }, { once: true });
+                document.getElementById('chooseFirebase').addEventListener('click', () => {
+                    localStorage.setItem('dovizx_storage_choice', 'firebase');
+                    Swal.close();
+                }, { once: true });
+            }
+        });
+    }
+
+    const finalChoice = localStorage.getItem('dovizx_storage_choice') || 'local';
+
+    // Firebase seçildiyse bağlan ve verileri oradan yükle
+    if (finalChoice === 'firebase') {
+        // Bağlantı kurulana kadar bekle (max 5 sn)
+        Swal.fire({
+            title: '☁️ Firebase\'e Bağlanılıyor',
+            text: 'Lütfen bekleyin...',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => Swal.showLoading()
+        });
+
+        let waited = 0;
+        await new Promise(resolve => {
+            const check = setInterval(() => {
+                waited += 200;
+                if (firebaseService._isConnected || waited >= 5000) {
+                    clearInterval(check);
+                    resolve();
+                }
+            }, 200);
+        });
+
+        Swal.close();
+
+        if (firebaseService._isConnected) {
+            // Kayıtlı vezneId'yi kullan, yoksa 'VZN01' dene (DEFAULT yerine)
+            const savedVezne = localStorage.getItem('dovizx_active_vezne') || 'VZN01';
+            const startupRef = firebaseService._db
+                ? firebaseService._db.ref(`dovizx/${savedVezne}/data`)
+                : null;
+
+            let fbData = null;
+            if (startupRef) {
+                try {
+                    const snap = await startupRef.once('value');
+                    fbData = snap.val();
+                } catch(e) { console.warn('Firebase startup read hatası:', e); }
+            }
+
+            if (fbData) {
+                // LocalStorage'a da yaz (offline fallback)
+                const theme = localStorage.getItem('dovizx_theme');
+                const vezne = localStorage.getItem('dovizx_active_vezne');
+                localStorage.setItem('dovizx_data', JSON.stringify(fbData));
+                if (theme) localStorage.setItem('dovizx_theme', theme);
+                if (vezne) localStorage.setItem('dovizx_active_vezne', vezne);
+                Swal.fire({ toast:true, position:'top-end', icon:'success', title:'Firebase\'den veri yüklendi ☁️', showConfirmButton:false, timer:2000 });
+            } else {
+                Swal.fire({ toast:true, position:'top-end', icon:'warning', title:'Firebase boş — Yerel veri kullanılıyor', showConfirmButton:false, timer:2500 });
+            }
+        } else {
+            Swal.fire({ toast:true, position:'top-end', icon:'error', title:'Firebase bağlanamadı — Yerel veri kullanılıyor', showConfirmButton:false, timer:3000 });
+        }
+    }
+    // ────────────────────────────────────────────────────────────
+
     await app.init();
 });
 
 
 /* ============================================================ */
-/*  DESKTOP MODE — DövizX Enterprise Desktop Engine            */
+/*  DövizX Enterprise Pro — DESKTOP DASHBOARD ENGINE v5        */
+/*  Layout: KUR (top-left) | KASA (bottom-left) | GEÇMİŞ | PANO | HAREKETLER */
 /* ============================================================ */
 const desktop = {
   IS_DESKTOP: false,
+  _L: null,                       // layout state
+  _DEF: { leftW: 320, kasaRatio: 0.42, gecmisF: 1, panoF: 1, harF: 1 },
 
+  /* ── INIT ── */
   init() {
     this.IS_DESKTOP = window.innerWidth >= 1024;
     if (!this.IS_DESKTOP) return;
-    this._restructureDOM();
-    this._buildTopNav();
-    this._buildStatusBar();
-    this._startClock();
-    this._bindKeyboard();
-    this._bindResize();
-    this._injectShortcutPanel();
-    console.log('[DövizX Desktop] Desktop modu aktif. ? tuşuna basın yardım için.');
+    this._loadL();
+    this._build();
+    this._statusBar();
+    this._clock();
+    this._patchApp();
+    this._keyboard();
+    this._shortcutPanel();
+    window.addEventListener('resize', () => {
+      const was = this.IS_DESKTOP;
+      this.IS_DESKTOP = window.innerWidth >= 1024;
+      if (this.IS_DESKTOP !== was) location.reload();
+    });
+    console.log('[DövizX Pro v5] Dashboard aktif. F1–F5 panel odak, ? kısayollar.');
   },
 
-  _restructureDOM() {
-    // 1. Move bottom-nav items into a top nav container
-    // The bottom-nav stays hidden (CSS), we clone its buttons into header
-    const header = document.querySelector('header');
-    if (!header) return;
+  /* ── LAYOUT PERSISTENCE ── */
+  _loadL() {
+    try { this._L = { ...this._DEF, ...JSON.parse(localStorage.getItem('dvx_dt5') || '{}') }; }
+    catch(e) { this._L = { ...this._DEF }; }
+  },
+  _saveL() {
+    try { localStorage.setItem('dvx_dt5', JSON.stringify(this._L)); } catch(e) {}
+  },
 
-    // Create top nav container
-    const topNav = document.createElement('div');
-    topNav.className = 'dt-topnav';
+  /* ── BUILD ENTIRE DASHBOARD ── */
+  _build() {
+    document.body.classList.add('dt-active');
+    this._headerNav();
 
-    // Clone bottom nav items
-    const navItems = document.querySelectorAll('.bottom-nav .nav-item');
-    navItems.forEach(item => {
-      const clone = item.cloneNode(true);
-      // Transfer onclick
-      const origOnclick = item.getAttribute('onclick');
-      if (origOnclick) clone.setAttribute('onclick', origOnclick);
-      topNav.appendChild(clone);
-    });
+    /* WORKSPACE */
+    const ws = document.createElement('div');
+    ws.id = 'dt-workspace';
 
-    // Insert after brand
-    const brand = header.querySelector('.brand');
-    if (brand && brand.nextSibling) {
-      header.insertBefore(topNav, brand.nextSibling);
-    } else {
-      header.appendChild(topNav);
-    }
+    /* ── LEFT COLUMN: KUR (top) + KAS (bottom) ── */
+    const colLeft = document.createElement('div');
+    colLeft.id = 'dt-col-left';
+    colLeft.style.width = (this._L.leftW || 320) + 'px';
 
-    // 2. Wrap the right-side header controls in dt-header-right
-    const rightDiv = header.querySelector('div:last-child') || header.querySelector('div[style]');
-    if (rightDiv) {
-      rightDiv.classList.add('dt-header-right');
-      // Add kasa badge
+    /* KUR PANEL */
+    const panKur = this._panel('dt-panel-kur', 'ri-line-chart-line', '📈 Döviz Kurları', [
+      { icon:'ri-fullscreen-line',  title:'Tam Ekran', fn:`desktop._maximize('dt-panel-kur')` },
+      { icon:'ri-subtract-line',    title:'Daralt',    fn:`desktop._collapse('dt-panel-kur')` },
+    ]);
+    panKur.style.flex = String(1 - (this._L.kasaRatio || 0.42));
+    const rateContainer = document.getElementById('rateGridContainer');
+    if (rateContainer) { rateContainer.classList.remove('hidden'); panKur.querySelector('.dt-panel-body').appendChild(rateContainer); }
+    // Sepet footer
+    const foot = document.createElement('div');
+    foot.className = 'dt-panel-foot';
+    foot.innerHTML = `<button class="dt-sepet-btn" onclick="app.openCart(this)">
+      <i class="ri-shopping-cart-line"></i>&nbsp;<span id="dtCartCount">Sepet</span>
+    </button>`;
+    panKur.appendChild(foot);
+
+    /* H Resizer between KUR and KASA */
+    const hRes = this._res('h');
+    this._hResizer(hRes, panKur, colLeft, 'kasaRatio');
+
+    /* KASA PANEL */
+    const panKasa = this._panel('dt-panel-kasa', 'ri-safe-2-line', '💰 Kasa & Bakiyeler', [
+      { icon:'ri-subtract-line', title:'Daralt', fn:`desktop._collapse('dt-panel-kasa')` },
+    ]);
+    panKasa.style.flex = String(this._L.kasaRatio || 0.42);
+    const kasaCard = document.getElementById('vezne-durumu-card');
+    if (kasaCard) { kasaCard.classList.remove('hidden'); panKasa.querySelector('.dt-panel-body').appendChild(kasaCard); }
+
+    colLeft.appendChild(panKur);
+    colLeft.appendChild(hRes);
+    colLeft.appendChild(panKasa);
+
+    /* V Resizer between LEFT column and RIGHT area */
+    const mainVRes = this._res('v');
+    this._mainVResizer(mainVRes, colLeft);
+
+    /* ── RIGHT AREA: GEÇMİŞ | PANO | HAREKETLER ── */
+    const colRight = document.createElement('div');
+    colRight.id = 'dt-col-right';
+
+    /* GEÇMİŞ */
+    const panGecmis = this._panel('dt-panel-gecmis', 'ri-file-list-3-line', '🗂️ İşlem Geçmişi', [
+      { icon:'ri-subtract-line', title:'Daralt', fn:`desktop._collapse('dt-panel-gecmis')` },
+    ]);
+    panGecmis.style.flex = '1';
+    const histView = document.getElementById('view-history');
+    if (histView) { histView.classList.remove('hidden'); panGecmis.querySelector('.dt-panel-body').appendChild(histView); }
+
+    const vRes1 = this._res('v');
+    this._colVResizer(vRes1, panGecmis, 'gecmisF');
+
+    /* PANO */
+    const panPano = this._panel('dt-panel-pano', 'ri-dashboard-3-line', '📊 Kur Panosu', [
+      { icon:'ri-refresh-line',  title:'Yenile',  fn:`pano.refreshNow ? pano.refreshNow() : pano.openTab()` },
+      { icon:'ri-subtract-line', title:'Daralt',  fn:`desktop._collapse('dt-panel-pano')` },
+    ]);
+    panPano.style.flex = '1';
+    const panoView = document.getElementById('view-pano');
+    if (panoView) { panoView.classList.remove('hidden'); panPano.querySelector('.dt-panel-body').appendChild(panoView); }
+
+    const vRes2 = this._res('v');
+    this._colVResizer(vRes2, panPano, 'panoF');
+
+    /* HAREKETLER */
+    const panHar = this._panel('dt-panel-hareketler', 'ri-funds-line', '📉 Kâr/Zarar & Hareketler', [
+      { icon:'ri-refresh-line',  title:'Yenile',  fn:`hareket.render()` },
+      { icon:'ri-subtract-line', title:'Daralt',  fn:`desktop._collapse('dt-panel-hareketler')` },
+    ]);
+    panHar.style.flex = '1';
+    const harView = document.getElementById('view-hareketler');
+    if (harView) { harView.classList.remove('hidden'); panHar.querySelector('.dt-panel-body').appendChild(harView); }
+
+    colRight.appendChild(panGecmis);
+    colRight.appendChild(vRes1);
+    colRight.appendChild(panPano);
+    colRight.appendChild(vRes2);
+    colRight.appendChild(panHar);
+
+    ws.appendChild(colLeft);
+    ws.appendChild(mainVRes);
+    ws.appendChild(colRight);
+
+    /* Insert workspace after header */
+    const hdr = document.querySelector('header');
+    if (hdr) hdr.after(ws); else document.body.appendChild(ws);
+
+    /* Backdrop for settings */
+    const bd = document.createElement('div');
+    bd.id = 'dt-settings-backdrop';
+    bd.onclick = () => this._closeSettings();
+    document.body.appendChild(bd);
+
+    /* Initial renders */
+    setTimeout(() => {
+      app.renderBalances();
+      app.renderLiveRates();
+      const todayBtn = document.querySelector('.filter-btn[data-filter="today"]') || document.querySelector('.filter-btn.active');
+      if (todayBtn) app.filterHistory(todayBtn);
+      pano.openTab();
+      hareket.render();
+      this._syncCartCount();
+    }, 200);
+  },
+
+  /* ── PANEL FACTORY ── */
+  _panel(id, iconClass, title, btns = []) {
+    const p = document.createElement('div');
+    p.className = 'dt-panel'; p.id = id;
+    const btnsHtml = btns.map(b =>
+      `<button class="dt-pbtn" onclick="${b.fn}" title="${b.title}"><i class="${b.icon}"></i></button>`
+    ).join('');
+    p.innerHTML = `
+      <div class="dt-panel-bar">
+        <i class="dt-panel-bar-icon ${iconClass}"></i>
+        <span class="dt-panel-bar-title">${title}</span>
+        <div class="dt-panel-bar-acts">${btnsHtml}</div>
+      </div>
+      <div class="dt-panel-body"></div>
+    `;
+    return p;
+  },
+
+  /* ── RESIZER FACTORY ── */
+  _res(dir) {
+    const r = document.createElement('div');
+    r.className = `dt-res dt-res-${dir}`;
+    r.innerHTML = '<div class="dt-res-dot"></div>';
+    return r;
+  },
+
+  /* ── HEADER NAV ── */
+  _headerNav() {
+    const hdr = document.querySelector('header');
+    if (!hdr) return;
+
+    /* Top nav pills */
+    const nav = document.createElement('div');
+    nav.className = 'dt-topnav';
+    nav.innerHTML = `
+      <button class="dt-pill active" id="dtp-kur"   onclick="desktop._focus('dt-panel-kur')"><i class="ri-line-chart-line"></i> Kur</button>
+      <button class="dt-pill" id="dtp-kasa"         onclick="desktop._focus('dt-panel-kasa')"><i class="ri-safe-2-line"></i> Kasa</button>
+      <button class="dt-pill" id="dtp-gecmis"       onclick="desktop._focus('dt-panel-gecmis')"><i class="ri-file-list-3-line"></i> Geçmiş</button>
+      <button class="dt-pill" id="dtp-pano"         onclick="desktop._focus('dt-panel-pano')"><i class="ri-dashboard-3-line"></i> Pano</button>
+      <button class="dt-pill" id="dtp-hareketler"   onclick="desktop._focus('dt-panel-hareketler')"><i class="ri-funds-line"></i> Hareketler</button>
+      <span class="dt-vsep"></span>
+      <button class="dt-pill pill-cart" onclick="app.openCart(this)"><i class="ri-shopping-cart-line"></i>&nbsp;<span id="dtCartCountTop">Sepet</span></button>
+      <button class="dt-pill pill-settings" onclick="desktop._openSettings()"><i class="ri-settings-3-line"></i> Ayarlar</button>
+    `;
+    const brand = hdr.querySelector('.brand');
+    if (brand) brand.after(nav);
+
+    /* Right controls */
+    const rightEl = hdr.querySelector('div[style], .dt-header-right') || hdr.lastElementChild;
+    if (rightEl) {
+      rightEl.classList.add('dt-hdr-right');
+      rightEl.style = '';
+      // Remove old inline children, rebuild
       const kasaBadge = document.createElement('div');
       kasaBadge.className = 'dt-kasa-badge';
-      kasaBadge.id = 'dt-kasa-badge';
-      kasaBadge.innerHTML = '<i class="ri-safe-2-line"></i> Kasa: <span id="dt-kasa-amount">0 ₺</span>';
-      rightDiv.insertBefore(kasaBadge, rightDiv.firstChild);
+      kasaBadge.id = 'dtKasaBadge';
+      kasaBadge.innerHTML = '<i class="ri-safe-2-line"></i>&nbsp;<span id="dtKasaAmt">0 ₺</span>';
 
-      // Clock
-      const clock = document.createElement('div');
-      clock.className = 'dt-clock';
-      clock.id = 'dt-clock';
-      rightDiv.insertBefore(clock, rightDiv.firstChild);
+      const clockEl = document.createElement('div');
+      clockEl.className = 'dt-clock'; clockEl.id = 'dtClock';
 
-      // Shortcut hint
-      const hint = document.createElement('button');
-      hint.className = 'dt-shortcut-hint';
-      hint.title = 'Kısayol Tuşları (?)';
-      hint.innerHTML = '? Kısayollar';
-      hint.onclick = () => desktop.toggleShortcutPanel();
-      rightDiv.appendChild(hint);
+      const hintBtn = document.createElement('button');
+      hintBtn.className = 'dt-hint-btn';
+      hintBtn.innerHTML = '⌨ Kısayollar';
+      hintBtn.onclick = () => this._toggleSC();
+
+      // Keep existing buttons (theme toggle, TV, exit)
+      const existing = [...rightEl.children];
+      rightEl.innerHTML = '';
+      rightEl.appendChild(clockEl);
+      rightEl.appendChild(kasaBadge);
+      existing.forEach(c => rightEl.appendChild(c));
+      rightEl.appendChild(hintBtn);
     }
 
-    // 3. Make #views always visible (desktop shows all in flex layout)
-    const views = document.getElementById('views');
-    if (views) {
-      views.classList.remove('hidden');
+    // Remove old exit/PanoTV buttons from header if they're now duplicated
+    // (they stay as-is from original HTML — no changes to functional buttons)
+  },
+
+  /* ── SETTINGS OVERLAY ── */
+  _openSettings() {
+    let ov = document.getElementById('dt-settings-overlay');
+    if (!ov) {
+      ov = document.createElement('div');
+      ov.id = 'dt-settings-overlay';
+      ov.innerHTML = `
+        <div id="dt-settings-overlay-hdr">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <i class="ri-settings-3-line" style="font-size:17px;color:var(--accent);"></i>
+            <strong style="font-size:14px;">⚙️ Uygulama Ayarları</strong>
+          </div>
+          <button onclick="desktop._closeSettings()"
+            style="background:var(--danger);color:#fff;border:none;border-radius:8px;
+                   padding:5px 13px;cursor:pointer;font-weight:800;font-size:12px;font-family:'Manrope',sans-serif;">
+            ✕ Kapat
+          </button>
+        </div>
+        <div id="dt-settings-overlay-body"></div>
+      `;
+      document.body.appendChild(ov);
+      // Move settings div
+      const settDiv = document.getElementById('settings');
+      const body = ov.querySelector('#dt-settings-overlay-body');
+      if (settDiv && body) { settDiv.classList.remove('hidden'); body.appendChild(settDiv); }
     }
-
-    // 4. Build the main layout wrapper
-    // views already has flex layout from CSS, wrap view-market
-    this._applyTwoColToMarket();
-
-    // 5. Build the pano split layout
-    this._applyPanoSplit();
-
-    // 6. History compact header
-    this._applyHistoryLayout();
+    requestAnimationFrame(() => {
+      ov.classList.add('open');
+      const bd = document.getElementById('dt-settings-backdrop');
+      if (bd) bd.style.display = 'block';
+    });
+    if (typeof app.initSettings === 'function') app.initSettings();
+  },
+  _closeSettings() {
+    const ov = document.getElementById('dt-settings-overlay');
+    const bd = document.getElementById('dt-settings-backdrop');
+    if (ov) ov.classList.remove('open');
+    if (bd) bd.style.display = 'none';
   },
 
-  _applyTwoColToMarket() {
-    const vm = document.getElementById('view-market');
-    if (vm) vm.classList.add('dt-two-col');
+  /* ── PANEL CONTROLS ── */
+  _focus(panelId) {
+    const p = document.getElementById(panelId);
+    if (!p) return;
+    p.classList.remove('dt-flash'); void p.offsetWidth; p.classList.add('dt-flash');
+    setTimeout(() => p.classList.remove('dt-flash'), 1100);
+    p.scrollIntoView({ behavior:'smooth', block:'nearest' });
+    const map = {
+      'dt-panel-kur':'dtp-kur','dt-panel-kasa':'dtp-kasa',
+      'dt-panel-gecmis':'dtp-gecmis','dt-panel-pano':'dtp-pano','dt-panel-hareketler':'dtp-hareketler'
+    };
+    document.querySelectorAll('.dt-pill').forEach(x => x.classList.remove('active'));
+    const pill = document.getElementById(map[panelId]);
+    if (pill) pill.classList.add('active');
   },
 
-  _applyPanoSplit() {
-    // Wrap pano in a split: left = rate list, right = controls
-    const panoView = document.getElementById('view-pano');
-    if (!panoView) return;
-    panoView.classList.add('dt-split');
-
-    const rateList = document.getElementById('panoRateList');
-    const lastUpdate = document.getElementById('panoLastUpdate');
-    const controlBar = panoView.querySelector('div[style*="border-top"]') || panoView.lastElementChild;
-
-    // Left panel
-    const leftPanel = document.createElement('div');
-    leftPanel.className = 'dt-split-left';
-    if (rateList) leftPanel.appendChild(rateList);
-    if (lastUpdate) leftPanel.appendChild(lastUpdate);
-
-    // Right panel — keep existing children (status/mode bar)
-    const rightPanel = document.createElement('div');
-    rightPanel.className = 'dt-split-right';
-    rightPanel.style.cssText = 'min-width:220px; max-width:280px;';
-    // Move remaining children
-    const remaining = [...panoView.children];
-    remaining.forEach(ch => rightPanel.appendChild(ch));
-
-    panoView.innerHTML = '';
-    panoView.appendChild(leftPanel);
-    panoView.appendChild(rightPanel);
+  _collapse(panelId) {
+    const p = document.getElementById(panelId);
+    if (!p) return;
+    p.classList.toggle('dt-collapsed');
+    const lastBtn = p.querySelector('.dt-panel-bar-acts .dt-pbtn:last-child i');
+    if (lastBtn) lastBtn.className = p.classList.contains('dt-collapsed') ? 'ri-add-line' : 'ri-subtract-line';
   },
 
-  _applyHistoryLayout() {
-    const hv = document.getElementById('view-history');
-    if (!hv) return;
-    hv.style.display = 'flex';
-    hv.style.flexDirection = 'column';
+  _maximize(panelId) {
+    const p = document.getElementById(panelId);
+    if (!p) return;
+    const isMax = p.classList.toggle('dt-maximized');
+    document.body.classList.toggle('has-max', isMax);
+    const icon = p.querySelector('.dt-panel-bar-acts .dt-pbtn:first-child i');
+    if (icon) icon.className = isMax ? 'ri-fullscreen-exit-line' : 'ri-fullscreen-line';
   },
 
-  _buildTopNav() {
-    // Sync active state from bottom-nav to top-nav
-    const syncActive = () => {
-      const activeBottom = document.querySelector('.bottom-nav .nav-item.active');
-      const topItems = document.querySelectorAll('.dt-topnav .nav-item');
-      topItems.forEach(item => item.classList.remove('active'));
-      if (activeBottom) {
-        const onclick = activeBottom.getAttribute('onclick') || '';
-        const match = onclick.match(/switchTab\('(\w+)'/);
-        if (match) {
-          topItems.forEach(item => {
-            const oc = item.getAttribute('onclick') || '';
-            if (oc.includes(match[1])) item.classList.add('active');
-          });
-        }
-        // Cart button
-        const cartBottom = document.querySelector('.bottom-nav .nav-item[onclick*="openCart"]');
-        if (activeBottom === cartBottom) {
-          topItems.forEach(item => {
-            if ((item.getAttribute('onclick') || '').includes('openCart')) item.classList.add('active');
-          });
-        }
+  /* ── RESIZE LOGIC ── */
+  /* Main vertical: left-column width */
+  _mainVResizer(el, leftCol) {
+    let x0, w0;
+    el.addEventListener('mousedown', e => {
+      x0 = e.clientX; w0 = leftCol.offsetWidth;
+      el.classList.add('dt-dragging');
+      document.body.style.setProperty('cursor','col-resize','important');
+      document.body.style.userSelect = 'none';
+      const mm = mv => {
+        const nw = Math.max(220, Math.min(580, w0 + mv.clientX - x0));
+        leftCol.style.width = nw + 'px';
+        this._L.leftW = nw;
+      };
+      const mu = () => {
+        el.classList.remove('dt-dragging');
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        this._saveL();
+        document.removeEventListener('mousemove', mm);
+        document.removeEventListener('mouseup', mu);
+      };
+      document.addEventListener('mousemove', mm);
+      document.addEventListener('mouseup', mu);
+      e.preventDefault();
+    });
+  },
+
+  /* Horizontal resizer: KUR (top) / KASA (bottom) in left column */
+  _hResizer(el, topPanel, container, layoutKey) {
+    let y0, f0;
+    el.addEventListener('mousedown', e => {
+      y0 = e.clientY; f0 = parseFloat(topPanel.style.flex) || 0.58;
+      el.classList.add('dt-dragging');
+      document.body.style.setProperty('cursor','row-resize','important');
+      document.body.style.userSelect = 'none';
+      const mm = mv => {
+        const h = container.offsetHeight || 600;
+        const nf = Math.max(0.15, Math.min(0.85, f0 + (mv.clientY - y0) / h));
+        topPanel.style.flex = nf;
+        const kasaPan = document.getElementById('dt-panel-kasa');
+        if (kasaPan) kasaPan.style.flex = 1 - nf;
+        this._L[layoutKey] = 1 - nf; // save kasa ratio
+      };
+      const mu = () => {
+        el.classList.remove('dt-dragging');
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        this._saveL();
+        document.removeEventListener('mousemove', mm);
+        document.removeEventListener('mouseup', mu);
+      };
+      document.addEventListener('mousemove', mm);
+      document.addEventListener('mouseup', mu);
+      e.preventDefault();
+    });
+  },
+
+  /* Vertical resizer between right-area columns */
+  _colVResizer(el, leftPanel, layoutKey) {
+    let x0, f0;
+    el.addEventListener('mousedown', e => {
+      x0 = e.clientX; f0 = parseFloat(leftPanel.style.flex) || 1;
+      el.classList.add('dt-dragging');
+      document.body.style.setProperty('cursor','col-resize','important');
+      document.body.style.userSelect = 'none';
+      const mm = mv => {
+        const w = document.getElementById('dt-col-right')?.offsetWidth || 900;
+        const delta = (mv.clientX - x0) / (w / 3);
+        const nf = Math.max(0.2, Math.min(3, f0 + delta));
+        leftPanel.style.flex = nf;
+        this._L[layoutKey] = nf;
+      };
+      const mu = () => {
+        el.classList.remove('dt-dragging');
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        this._saveL();
+        document.removeEventListener('mousemove', mm);
+        document.removeEventListener('mouseup', mu);
+      };
+      document.addEventListener('mousemove', mm);
+      document.addEventListener('mouseup', mu);
+      e.preventDefault();
+    });
+    // Restore saved ratio
+    const saved = this._L[layoutKey];
+    if (saved) leftPanel.style.flex = saved;
+  },
+
+  /* ── APP METHOD PATCHES ── */
+  _patchApp() {
+    const self = this;
+
+    /* switchTab → focus panel or open settings */
+    app.switchTab = function(tabId) {
+      const map = {
+        kur:'dt-panel-kur', market:'dt-panel-kasa',
+        history:'dt-panel-gecmis', pano:'dt-panel-pano', hareketler:'dt-panel-hareketler'
+      };
+      if (tabId === 'settings') { self._openSettings(); return; }
+      if (map[tabId]) self._focus(map[tabId]);
+      // Trigger panel-specific data refresh
+      if (tabId === 'history') {
+        const btn = document.querySelector('.filter-btn.active') || document.querySelector('.filter-btn[data-filter="today"]');
+        if (btn) app.filterHistory(btn);
       }
+      if (tabId === 'pano') pano.openTab();
+      if (tabId === 'hareketler') hareket.render();
+      if (tabId === 'market' || tabId === 'kur') app.renderBalances();
     };
 
-    // Patch app.switchTab to also update top nav
-    const origSwitch = app.switchTab.bind(app);
-    app.switchTab = function(tabId, el) {
-      origSwitch(tabId, el);
-      setTimeout(syncActive, 50);
-      // Update cart count on top nav too
-      const topCart = document.querySelector('.dt-topnav .nav-item[onclick*="openCart"] span');
-      const bottomCart = document.getElementById('cartItemCount');
-      if (topCart && bottomCart) topCart.innerHTML = bottomCart.innerHTML;
-    };
-
-    // Patch updateCartCount
-    const origCartCount = app.updateCartCount.bind(app);
-    app.updateCartCount = function() {
-      origCartCount();
-      const topCart = document.querySelector('.dt-topnav .nav-item[onclick*="openCart"] span');
-      const bottomCart = document.getElementById('cartItemCount');
-      if (topCart && bottomCart) topCart.innerHTML = bottomCart.innerHTML;
-    };
-
-    // Patch renderBalances to also update kasa badge
-    const origRenderBal = app.renderBalances.bind(app);
+    /* renderBalances → update kasa badge */
+    const origBal = app.renderBalances.bind(app);
     app.renderBalances = function() {
-      origRenderBal();
-      const hdr = document.getElementById('dt-kasa-amount');
-      const hdrOrig = document.getElementById('headerTotal');
-      if (hdr && hdrOrig) hdr.innerText = hdrOrig.innerText;
+      origBal();
+      const badge = document.getElementById('dtKasaAmt');
+      const orig  = document.getElementById('headerTotal');
+      if (badge && orig) badge.innerText = orig.innerText;
     };
 
-    setTimeout(syncActive, 300);
+    /* updateCartCount → sync both cart labels */
+    const origCart = app.updateCartCount.bind(app);
+    app.updateCartCount = function() {
+      origCart();
+      self._syncCartCount();
+    };
+
+    /* loginSuccess → trigger all panel renders */
+    const origLogin = app.loginSuccess.bind(app);
+    app.loginSuccess = function(vezneId) {
+      origLogin(vezneId);
+      setTimeout(() => {
+        app.renderBalances();
+        const btn = document.querySelector('.filter-btn[data-filter="today"]');
+        if (btn) app.filterHistory(btn);
+        pano.openTab();
+        hareket.render();
+      }, 250);
+    };
   },
 
-  _buildStatusBar() {
+  _syncCartCount() {
+    const main = document.getElementById('cartItemCount');
+    const a = document.getElementById('dtCartCount');
+    const b = document.getElementById('dtCartCountTop');
+    if (main) {
+      if (a) a.innerHTML = main.innerHTML;
+      if (b) b.innerHTML = main.innerHTML;
+    }
+  },
+
+  /* ── STATUS BAR ── */
+  _statusBar() {
     const bar = document.createElement('div');
-    bar.className = 'dt-statusbar';
+    bar.id = 'dt-statusbar';
     bar.innerHTML = `
-      <div class="dt-statusbar-item"><i class="ri-user-line"></i> <span id="dt-sb-vezne">--</span></div>
-      <div class="dt-statusbar-sep"></div>
-      <div class="dt-statusbar-item"><i class="ri-database-2-line"></i> <span id="dt-sb-storage">LocalStorage</span></div>
-      <div class="dt-statusbar-sep"></div>
-      <div class="dt-statusbar-item"><i class="ri-exchange-line"></i> <span id="dt-sb-txcount">0 işlem</span></div>
-      <div class="dt-statusbar-sep"></div>
-      <div class="dt-statusbar-item" style="margin-left:auto; color:var(--primary);">DövizX Enterprise Pro v3.2 — Desktop</div>
+      <div class="dt-sb-item"><i class="ri-user-line"></i>&nbsp;<span id="dtSbVezne">—</span></div>
+      <div class="dt-sb-sep"></div>
+      <div class="dt-sb-item"><i class="ri-database-2-line"></i>&nbsp;<span id="dtSbStorage">Yerel</span></div>
+      <div class="dt-sb-sep"></div>
+      <div class="dt-sb-item"><i class="ri-exchange-line"></i>&nbsp;<span id="dtSbTx">0 işlem</span></div>
+      <div class="dt-sb-sep"></div>
+      <div class="dt-sb-item"><i class="ri-shield-check-line"></i>&nbsp;<span id="dtSbAuth">—</span></div>
+      <div style="margin-left:auto;color:var(--primary);font-weight:700;font-size:10px;letter-spacing:.3px;">
+        DövizX Enterprise Pro v5.0
+      </div>
     `;
     document.body.appendChild(bar);
-
-    // Update statusbar every 3 sec
     setInterval(() => {
-      const vEl = document.getElementById('dt-sb-vezne');
-      if (vEl && app.data && app.data.activeVezneId) {
-        const vezne = app.data.vezneler.find(v => v.id === app.data.activeVezneId);
-        if (vezne) vEl.innerText = vezne.name || vezne.id;
+      const vEl = document.getElementById('dtSbVezne');
+      if (vEl && app.data?.activeVezneId) {
+        const v = (app.data.vezneler || []).find(x => x.id === app.data.activeVezneId);
+        if (v) vEl.innerText = `${v.id} — ${v.name}`;
       }
-      const txEl = document.getElementById('dt-sb-txcount');
+      const txEl = document.getElementById('dtSbTx');
       if (txEl && app.data) txEl.innerText = (app.data.transactions || []).length + ' işlem';
-      const storEl = document.getElementById('dt-sb-storage');
-      if (storEl) {
-        const connected = typeof firebaseService !== 'undefined' && firebaseService._isConnected;
-        storEl.innerText = connected ? 'LocalStorage + Firebase ☁️' : 'LocalStorage';
+      const stEl = document.getElementById('dtSbStorage');
+      if (stEl) {
+        const ch = localStorage.getItem('dovizx_storage_choice') || 'local';
+        const fbOk = typeof firebaseService !== 'undefined' && firebaseService._isConnected;
+        stEl.innerText = fbOk ? '☁️ Firebase' : (ch === 'firebase' ? '⚠️ FB bağlanıyor' : '💾 Yerel');
+      }
+      const authEl = document.getElementById('dtSbAuth');
+      if (authEl) {
+        const authBadge = document.getElementById('fbAuthStatusBadge');
+        if (authBadge) authEl.innerText = authBadge.innerText;
       }
     }, 3000);
   },
 
-  _startClock() {
-    const update = () => {
-      const el = document.getElementById('dt-clock');
+  /* ── CLOCK ── */
+  _clock() {
+    const upd = () => {
+      const el = document.getElementById('dtClock');
       if (!el) return;
-      const now = new Date();
-      el.innerText = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const n = new Date();
+      el.innerText = n.toLocaleDateString('tr-TR',{weekday:'short',day:'2-digit',month:'short'})
+        + '  ' + n.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
     };
-    update();
-    setInterval(update, 1000);
+    upd(); setInterval(upd, 1000);
   },
 
-  _injectShortcutPanel() {
-    const panel = document.createElement('div');
-    panel.id = 'dt-shortcut-panel';
-    panel.innerHTML = `
-      <div style="font-size:13px; font-weight:900; margin-bottom:10px; color:var(--text);">⌨️ Kısayol Tuşları</div>
-      <div class="dt-sc-row"><span>Kur Ekranı</span><div class="dt-sc-keys"><span class="dt-sc-key">F1</span></div></div>
-      <div class="dt-sc-row"><span>Kasa / Bakiye</span><div class="dt-sc-keys"><span class="dt-sc-key">F2</span></div></div>
-      <div class="dt-sc-row"><span>Geçmiş</span><div class="dt-sc-keys"><span class="dt-sc-key">F3</span></div></div>
-      <div class="dt-sc-row"><span>Hareketler</span><div class="dt-sc-keys"><span class="dt-sc-key">F4</span></div></div>
-      <div class="dt-sc-row"><span>Kur Panosu</span><div class="dt-sc-keys"><span class="dt-sc-key">F5</span></div></div>
+  /* ── SHORTCUT PANEL ── */
+  _shortcutPanel() {
+    const p = document.createElement('div');
+    p.id = 'dt-shortcut-panel';
+    p.innerHTML = `
+      <div style="font-size:13px;font-weight:900;margin-bottom:9px;color:var(--text);">⌨️ Klavye Kısayolları</div>
+      <div class="dt-sc-row"><span>Kur Paneli</span><div class="dt-sc-keys"><span class="dt-sc-key">F1</span></div></div>
+      <div class="dt-sc-row"><span>Kasa Paneli</span><div class="dt-sc-keys"><span class="dt-sc-key">F2</span></div></div>
+      <div class="dt-sc-row"><span>Geçmiş Paneli</span><div class="dt-sc-keys"><span class="dt-sc-key">F3</span></div></div>
+      <div class="dt-sc-row"><span>Pano Paneli</span><div class="dt-sc-keys"><span class="dt-sc-key">F4</span></div></div>
+      <div class="dt-sc-row"><span>Hareketler Paneli</span><div class="dt-sc-keys"><span class="dt-sc-key">F5</span></div></div>
       <div class="dt-sc-row"><span>Ayarlar</span><div class="dt-sc-keys"><span class="dt-sc-key">F6</span></div></div>
       <div class="dt-sc-row"><span>Sepet / POS</span><div class="dt-sc-keys"><span class="dt-sc-key">F7</span></div></div>
-      <div class="dt-sc-row"><span>Kurları Yenile</span><div class="dt-sc-keys"><span class="dt-sc-key">F8</span></div></div>
+      <div class="dt-sc-row"><span>Pano Yenile</span><div class="dt-sc-keys"><span class="dt-sc-key">F8</span></div></div>
       <div class="dt-sc-row"><span>Tam Nakit (Ödeme)</span><div class="dt-sc-keys"><span class="dt-sc-key">F9</span></div></div>
       <div class="dt-sc-row"><span>Nakit Öde</span><div class="dt-sc-keys"><span class="dt-sc-key">F10</span></div></div>
       <div class="dt-sc-row"><span>Kartla Öde</span><div class="dt-sc-keys"><span class="dt-sc-key">F11</span></div></div>
       <div class="dt-sc-row"><span>Karanlık/Aydınlık</span><div class="dt-sc-keys"><span class="dt-sc-key">Ctrl</span><span class="dt-sc-key">D</span></div></div>
-      <div class="dt-sc-row"><span>Kısayol Paneli</span><div class="dt-sc-keys"><span class="dt-sc-key">?</span></div></div>
-      <div class="dt-sc-row"><span>Arama/Hesap</span><div class="dt-sc-keys"><span class="dt-sc-key">Ctrl</span><span class="dt-sc-key">F</span></div></div>
-      <div class="dt-sc-row"><span>POS — EKLE</span><div class="dt-sc-keys"><span class="dt-sc-key">Enter</span></div></div>
-      <div class="dt-sc-row"><span>POS — Vazgeç</span><div class="dt-sc-keys"><span class="dt-sc-key">Esc</span></div></div>
-      <hr style="border-color:var(--border); margin:8px 0;">
-      <div style="font-size:10px; color:var(--muted); text-align:center;">Sayısal tuşlar (0-9) POS ekranında çalışır</div>
+      <div class="dt-sc-row"><span>Bu Panel</span><div class="dt-sc-keys"><span class="dt-sc-key">?</span></div></div>
+      <hr style="border-color:var(--border);margin:7px 0;">
+      <div style="font-size:10px;color:var(--muted);text-align:center;">
+        POS/Ödeme ekranında: 0–9 numpad, Enter onay, Backspace sil, Esc iptal
+      </div>
     `;
-    document.body.appendChild(panel);
+    document.body.appendChild(p);
+    document.addEventListener('click', e => {
+      if (p.classList.contains('open') && !p.contains(e.target) && !e.target.closest('.dt-hint-btn'))
+        p.classList.remove('open');
+    });
   },
+  _toggleSC() { document.getElementById('dt-shortcut-panel')?.classList.toggle('open'); },
 
-  toggleShortcutPanel() {
-    const panel = document.getElementById('dt-shortcut-panel');
-    if (panel) panel.classList.toggle('open');
-  },
+  /* ── KEYBOARD SHORTCUTS ── */
+  _keyboard() {
+    document.addEventListener('keydown', e => {
+      const tag = document.activeElement?.tagName || '';
+      const isInput = ['INPUT','TEXTAREA','SELECT'].includes(tag);
+      const posActive = document.getElementById('posScreen')?.classList.contains('active');
+      const payActive = document.getElementById('paymentScreen')?.classList.contains('active');
 
-  _navTo(tabId) {
-    const navBtn = document.querySelector(`.bottom-nav .nav-item[onclick*="${tabId}"]`);
-    const topBtn = document.querySelector(`.dt-topnav .nav-item[onclick*="${tabId}"]`);
-    if (navBtn) {
-      app.switchTab(tabId, navBtn);
-    } else if (topBtn) {
-      app.switchTab(tabId, topBtn);
-    }
-  },
-
-  _bindKeyboard() {
-    document.addEventListener('keydown', (e) => {
-      const tag = document.activeElement ? document.activeElement.tagName : '';
-      const isInput = ['INPUT', 'TEXTAREA', 'SELECT'].includes(tag);
-
-      // ── F-keys — always active ──
-      switch (e.key) {
-        case 'F1': e.preventDefault(); this._navTo('kur'); return;
-        case 'F2': e.preventDefault(); this._navTo('market'); return;
-        case 'F3': e.preventDefault(); this._navTo('history'); return;
-        case 'F4': e.preventDefault(); this._navTo('hareketler'); return;
-        case 'F5': e.preventDefault(); this._navTo('pano'); return;
-        case 'F6': e.preventDefault(); this._navTo('settings'); return;
-        case 'F7':
-          e.preventDefault();
-          const cartBtn = document.querySelector('.bottom-nav .nav-item[onclick*="openCart"]');
-          if (cartBtn) app.openCart(cartBtn);
-          return;
-        case 'F8':
-          e.preventDefault();
-          if (typeof pano !== 'undefined') pano.refreshNow();
-          return;
-        case 'F9':
-          e.preventDefault();
-          // Tam nakit (ödeme ekranı açıksa)
-          if (document.getElementById('paymentScreen').classList.contains('active')) {
-            payment.fullCash();
-          }
-          return;
-        case 'F10':
-          e.preventDefault();
-          if (document.getElementById('paymentScreen').classList.contains('active')) {
-            payment.processPayment('NAKİT');
-          }
-          return;
-        case 'F11':
-          e.preventDefault();
-          if (document.getElementById('paymentScreen').classList.contains('active')) {
-            payment.processPayment('KARTLA');
-          }
-          return;
+      /* F-keys (always) */
+      switch(e.key) {
+        case 'F1': e.preventDefault(); this._focus('dt-panel-kur'); return;
+        case 'F2': e.preventDefault(); this._focus('dt-panel-kasa'); return;
+        case 'F3': e.preventDefault(); this._focus('dt-panel-gecmis'); return;
+        case 'F4': e.preventDefault(); this._focus('dt-panel-pano'); return;
+        case 'F5': e.preventDefault(); this._focus('dt-panel-hareketler'); return;
+        case 'F6': e.preventDefault(); this._openSettings(); return;
+        case 'F7': e.preventDefault(); app.openCart(document.querySelector('.dt-sepet-btn') || document.createElement('button')); return;
+        case 'F8': e.preventDefault(); if(typeof pano!=='undefined') pano.refreshNow ? pano.refreshNow() : pano.openTab(); return;
+        case 'F9': e.preventDefault(); if(payActive && typeof payment!=='undefined') payment.fullCash && payment.fullCash(); return;
+        case 'F10': e.preventDefault(); if(payActive && typeof payment!=='undefined') payment.processPayment('NAKİT'); return;
+        case 'F11': e.preventDefault(); if(payActive && typeof payment!=='undefined') payment.processPayment('KARTLA'); return;
+        case 'Escape':
+          this._closeSettings();
+          document.getElementById('dt-shortcut-panel')?.classList.remove('open');
+          break;
       }
 
-      // ── Ctrl combos ──
       if (e.ctrlKey) {
-        switch (e.key.toLowerCase()) {
-          case 'd':
-            e.preventDefault();
-            app.toggleDayMode();
-            return;
-          case 'f':
-            e.preventDefault();
-            app.openCurrencyCalculator && app.openCurrencyCalculator('USD');
-            return;
-        }
+        if (e.key.toLowerCase() === 'd') { e.preventDefault(); app.toggleDayMode(); return; }
       }
 
-      // ── ? key ──
-      if (e.key === '?' && !isInput) {
-        e.preventDefault();
-        this.toggleShortcutPanel();
-        return;
-      }
+      if (e.key === '?' && !isInput) { e.preventDefault(); this._toggleSC(); return; }
 
-      // ── POS screen shortcuts ──
-      const posActive = document.getElementById('posScreen') && document.getElementById('posScreen').classList.contains('active');
-      const payActive = document.getElementById('paymentScreen') && document.getElementById('paymentScreen').classList.contains('active');
-
+      /* POS numpad */
       if (posActive && !isInput) {
-        if (e.key === 'Enter') { e.preventDefault(); pos.addTransactionItem(); return; }
-        if (e.key === 'Escape') { e.preventDefault(); pos.unlockAndClose(true); return; }
-        if (e.key === 'Backspace') { e.preventDefault(); pos.clear(); return; }
-        if (e.key >= '0' && e.key <= '9') { e.preventDefault(); pos.num(e.key); return; }
-        if (e.key === ',' || e.key === '.') { e.preventDefault(); pos.dot(); return; }
+        if (e.key === 'Enter')            { e.preventDefault(); pos.addTransactionItem(); return; }
+        if (e.key === 'Escape')           { e.preventDefault(); pos.unlockAndClose(true); return; }
+        if (e.key === 'Backspace')        { e.preventDefault(); pos.clear(); return; }
+        if (e.key >= '0' && e.key <= '9'){ e.preventDefault(); pos.num(e.key); return; }
+        if (e.key===',' || e.key==='.')   { e.preventDefault(); pos.dot(); return; }
       }
-
       if (payActive && !isInput) {
-        if (e.key === 'Escape') { e.preventDefault(); pos.unlockAndClose(false); return; }
-        if (e.key === 'Enter') { e.preventDefault(); payment.processPayment('NAKİT'); return; }
-        if (e.key === 'Backspace') { e.preventDefault(); payment.clear(); return; }
-        if (e.key >= '0' && e.key <= '9') { e.preventDefault(); payment.num(e.key); return; }
-        if (e.key === ',' || e.key === '.') { e.preventDefault(); payment.dot(); return; }
+        if (e.key === 'Escape')           { e.preventDefault(); pos.unlockAndClose(false); return; }
+        if (e.key === 'Enter')            { e.preventDefault(); payment.processPayment('NAKİT'); return; }
+        if (e.key === 'Backspace')        { e.preventDefault(); payment.clear(); return; }
+        if (e.key >= '0' && e.key <= '9'){ e.preventDefault(); payment.num(e.key); return; }
+        if (e.key===',' || e.key==='.')   { e.preventDefault(); payment.dot(); return; }
       }
-
-      // Close shortcut panel on Escape
-      if (e.key === 'Escape') {
-        const panel = document.getElementById('dt-shortcut-panel');
-        if (panel && panel.classList.contains('open')) {
-          panel.classList.remove('open');
-        }
-      }
-    });
-
-    // Close shortcut panel on outside click
-    document.addEventListener('click', (e) => {
-      const panel = document.getElementById('dt-shortcut-panel');
-      if (panel && panel.classList.contains('open') && !panel.contains(e.target) && !e.target.closest('.dt-shortcut-hint')) {
-        panel.classList.remove('open');
-      }
-    });
-  },
-
-  _bindResize() {
-    window.addEventListener('resize', () => {
-      const wasDesktop = this.IS_DESKTOP;
-      this.IS_DESKTOP = window.innerWidth >= 1024;
-      if (this.IS_DESKTOP !== wasDesktop) location.reload();
     });
   }
 };
 
-// Boot desktop module
+// Boot desktop module — waits for app to fully initialize
 document.addEventListener('DOMContentLoaded', async () => {
-  // Wait for app.init to complete then init desktop
-  setTimeout(() => desktop.init(), 400);
+  setTimeout(() => desktop.init(), 500);
 });
 
+
 </script>
+</body>
+</html>
