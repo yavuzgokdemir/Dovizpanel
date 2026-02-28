@@ -946,13 +946,6 @@ header { padding: 15px 20px; background: rgba(30, 41, 59, 0.95); border-bottom: 
 .ticker-chip.com  { color: #a78bfa; }
 
 /* Tablo başlığı */
-.pano-board-header {
-    display: grid; grid-template-columns: 1fr 110px 110px 44px;
-    padding: 4px 12px; font-size: 9px; font-weight: 800;
-    text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted);
-    border-bottom: 1px solid var(--border);
-}
-
 /* Döviz satırı — compact */
 .pano-rate-item {
     display: grid;
@@ -978,13 +971,21 @@ header { padding: 15px 20px; background: rgba(30, 41, 59, 0.95); border-bottom: 
 .pano-rate-name { font-size: 9.5px; color: var(--muted); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 95px; }
 
 /* Fiyat sütunları */
-.pano-rate-col { text-align: right; padding-right: 4px; }
+.pano-rate-col {
+    text-align: right;
+    padding: 9px 14px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 8px;
+    margin: 2px 2px;
+}
+.pano-rate-buy-col  { background: rgba(16,185,129,0.07) !important; }
+.pano-rate-sell-col { background: rgba(239,68,68,0.07)  !important; }
 .pano-rate-val {
-    font-size: 14px; font-weight: 800; line-height: 1.15;
+    font-size: 18px; font-weight: 800; line-height: 1.15;
     transition: color 0.35s ease, transform 0.25s ease;
     display: inline-block;
 }
-.pano-rate-lbl { font-size: 9px; color: var(--muted); font-weight: 600; letter-spacing: 0.4px; }
+.pano-rate-lbl { font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: 0.4px; }
 .pano-rate-buy  { color: var(--success); }
 .pano-rate-sell { color: var(--danger); }
 
@@ -1991,38 +1992,12 @@ body.dt-active .payment-screen.active { display: flex !important; }
                     <i class="ri-add-line collapse-icon"></i>
                 </div>
                 <div class="settings-card-body">
-                <p style="font-size:13px; color:var(--muted); margin-bottom:12px;">Sisteme yeni vezne ekleyin veya mevcut vezneyi düzenleyin / silin.</p>
+                <div style="background:rgba(59,130,246,0.08); border:1px solid rgba(59,130,246,0.3); border-radius:8px; padding:10px; margin-bottom:12px; font-size:12px; color:var(--text);">
+                    <i class="ri-information-line" style="color:#60a5fa;"></i> Sistem sabit 3 vezne ile çalışmaktadır: <b>VZN01</b> (Yönetici - Tam Yetki), <b>VZN02</b> ve <b>VZN03</b> (Veznedar - Kısıtlı Yetki). Ad, e-posta ve şifre düzenlenebilir.
+                </div>
 
                 <!-- Vezne Listesi -->
                 <div id="vezneListContainer" style="margin-bottom:14px;"></div>
-
-                <!-- Yeni Vezne Ekle -->
-                <div style="background:var(--input); border-radius:10px; padding:12px; border:1px solid var(--border);">
-                    <div style="font-size:13px; font-weight:700; margin-bottom:10px; color:var(--primary);">
-                        <i class="ri-user-add-line"></i> Yeni Vezne Ekle
-                    </div>
-                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:8px; margin-bottom:8px;">
-                        <input type="text" id="newVezneId" placeholder="VZN04 (ID)" maxlength="6"
-                            style="padding:9px; border-radius:8px; border:1px solid var(--border); background:var(--card); color:var(--text); font-size:13px; text-transform:uppercase; width:100%; box-sizing:border-box;"/>
-                        <input type="text" id="newVezneName" placeholder="Ad Soyad"
-                            style="padding:9px; border-radius:8px; border:1px solid var(--border); background:var(--card); color:var(--text); font-size:13px; width:100%; box-sizing:border-box;"/>
-                    </div>
-                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:8px; margin-bottom:8px;">
-                        <input type="email" id="newVezneEmail" placeholder="email@sirket.com"
-                            style="padding:9px; border-radius:8px; border:1px solid var(--border); background:var(--card); color:var(--text); font-size:13px; width:100%; box-sizing:border-box;"/>
-                        <input type="password" id="newVeznePassword" placeholder="Şifre"
-                            style="padding:9px; border-radius:8px; border:1px solid var(--border); background:var(--card); color:var(--text); font-size:13px; width:100%; box-sizing:border-box;"/>
-                    </div>
-                    <div style="margin-bottom:10px;">
-                        <select id="newVezneRole" style="width:100%; padding:9px; border-radius:8px; border:1px solid var(--border); background:var(--card); color:var(--text); font-size:13px; font-weight:700; cursor:pointer;">
-                            <option value="veznedar">👤 Veznedar — Kısıtlı Yetki (POS işlemi yapabilir)</option>
-                            <option value="yonetici">🔑 Yönetici — Tam Yetki (Bakiye düzenleme + Fiş iptali)</option>
-                        </select>
-                    </div>
-                    <button onclick="app.addVezne()" style="width:100%; padding:10px; background:var(--success); color:white; border:none; border-radius:8px; font-weight:800; cursor:pointer; font-size:13px;">
-                        <i class="ri-user-add-line"></i> Vezne Ekle
-                    </button>
-                </div>
                 </div><!-- end settings-card-body -->
             </div>
 
@@ -2359,45 +2334,147 @@ body.dt-active .payment-screen.active { display: flex !important; }
 
             <p style="color:var(--muted); font-size:13px; margin-top:20px;">Pano & Kur Servisi Ayarları</p>
 
-            <!-- GOOGLE SHEETS AYARI -->
-            <div class="card">
+            <!-- KUR ÇEKME — GLOBAL KUR & GOOGLE SHEETS BİRLEŞİK KART (Sadece VZN01) -->
+            <div class="card" id="kurCekmeCard">
                 <div class="settings-card-header" onclick="toggleSettingsCard(this)">
-                    <h4 style="margin:0; font-size:16px;" class="settings-header-sheets"><i class="ri-table-line"></i> Google Sheets Kur Kaynağı</h4>
+                    <h4 style="margin:0; font-size:16px;"><i class="ri-refresh-line"></i> Kur Çekme Ayarları
+                        <span id="kurCekmeBadge" style="display:none; margin-left:8px; font-size:11px; background:rgba(16,185,129,0.2); color:#10b981; border:1px solid rgba(16,185,129,0.4); border-radius:5px; padding:2px 7px; font-weight:700;">AKTİF</span>
+                    </h4>
                     <i class="ri-add-line collapse-icon"></i>
                 </div>
                 <div class="settings-card-body">
-                <p style="font-size:13px; color:var(--muted); margin:0 0 10px 0;">Otomatik kur güncellemesi için Google Sheets URL'si girin. <b>Düzenleme veya paylaşım linkini direkt yapıştırabilirsiniz</b> — sistem otomatik dönüştürür. <button onclick="_sheetsShowGuide()" style="background:none; border:none; color:var(--primary); font-size:12px; font-weight:700; cursor:pointer; text-decoration:underline;">📖 Kurulum Rehberi</button></p>
-                <div style="background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.3); border-radius:8px; padding:10px; margin-bottom:10px; font-size:12px; color:var(--text);">
-                    <b>📋 Tablo Formatı (A sütunu: KOD, B: ALIŞ, C: SATIŞ):</b><br>
-                    <code style="display:block; margin-top:5px; background:var(--input); padding:5px; border-radius:4px; font-size:11px;">USD &nbsp; 38.50 &nbsp; 39.20<br>EUR &nbsp; 41.10 &nbsp; 42.00<br>GBP &nbsp; 47.80 &nbsp; 48.90</code>
-                    <div style="margin-top:6px; color:var(--muted);">⚠️ Tablonuzun <b>Herkesle paylaşıldığından</b> emin olun (Paylaş → Bağlantıya sahip herkes → Görüntüleyici)</div>
+                    <p style="font-size:13px; color:var(--muted); margin:0 0 14px 0;">
+                        Kur çekme kaynağını seçin. Seçilen kaynak hem <b>Pano</b> hem <b>Kur</b> bölümünü hem de <b>Firebase'deki kurları</b> günceller. Aynı marj/komisyon ayarları her iki kaynağa da uygulanır.
+                    </p>
+
+                    <!-- Kaynak Seçimi Radio -->
+                    <div style="display:flex; gap:10px; margin-bottom:16px;">
+                        <label style="flex:1; display:flex; align-items:center; gap:8px; background:var(--input); border:2px solid var(--border); border-radius:10px; padding:12px; cursor:pointer; transition:border-color .2s;" id="kurSrcGlobalLabel">
+                            <input type="radio" name="kurCekmeSource" id="kurSrcGlobal" value="global" onchange="app.onKurCekmeSourceChange('global')" style="accent-color:var(--primary);">
+                            <div>
+                                <div style="font-weight:700; font-size:13px;">🌐 Global Kur API</div>
+                                <div style="font-size:11px; color:var(--muted);">ExchangeRate, Frankfurter veya Fixer</div>
+                            </div>
+                        </label>
+                        <label style="flex:1; display:flex; align-items:center; gap:8px; background:var(--input); border:2px solid var(--border); border-radius:10px; padding:12px; cursor:pointer; transition:border-color .2s;" id="kurSrcSheetsLabel">
+                            <input type="radio" name="kurCekmeSource" id="kurSrcSheets" value="sheets" onchange="app.onKurCekmeSourceChange('sheets')" style="accent-color:var(--primary);">
+                            <div>
+                                <div style="font-weight:700; font-size:13px;">📊 Google Sheets</div>
+                                <div style="font-size:11px; color:var(--muted);">Kendi tablonuzdan kur çekin</div>
+                            </div>
+                        </label>
+                        <label style="flex:1; display:flex; align-items:center; gap:8px; background:var(--input); border:2px solid var(--border); border-radius:10px; padding:12px; cursor:pointer; transition:border-color .2s;" id="kurSrcOffLabel">
+                            <input type="radio" name="kurCekmeSource" id="kurSrcOff" value="off" onchange="app.onKurCekmeSourceChange('off')" style="accent-color:var(--primary);" checked>
+                            <div>
+                                <div style="font-weight:700; font-size:13px;">⛔ Kapalı</div>
+                                <div style="font-size:11px; color:var(--muted);">Simülasyon modu</div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- GLOBAL KUR API bölümü -->
+                    <div id="kurCekmeGlobalSection" style="display:none;">
+                        <div style="border-top:1px solid var(--border); padding-top:12px; margin-bottom:12px;">
+                            <div style="font-weight:700; font-size:13px; margin-bottom:10px; color:var(--text);"><i class="ri-server-line"></i> API Kaynağı:</div>
+                            <select id="globalCurrencyApiSelect" onchange="app.onGlobalApiChange(this.value)"
+                                style="width:100%; padding:9px; border-radius:8px; border:1px solid var(--border); background:var(--input); color:var(--text); font-size:13px; font-weight:600; cursor:pointer; margin-bottom:8px;">
+                                <option value="exchangerate">🆓 ExchangeRate-API (Ücretsiz, API Key opsiyonel)</option>
+                                <option value="frankfurter">🆓 Frankfurter (ECB tabanlı, tamamen ücretsiz)</option>
+                                <option value="fixer">🔑 Fixer.io (API Key gerekli)</option>
+                            </select>
+                            <div id="globalCurrencyApiKeyRow" style="display:none; margin-bottom:8px;">
+                                <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:4px;"><i class="ri-key-line"></i> API Key:</label>
+                                <input type="text" id="globalCurrencyApiKeyInput" placeholder="API anahtarınızı girin..."
+                                    style="width:100%; padding:9px; border-radius:8px; border:1px solid var(--border); background:var(--input); color:var(--text); box-sizing:border-box; font-size:13px;"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- GOOGLE SHEETS bölümü -->
+                    <div id="kurCekmeSheetsSection" style="display:none;">
+                        <div style="border-top:1px solid var(--border); padding-top:12px; margin-bottom:12px;">
+                            <p style="font-size:12px; color:var(--muted); margin:0 0 8px 0;">
+                                <button onclick="_sheetsShowGuide()" style="background:none; border:none; color:var(--primary); font-size:12px; font-weight:700; cursor:pointer; text-decoration:underline; padding:0;">📖 Kurulum Rehberi</button>
+                                — Tablo Formatı (A: KOD, B: ALIŞ, C: SATIŞ)
+                            </p>
+                            <div style="margin-bottom:8px;">
+                                <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:4px;"><i class="ri-link"></i> Sheets URL:</label>
+                                <input type="text" id="sheetsUrlInput" placeholder="https://docs.google.com/spreadsheets/d/..."
+                                    style="width:100%; padding:9px; border-radius:8px; border:1px solid var(--border); background:var(--input); color:var(--text); box-sizing:border-box; font-size:13px;" oninput="_sheetsPreviewUrl(this.value, document.getElementById('sheetsGidInput')?.value||'0')"/>
+                            </div>
+                            <div id="sheetsUrlPreview" style="display:none; font-size:11px; color:#34d399; background:rgba(52,211,153,0.1); border:1px solid rgba(52,211,153,0.3); border-radius:6px; padding:8px; margin-bottom:8px; word-break:break-all;">
+                                <i class="ri-check-line"></i> <b>Dönüştürülmüş URL:</b><br><span id="sheetsUrlPreviewText"></span>
+                            </div>
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                                <div>
+                                    <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:4px;"><i class="ri-table-line"></i> Sayfa gid: <span style="color:var(--accent);">İlk = 0</span></label>
+                                    <input type="number" id="sheetsGidInput" min="0" placeholder="0" value="0"
+                                        style="width:100%; padding:9px; border-radius:8px; border:1px solid var(--border); background:var(--input); color:var(--text); box-sizing:border-box; font-size:13px;"/>
+                                </div>
+                                <div>
+                                    <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:4px;"><i class="ri-time-line"></i> Güncelleme (dk):</label>
+                                    <input type="number" id="sheetsIntervalInput" min="1" max="60" placeholder="5"
+                                        style="width:100%; padding:9px; border-radius:8px; border:1px solid var(--border); background:var(--input); color:var(--text); box-sizing:border-box; font-size:13px;"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ortak: Alış/Satış Marjı (Spread) -->
+                    <div style="margin-bottom:12px; border-top:1px solid var(--border); padding-top:12px;" id="kurCekmeSpreadSection">
+                        <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:4px;">
+                            <i class="ri-percent-line"></i> Alış/Satış Spread (%) — Orta kurdan sapma:
+                            <span id="spreadPreviewLabel" style="color:var(--primary); font-weight:700;"> 0.5%</span>
+                        </label>
+                        <input type="range" id="globalCurrencySpreadInput" min="0" max="5" step="0.1" value="0.5"
+                            oninput="document.getElementById('spreadPreviewLabel').innerText=' '+this.value+'%'"
+                            style="width:100%; cursor:pointer; accent-color:var(--primary); margin-bottom:4px;">
+                        <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--muted);">
+                            <span>0% (Orta kur)</span><span>2.5%</span><span>5% (Geniş spread)</span>
+                        </div>
+                        <p style="font-size:11px; color:var(--muted); margin-top:6px;">
+                            Örn: API kuru = 43.80 TL, Spread = 0.5% → Alış: <b>43.58</b> | Satış: <b>44.02</b>
+                        </p>
+                    </div>
+
+                    <!-- Ortak: Komisyon tablosu -->
+                    <div style="margin-bottom:12px;">
+                        <div style="font-weight:700; font-size:13px; margin-bottom:8px; color:var(--text);">
+                            <i class="ri-money-dollar-box-line"></i> Komisyon Ayarları (Sabit ₺ ekleme — Alış marjı düş, Satış marjı ekle)
+                        </div>
+                        <div id="globalCommissionTable" style="display:flex; flex-direction:column; gap:6px;">
+                            <!-- JS tarafından doldurulur -->
+                        </div>
+                    </div>
+
+                    <!-- Güncelleme Aralığı -->
+                    <div id="kurCekmeGlobalIntervalSection" style="display:none; margin-bottom:12px;">
+                        <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:4px;"><i class="ri-time-line"></i> Güncelleme Aralığı (dakika):</label>
+                        <input type="number" id="globalCurrencyIntervalInput" min="1" max="60" placeholder="5" value="5"
+                            style="width:100%; padding:9px; border-radius:8px; border:1px solid var(--border); background:var(--input); color:var(--text); box-sizing:border-box; font-size:13px;"/>
+                    </div>
+
+                    <!-- Test & Kaydet -->
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px;">
+                        <button onclick="app.testGlobalCurrencyFetch()"
+                            style="padding:10px; background:rgba(16,185,129,0.15); color:#10b981; border:1px solid rgba(16,185,129,0.4); border-radius:8px; font-weight:700; cursor:pointer; font-size:13px;">
+                            <i class="ri-wifi-line"></i> Test Et
+                        </button>
+                        <button onclick="app.saveKurCekmeSettings()"
+                            style="padding:10px; background:var(--primary); color:white; border:none; border-radius:8px; font-weight:700; cursor:pointer; font-size:13px;">
+                            <i class="ri-save-line"></i> Kaydet & Uygula
+                        </button>
+                    </div>
+
+                    <!-- Durum -->
+                    <div id="globalCurrencyStatus" style="display:none; margin-top:10px; padding:10px; border-radius:8px; font-size:12px; background:var(--input); border:1px solid var(--border);">
+                        <span id="globalCurrencyStatusText">—</span>
+                    </div>
+
+                    <!-- hidden legacy ids for backwards compat -->
+                    <input type="hidden" id="globalCurrencyToggle" value="0">
+                    <span id="globalCurrencyBadge" style="display:none;"></span>
                 </div>
-                <div style="margin-bottom:8px;">
-                    <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:4px;"><i class="ri-link"></i> Sheets URL (edit veya paylaşım linki):</label>
-                    <input type="text" id="sheetsUrlInput" placeholder="https://docs.google.com/spreadsheets/d/..."
-                        style="width:100%; padding:9px; border-radius:8px; border:1px solid var(--border); background:var(--input); color:var(--text); box-sizing:border-box; font-size:13px;"/>
-                </div>
-                <div id="sheetsUrlPreview" style="display:none; font-size:11px; color:#34d399; background:rgba(52,211,153,0.1); border:1px solid rgba(52,211,153,0.3); border-radius:6px; padding:8px; margin-bottom:8px; word-break:break-all;">
-                    <i class="ri-check-line"></i> <b>Dönüştürülmüş URL:</b><br><span id="sheetsUrlPreviewText"></span>
-                </div>
-                <div style="margin-bottom:10px;">
-                    <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:4px;"><i class="ri-table-line"></i> Sayfa Numarası (gid): <span style="color:var(--accent);">İlk sayfa = 0</span></label>
-                    <input type="number" id="sheetsGidInput" min="0" placeholder="0" value="0"
-                        style="width:100%; padding:9px; border-radius:8px; border:1px solid var(--border); background:var(--input); color:var(--text); box-sizing:border-box; font-size:13px;"/>
-                </div>
-                <div style="margin-bottom:10px;">
-                    <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:4px;"><i class="ri-time-line"></i> Güncelleme Aralığı (dakika):</label>
-                    <input type="number" id="sheetsIntervalInput" min="1" max="60" placeholder="5"
-                        style="width:100%; padding:9px; border-radius:8px; border:1px solid var(--border); background:var(--input); color:var(--text); box-sizing:border-box; font-size:13px;"/>
-                </div>
-                <p style="font-size:11px; color:var(--muted); margin:8px 0;">
-                    <i class="ri-information-line"></i> Komisyon ayarları artık her döviz için sabit alış/satış değeri olarak yapılmaktadır. Pano sekmesinde her dövize tıklayarak komisyon değerlerini değiştirebilirsiniz.
-                </p>
-                <button onclick="app.savePanoSettings()"
-                    style="width:100%; padding:10px; background:var(--primary); color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">
-                    <i class="ri-save-line"></i> Pano Ayarlarını Kaydet
-                </button>
-                </div><!-- end settings-card-body -->
             </div>
 
             <!-- PANOTV AYARI -->
@@ -2892,7 +2969,7 @@ body.dt-active .payment-screen.active { display: flex !important; }
     <button class="nav-item" onclick="app.switchTab('history', this)">
         <i class="ri-file-list-3-line"></i><span>Geçmiş</span>
     </button>
-    <button class="nav-item" onclick="app.switchTab('hareketler', this)">
+    <button class="nav-item" id="navHareketlerBtn" onclick="app.switchTab('hareketler', this)">
         <i class="ri-funds-line"></i><span>Hareketler</span>
     </button>
     <button class="nav-item" onclick="app.switchTab('settings', this)">
@@ -3124,8 +3201,9 @@ function _sheetsShowGuide() {
                 <span style="color:var(--accent)">Her para birimi için <b>ilk eşleşen satır</b> kullanılır.</span></p>
                 <hr style="border-color:var(--border); margin:8px 0;">
                 <p><b>Komisyon nasıl çalışır?</b><br>
-                Komisyon kuru üzerine <b>eklenerek</b> uygulanır.<br>
-                Örn: Sheets 43,500 + Komisyon 0,300 = <b>43,800</b> olarak gösterilir.</p>
+                Alış komisyonu ham kurdan <b>düşülür</b> (büro daha düşük fiyatla alır).<br>
+                Satış komisyonu ham kura <b>eklenir</b> (büro daha yüksek fiyatla satar).<br>
+                Örn: Ham 43,500 · Alış −0,500 = <b>43,000</b> · Satış +0,800 = <b>44,300</b></p>
                 <hr style="border-color:var(--border); margin:8px 0;">
                 <p><b>Dosyayı herkese açık yapın:</b><br>
                 Paylaş → <i>"Bağlantıya sahip herkes"</i> → <i>Görüntüleyici</i></p>
@@ -3181,6 +3259,8 @@ const authMatrix = {
         return v?.role || 'veznedar';
     },
     isYonetici() { return this.getRole() === 'yonetici'; },
+    /* VZN01 mi kontrol et */
+    isVZN01() { return app.data?.activeVezneId === 'VZN01'; },
 
     /* İzin kontrolü — izin yoksa kullanıcıya uyarı göster ve false döndür */
     can(action) {
@@ -3193,6 +3273,10 @@ const authMatrix = {
             manageRates:     ['yonetici','veznedar'],
             posTransaction:  ['yonetici','veznedar'],
             viewHistory:     ['yonetici','veznedar'],
+            viewHareketler:  ['yonetici'],          // Sadece VZN01
+            manageKurCekme:  ['yonetici'],          // Sheets/Global Kur ayarları sadece VZN01
+            manualOtoMod:    ['yonetici'],          // Oto mod ayarı sadece VZN01
+            viewAllVezneKasa:['yonetici'],          // Tüm vezne kasaları sadece VZN01
         };
         const allowed = matrix[action] || [];
         if (allowed.includes(role)) return true;
@@ -3227,9 +3311,9 @@ const app = {
         isLocked: false,
         isDayMode: false,
         vezneler: [
-            { id: 'VZN01', name: 'Ayşe Yılmaz', email: 'test@test.com', password: 'admin1234', role: 'veznedar' },
-            { id: 'VZN02', name: 'Mehmet Kaya', email: 'mehmet@test.com', password: 'admin', role: 'veznedar' },
-            { id: 'VZN03', name: 'Admin', email: 'admin@test.com', password: 'admin', role: 'yonetici' }
+            { id: 'VZN01', name: 'Yönetici', email: 'vzn01@sistem.com', password: 'admin1234', role: 'yonetici' },
+            { id: 'VZN02', name: 'Vezne 2',  email: 'vzn02@sistem.com', password: 'admin',     role: 'veznedar' },
+            { id: 'VZN03', name: 'Vezne 3',  email: 'vzn03@sistem.com', password: 'admin',     role: 'veznedar' }
         ],
         activeVezneId: null,
         rateInputMode: 'auto', 
@@ -3240,6 +3324,15 @@ const app = {
             sheetsUrl: 'https://docs.google.com/spreadsheets/d/15hEw-s-Zl-E8ZGvzF7KeRQb8VPivdTmX12mBydA7x7Y/edit?usp=drivesdk',
             sheetsGid: '0',
             updateInterval: 5,
+            // ─── Global Kur Kaynağı ──────────────────────────────────
+            globalCurrencyEnabled: false,
+            globalCurrencyApi: 'exchangerate',
+            globalCurrencyApiKey: '',
+            globalCurrencyBase: 'TRY',
+            globalCurrencySpread: 0.5,        // % spread - alış/satış aralığı
+            globalCurrencyCommissions: {},    // { USD:{buy:0,sell:0}, EUR:{buy:0,sell:0}, ... }
+            globalCurrencyLastFetch: null,
+            kurCekmeSource: 'off',            // 'global' | 'sheets' | 'off'
         },
         panoTv: {
             enabled: false,
@@ -3382,11 +3475,12 @@ const app = {
             localStorage.setItem('dovizx_data', JSON.stringify(dataToSave));
             localStorage.setItem('dovizx_active_vezne', this.data.activeVezneId);
             
-            // Firebase'e de yaz (db bağlı VE auth oturumu varsa)
-            if (typeof firebaseService !== 'undefined' && firebaseService._db) {
+            // Firebase'e de yaz (bağlı VE uygun auth koşulu varsa)
+            if (typeof firebaseService !== 'undefined' && firebaseService._db && firebaseService._isConnected) {
                 const mode   = localStorage.getItem('dovizx_storage_choice') || 'local';
                 const fbUser = firebaseService._auth ? firebaseService._auth.currentUser : null;
-                if (mode === 'local' || fbUser) {
+                // firebase modu: auth zorunlu | local modu: bağlıysa yedek olarak yaz
+                if (mode === 'firebase' ? !!fbUser : true) {
                     firebaseService.write(dataToSave).catch(e => console.warn('Firebase yazma hatasi:', e));
                 }
             }
@@ -3441,9 +3535,9 @@ const app = {
                             rates: this.data.rates.map(r => ({ ...r, buy: 0, sell: 0 })),
                             transactions: [],
                             vezneler: [
-                                { id: 'VZN01', name: 'Vezne1', email: 'vezne1@sistem.com', password: 'admin', role: 'veznedar' },
-                                { id: 'VZN02', name: 'Vezne2', email: 'vezne2@sistem.com', password: 'admin', role: 'veznedar' },
-                                { id: 'VZN03', name: 'Vezne3', email: 'vezne3@sistem.com', password: 'admin', role: 'yonetici' },
+                                { id: 'VZN01', name: 'Yönetici', email: 'vzn01@sistem.com', password: 'admin', role: 'yonetici' },
+                                { id: 'VZN02', name: 'Vezne 2',  email: 'vzn02@sistem.com', password: 'admin', role: 'veznedar' },
+                                { id: 'VZN03', name: 'Vezne 3',  email: 'vzn03@sistem.com', password: 'admin', role: 'veznedar' },
                             ],
                             _ts: Date.now(),
                             _reset: true
@@ -3772,7 +3866,11 @@ const app = {
         
         // Desktop modunda top-nav senkronize et
         if (typeof desktop !== 'undefined' && desktop.IS_DESKTOP) {
-            setTimeout(() => desktop._buildTopNav(), 100);
+            // BUG FIX v26: _buildTopNav yoktu → _headerNav doğrusu
+            // Giriş sonrası status bar vezne bilgisini güncelle (header zaten render'lı)
+            const vEl = document.getElementById('dtSbVezne');
+            const v = this.data.vezneler.find(x => x.id === vezneId);
+            if (vEl && v) vEl.innerText = `${v.id} — ${v.name}`;
         }
         
         // ── Firebase modunda: login sonrası verileri çek ──
@@ -3839,6 +3937,57 @@ const app = {
         this.switchTab('kur', document.querySelector('.bottom-nav .nav-item:nth-child(1)'));
         this.initSettings();
         this._applyPanoTvHeader();
+
+        // ── Rol bazlı UI düzenlemeleri (VZN02/VZN03 kısıtlamaları) ──
+        this._applyRoleBasedUI(vezneId);
+    },
+
+    /* Giriş sonrası rol bazlı UI kısıtlamalarını uygula */
+    _applyRoleBasedUI(vezneId) {
+        const isVZN01 = (vezneId === 'VZN01');
+        // Hareketler nav butonunu gizle/göster
+        const harBtn = document.getElementById('navHareketlerBtn');
+        if (harBtn) harBtn.style.display = isVZN01 ? '' : 'none';
+        // Desktop'ta hareketler panelini gizle/göster
+        const harPanel = document.getElementById('dt-panel-hareketler');
+        if (harPanel) harPanel.style.display = isVZN01 ? '' : 'none';
+        const harPill = document.getElementById('dtp-hareketler');
+        if (harPill) harPill.style.display = isVZN01 ? '' : 'none';
+        // Kur çekme ayarları: VZN02/VZN03 için gizle
+        const kurCekmeCard = document.getElementById('kurCekmeCard');
+        if (kurCekmeCard) kurCekmeCard.style.display = isVZN01 ? '' : 'none';
+
+        // VZN02/VZN03: Firebase'den VZN01'in kurlarını çek (otomod verileri)
+        if (!isVZN01 && firebaseService._db) {
+            setTimeout(() => this._loadRatesFromVZN01Firebase(), 1500);
+        }
+    },
+
+    /* VZN02/VZN03 için VZN01'in Firebase'indeki kurları yükle */
+    async _loadRatesFromVZN01Firebase() {
+        if (!firebaseService._db) return;
+        try {
+            const snap = await firebaseService._db.ref('dovizx/VZN01/data/rates').once('value');
+            const fbRates = snap.val();
+            if (!Array.isArray(fbRates) || fbRates.length === 0) return;
+            // Kendi rates'imizle birleştir — kodu eşleşenleri güncelle
+            let updated = 0;
+            fbRates.forEach(fbR => {
+                const idx = this.data.rates.findIndex(r => r.code === fbR.code);
+                if (idx !== -1 && this.data.rates[idx].mode === 'auto') {
+                    this.data.rates[idx].buy  = fbR.buy;
+                    this.data.rates[idx].sell = fbR.sell;
+                    updated++;
+                }
+            });
+            if (updated > 0) {
+                this.saveData();
+                this.renderLiveRates();
+                console.log(`[VZN02/03] VZN01 Firebase'den ${updated} kur yüklendi`);
+            }
+        } catch(e) {
+            console.warn('[VZN02/03] VZN01 kur yükleme hatası:', e);
+        }
     },
 
     logout() {
@@ -3848,9 +3997,13 @@ const app = {
             confirmButtonText: 'Evet, Çıkış Yap'
         }).then(async (result) => {
             if (result.isConfirmed) {
+                // BUG FIX v26: activeVezneId null edilmeden ÖNCE sakla — audit log için
+                const logoutVezneId = this.data.activeVezneId || '?';
+                const logoutVezne = (this.data.vezneler || []).find(v => v.id === logoutVezneId);
+                const logoutName  = logoutVezne ? logoutVezne.name : '?';
                 this.data.activeVezneId = null;
                 localStorage.removeItem('dovizx_active_vezne');
-                auditLog.add('login', { vezneId: app.data.activeVezneId || '?', desc: `${app.data.activeVezneId || '?'} çıkış yaptı` });
+                auditLog.add('login', { vezneId: logoutVezneId, desc: `${logoutVezneId} (${logoutName}) çıkış yaptı` });
         if (typeof firebaseService !== 'undefined') await firebaseService.signOut();
                 const emailEl = document.getElementById('emailInput');
                 const passEl  = document.getElementById('passwordInput');
@@ -3922,6 +4075,8 @@ const app = {
                     transactions: this.data.transactions, rateInputMode: this.data.rateInputMode,
                     printerSettings: this.data.printerSettings, panoSettings: this.data.panoSettings,
                     panoTv: this.data.panoTv, vezneler: this.data.vezneler,
+                    customers: this.data.customers || [],
+                    auditLogs: (this.data.auditLogs || []).slice(-500),
                 };
                 await firebaseService.write(dataToSave);
             } catch(e) { console.warn('Çıkış Firebase hatası:', e); }
@@ -4210,6 +4365,11 @@ const app = {
         });
         grid.innerHTML = html;
 
+        // ── VZN01: Diğer veznelerin kasalarını Firebase'den çek ve göster ──
+        if (this.data.activeVezneId === 'VZN01' && firebaseService._db) {
+            this._renderOtherVezneBalances();
+        }
+
         // Header toplam: tüm varlıkları alış kurundan TL'ye çevir
         let totalTL = (this.data.balances.TRY || 0) + (this.data.balances.POSKASA || 0);
         const usdRateObj = this.data.rates.find(r => r.code === 'USD');
@@ -4243,6 +4403,100 @@ const app = {
                 }, 400);
             }
         }
+    },
+
+    /* VZN01 için diğer veznelerin kasa durumlarını Firebase'den çek ve göster */
+    async _renderOtherVezneBalances() {
+        if (!firebaseService._db) return;
+        const grid = document.getElementById('balanceGrid');
+        if (!grid) return;
+
+        const otherVezneler = (this.data.vezneler || []).filter(v => v.id !== 'VZN01');
+        if (otherVezneler.length === 0) return;
+
+        // Mevcut VZN01 kasası özeti için toplam TL hesabı
+        const rates = this.data.rates;
+        const calcTL = (balances) => {
+            if (!balances) return 0;
+            let total = (balances.TRY || 0) + (balances.POSKASA || 0);
+            const usdR = rates.find(r => r.code === 'USD');
+            if (usdR) total += (balances.SGKUSD || 0) * usdR.buy;
+            Object.keys(balances).forEach(code => {
+                if (code === 'TRY' || code === 'POSKASA' || code === 'SGKUSD') return;
+                const rObj = rates.find(r => r.code === code);
+                if (rObj) total += (balances[code] || 0) * rObj.buy;
+            });
+            return total;
+        };
+
+        // Separator
+        const sep = document.createElement('div');
+        sep.style.cssText = 'grid-column:1/-1; border-top:1px dashed var(--border); padding-top:10px; margin-top:4px; font-size:11px; color:var(--muted); font-weight:700;';
+        sep.innerHTML = '📦 Diğer Veznelerin Kasa Durumu (Firebase)';
+        grid.appendChild(sep);
+
+        let grandTotalTL = calcTL(this.data.balances); // VZN01'in kendi kasası
+        let vzn01TL = grandTotalTL;
+
+        for (const v of otherVezneler) {
+            try {
+                const snap = await firebaseService._db.ref(`dovizx/${v.id}/data/balances`).once('value');
+                const bal  = snap.val();
+                if (!bal) {
+                    const noDataDiv = document.createElement('div');
+                    noDataDiv.className = 'stat-box';
+                    noDataDiv.style.cssText = 'border:1px dashed var(--border); opacity:.6;';
+                    noDataDiv.innerHTML = `<div class="stat-val" style="font-size:13px; color:var(--muted);">—</div><div class="stat-lbl">${v.id} • ${v.name}<br><span style="font-size:10px;">Veri yok</span></div>`;
+                    grid.appendChild(noDataDiv);
+                    continue;
+                }
+                const vTL = calcTL(bal);
+                grandTotalTL += vTL;
+                // Her döviz kodu için küçük satırlar
+                let balLines = Object.keys(bal)
+                    .filter(c => c !== 'TRY' && c !== 'POSKASA' && c !== 'SGKUSD' && bal[c] !== 0)
+                    .map(c => `<span style="font-size:10px; color:var(--muted);">${c}: ${this.fmt(bal[c],2)}</span>`)
+                    .join(' ');
+                const vDiv = document.createElement('div');
+                vDiv.className = 'stat-box';
+                vDiv.style.cssText = 'border:1px solid rgba(59,130,246,0.3); cursor:default;';
+                vDiv.innerHTML = `
+                    <div class="stat-val" style="font-size:16px; color:var(--primary);">${this.fmt(vTL)} ₺</div>
+                    <div class="stat-lbl" style="margin-bottom:4px;">${v.id} — ${v.name}</div>
+                    <div style="font-size:10px; color:var(--muted);">TRY: ${this.fmt(bal.TRY||0)}</div>
+                    ${balLines ? `<div style="margin-top:2px; display:flex; flex-wrap:wrap; gap:4px;">${balLines}</div>` : ''}
+                `;
+                grid.appendChild(vDiv);
+            } catch(e) {
+                console.warn(`[Kasa] ${v.id} okunamadı:`, e);
+            }
+        }
+
+        // Toplam satırı
+        const totalDiv = document.createElement('div');
+        totalDiv.style.cssText = 'grid-column:1/-1; background:var(--input); border-radius:10px; padding:10px 14px; border:1px solid var(--primary); margin-top:6px;';
+
+        // BUG FIX v26: VZN02/03 bireysel kasa bilgilerini topla
+        // (her vDiv createElement döngüsünde veri topla — tekrar fetch yerine mevcut yapıyı kullan)
+        const allVezneData = [{ id: 'VZN01', amount: vzn01TL }];
+        // otherVezneler için grandTotalTL zaten döngüde hesaplandı;
+        // ayrı depolamak için döngüyü tekrar çalıştırmak yerine DOM'daki değerleri oku
+        const otherCards = grid.querySelectorAll('.stat-box[style*="rgba(59,130,246"]');
+        otherCards.forEach((card, i) => {
+            if (i < otherVezneler.length) {
+                const valEl = card.querySelector('.stat-val');
+                allVezneData.push({ id: otherVezneler[i].id, amount: valEl ? parseFloat(valEl.innerText.replace(/[^0-9,.-]/g,'').replace(',','.')) || 0 : 0 });
+            }
+        });
+
+        totalDiv.innerHTML = `
+            <div style="font-size:11px; color:var(--muted); margin-bottom:4px; font-weight:700;">TOPLAM KASA (Tüm Vezneler)</div>
+            <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+                ${allVezneData.map(v => `<span style="font-size:11px; color:var(--muted);">${v.id}: <b style="color:var(--text);">${app.fmt(v.amount)} ₺</b></span>`).join('<span style="color:var(--border);">|</span>')}
+                <span style="font-size:16px; font-weight:900; color:var(--success); margin-left:auto;">= ${app.fmt(grandTotalTL)} ₺</span>
+            </div>
+        `;
+        grid.appendChild(totalDiv);
     },
 
     // =================================================
@@ -4392,11 +4646,13 @@ const app = {
                         <div class="rate-actions">
                             <div class="rate-action-btn btn-buy" onclick="pos.open('${r.code}', 'buy', ${r.buy}, ${r.sell});">
                                 <span style="font-size:12px; color:var(--success)">ALIŞ</span>
-                                <strong>${r.buy.toFixed(4)}</strong>
+                                <strong>${r.buy.toFixed(cat === 'coin' ? 2 : 4)}</strong>
+                                ${cat === 'coin' ? '<span style="font-size:9px;color:var(--muted)">USD</span>' : ''}
                             </div>
                             <div class="rate-action-btn btn-sell" onclick="pos.open('${r.code}', 'sell', ${r.buy}, ${r.sell});">
                                 <span style="font-size:12px; color:var(--danger)">SATIŞ</span>
-                                <strong>${r.sell.toFixed(4)}</strong>
+                                <strong>${r.sell.toFixed(cat === 'coin' ? 2 : 4)}</strong>
+                                ${cat === 'coin' ? '<span style="font-size:9px;color:var(--muted)">USD</span>' : ''}
                             </div>
                         </div>
                     </div>
@@ -4528,8 +4784,15 @@ const app = {
     renderHistory(startTime, endTime) {
         const list = document.getElementById('historyList');
         if (!list) return;
+        const isVZN01 = (app.data.activeVezneId === 'VZN01');
         const transactions = this.data.transactions;
         const placeholder = document.getElementById('history-placeholder');
+
+        // VZN01: Firebase'den diğer veznelerin geçmişini çek ve birleştir (async)
+        if (isVZN01 && firebaseService._db) {
+            this._renderHistoryAllVezne(startTime, endTime, transactions, list, placeholder);
+            return;
+        }
 
         if (transactions.length === 0) {
             if (placeholder) { placeholder.style.display = 'block'; list.innerHTML = ''; list.appendChild(placeholder); }
@@ -4562,9 +4825,54 @@ const app = {
             return acc;
         }, {});
 
-        // Filtre & arama & sıralama uygula
         let receipts = Object.values(groupedReceipts);
-        this._lastGroupedReceipts = receipts; // _applyHistorySort için sakla
+        this._lastGroupedReceipts = receipts;
+        this._applyHistoryFilter(receipts, list, placeholder);
+    },
+
+    async _renderHistoryAllVezne(startTime, endTime, ownTxs, list, placeholder) {
+        let allTxs = [...ownTxs];
+        const otherVezneler = (this.data.vezneler || []).filter(v => v.id !== 'VZN01');
+        for (const v of otherVezneler) {
+            try {
+                const snap = await firebaseService._db.ref(`dovizx/${v.id}/data/transactions`).once('value');
+                const fbTxs = snap.val();
+                if (Array.isArray(fbTxs)) allTxs = allTxs.concat(fbTxs);
+            } catch(e) { console.warn(`[Geçmiş] ${v.id} okunamadı:`, e); }
+        }
+
+        if (allTxs.length === 0) {
+            if (placeholder) { placeholder.style.display = 'block'; list.innerHTML = ''; list.appendChild(placeholder); }
+            this.updateHistoryStats(0, 0, 0);
+            return;
+        }
+        if (placeholder) placeholder.style.display = 'none';
+
+        const groupedReceipts = allTxs.reduce((acc, tx) => {
+            if (startTime && tx.date < startTime) return acc;
+            if (endTime && tx.date > endTime) return acc;
+            if (!acc[tx.receiptId]) {
+                acc[tx.receiptId] = {
+                    receiptId: tx.receiptId,
+                    date: tx.date,
+                    paymentMethod: tx.paymentMethod,
+                    changeDue: tx.changeDue,
+                    vezneId: tx.vezneId,
+                    isCancelled: tx.isCancelled || false,
+                    cancellationReason: tx.cancellationReason || '',
+                    items: [],
+                    netTLMovement: 0,
+                };
+            }
+            if (!tx.isCancelled) {
+                acc[tx.receiptId].netTLMovement += (tx.type === 'sell' ? tx.total : -tx.total);
+            }
+            acc[tx.receiptId].items.push(tx);
+            return acc;
+        }, {});
+
+        let receipts = Object.values(groupedReceipts);
+        this._lastGroupedReceipts = receipts;
         this._applyHistoryFilter(receipts, list, placeholder);
     },
 
@@ -4742,13 +5050,19 @@ const app = {
 
         const itemDetailsHtml = receipt.items.map(tx => {
             const statusStyle = tx.isCancelled ? 'text-decoration: line-through; color: var(--danger) !important;' : '';
+            const txRateInfo = app.data.rates.find(r => r.code === tx.code);
+            const isCoin = txRateInfo && txRateInfo.category === 'coin';
+            const rateLabel = isCoin ? `@${app.fmt(tx.rate, 2)} USD` : `@${app.fmt(tx.rate, 4)}`;
+            const totalLabel = isCoin && tx.totalUSD !== undefined
+                ? `${app.fmt(tx.totalUSD, 2)} USD ≈ ${app.fmt(tx.total)} ₺`
+                : `${app.fmt(tx.total)} ₺`;
             return `
             <p style="margin:5px 0; display:flex; justify-content:space-between; font-size:13px; border-bottom:1px dotted var(--border); padding-bottom:5px; ${statusStyle}">
                 <span style="font-weight:700; color:${tx.type === 'buy' ? 'var(--success)' : 'var(--danger)'}">
-                    ${tx.type.toUpperCase()} ${app.fmt(tx.amount, 2)} ${tx.code} (@${app.fmt(tx.rate, 4)})
+                    ${tx.type.toUpperCase()} ${app.fmt(tx.amount, isCoin ? 6 : 2)} ${tx.code} (${rateLabel})
                     ${tx.isCancelled ? ' (İPTAL KAYDI)' : ''}
                 </span>
-                <span style="font-weight:800">${app.fmt(tx.total)} ₺</span>
+                <span style="font-weight:800">${totalLabel}</span>
             </p>
         `}).join('');
 
@@ -4756,14 +5070,24 @@ const app = {
         const pnlRows = receipt.items.filter(t => !t.isCancelled).map(tx => {
             const rObj = app.data.rates.find(r => r.code === tx.code);
             if (!rObj) return '';
+            const isCoin = rObj.category === 'coin';
             const marketBuy  = rObj.buy;
             const marketSell = rObj.sell;
             let pnl = 0;
-            if (tx.type === 'buy')  pnl = (marketSell - tx.rate) * tx.amount; // aldık, satabilecek fiyat
-            if (tx.type === 'sell') pnl = (tx.rate - marketBuy)  * tx.amount; // sattık, aldığımız fiyat
+            if (isCoin) {
+                // USD spread × usdToTL
+                const usdR = app.data.rates.find(r => r.code === 'USD');
+                const usdToTL = usdR ? usdR.buy : 1;
+                if (tx.type === 'buy')  pnl = (marketSell - tx.rate) * tx.amount * usdToTL;
+                if (tx.type === 'sell') pnl = (tx.rate - marketBuy)  * tx.amount * usdToTL;
+            } else {
+                if (tx.type === 'buy')  pnl = (marketSell - tx.rate) * tx.amount;
+                if (tx.type === 'sell') pnl = (tx.rate - marketBuy)  * tx.amount;
+            }
             const pnlColor = pnl >= 0 ? 'var(--success)' : 'var(--danger)';
+            const rateDisp = isCoin ? app.fmt(tx.rate,2)+' USD' : app.fmt(tx.rate,4);
             return `<div style="display:flex; justify-content:space-between; font-size:11px; padding:2px 0; border-bottom:1px dotted var(--border);">
-                <span>${tx.type === 'buy' ? '↓' : '↑'} ${tx.code} ${app.fmt(tx.amount,2)} @${app.fmt(tx.rate,4)}</span>
+                <span>${tx.type === 'buy' ? '↓' : '↑'} ${tx.code} ${app.fmt(tx.amount, isCoin ? 6 : 2)} @${rateDisp}</span>
                 <span style="color:${pnlColor}; font-weight:800;">${pnl >= 0 ? '+' : ''}${app.fmt(pnl)} ₺</span>
             </div>`;
         }).join('');
@@ -5176,10 +5500,14 @@ const app = {
         transactions.forEach(tx => {
             const typeEmoji = tx.type === 'buy' ? '📥' : '📤';
             const typeLabel = tx.type === 'buy' ? 'ALIŞ' : 'SATIŞ';
+            const isCoinTx = tx.isCoin;
             message += `${typeEmoji} *${typeLabel} ${tx.code}*\n`;
-            message += `   Miktar: ${this.fmt(tx.amount, 2)}\n`;
-            message += `   Kur: ${this.fmt(tx.rate, 4)}\n`;
-            message += `   Toplam: ${this.fmt(tx.total)} ₺\n\n`;
+            message += `   Miktar: ${this.fmt(tx.amount, isCoinTx ? 6 : 2)}\n`;
+            message += `   Kur: ${this.fmt(tx.rate, isCoinTx ? 2 : 4)}${isCoinTx ? ' USD' : ''}\n`;
+            if (isCoinTx && tx.totalUSD !== undefined) {
+                message += `   USD Tutar: ${this.fmt(tx.totalUSD, 2)} USD\n`;
+            }
+            message += `   TL Toplam: ${this.fmt(tx.total)} ₺\n\n`;
         });
 
         message += `━━━━━━━━━━━━━━━━━━\n`;
@@ -5604,7 +5932,7 @@ const app = {
             return;
         }
         container.innerHTML = vezneler.map(v => {
-            const isYonetici = (v.role === 'yonetici');
+            const isYonetici = (v.id === 'VZN01');
             const roleBadge = isYonetici
                 ? `<span style="background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.4); border-radius:5px; font-size:10px; font-weight:800; padding:2px 7px; margin-left:6px;">YÖNETİCİ</span>`
                 : `<span style="background:rgba(59,130,246,0.12); color:#60a5fa; border:1px solid rgba(59,130,246,0.3); border-radius:5px; font-size:10px; font-weight:700; padding:2px 7px; margin-left:6px;">VEZNEDAR</span>`;
@@ -5617,7 +5945,6 @@ const app = {
                 </div>
                 <div class="vezne-actions">
                     <button class="vezne-edit-btn" onclick="app.editVezne('${v.id}')" title="Düzenle"><i class="ri-edit-line"></i></button>
-                    <button class="vezne-del-btn" onclick="app.removeVezne('${v.id}')" title="Sil"><i class="ri-delete-bin-line"></i></button>
                 </div>
             </div>`;
         }).join('');
@@ -5664,22 +5991,19 @@ const app = {
     editVezne(id) {
         const vezne = this.data.vezneler.find(v => v.id === id);
         if (!vezne) return;
+        const fixedRole = id === 'VZN01' ? '🔑 Yönetici (Tam Yetki)' : '👤 Veznedar (Kısıtlı)';
         Swal.fire({
             title: `${id} Düzenle`,
             background: 'var(--card)', color: 'var(--text)',
             html: `
                 <div style="text-align:left;">
+                    <div style="font-size:11px; color:var(--muted); background:var(--input); border-radius:6px; padding:6px 10px; margin-bottom:10px;">Rol: <b>${fixedRole}</b> (değiştirilemez)</div>
                     <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:4px;">Ad Soyad</label>
                     <input id="ev_name" value="${vezne.name}" class="swal2-input" style="background:var(--input); color:var(--text); border:1px solid var(--border); margin-bottom:8px;">
                     <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:4px;">Email</label>
                     <input id="ev_email" type="email" value="${vezne.email}" class="swal2-input" style="background:var(--input); color:var(--text); border:1px solid var(--border); margin-bottom:8px;">
                     <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:4px;">Yeni Şifre (boş bırakırsanız değişmez)</label>
                     <input id="ev_pass" type="password" placeholder="Yeni Şifre" class="swal2-input" style="background:var(--input); color:var(--text); border:1px solid var(--border); margin-bottom:8px;">
-                    <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:4px;">Rol</label>
-                    <select id="ev_role" class="swal2-input" style="background:var(--input); color:var(--text); border:1px solid var(--border);">
-                        <option value="veznedar" ${(vezne.role||'veznedar')==='veznedar'?'selected':''}>👤 Veznedar (Kısıtlı)</option>
-                        <option value="yonetici" ${vezne.role==='yonetici'?'selected':''}>🔑 Yönetici (Tam Yetki)</option>
-                    </select>
                 </div>`,
             showCancelButton: true,
             confirmButtonText: 'Kaydet',
@@ -5689,9 +6013,8 @@ const app = {
                 const name  = document.getElementById('ev_name')?.value.trim();
                 const email = document.getElementById('ev_email')?.value.trim();
                 const pass  = document.getElementById('ev_pass')?.value.trim();
-                const role  = document.getElementById('ev_role')?.value || 'veznedar';
                 if (!name || !email) { Swal.showValidationMessage('Ad ve email zorunlu!'); return false; }
-                return { name, email, pass, role };
+                return { name, email, pass };
             }
         }).then(async r => {
             if (r.isConfirmed) {
@@ -5699,7 +6022,7 @@ const app = {
                 if (idx !== -1) {
                     this.data.vezneler[idx].name  = r.value.name;
                     this.data.vezneler[idx].email = r.value.email;
-                    this.data.vezneler[idx].role  = r.value.role;
+                    // Rol değiştirilmez — sabit kalır
                     if (r.value.pass) this.data.vezneler[idx].password = r.value.pass;
                     this.saveData();
                     this.renderVezneList();
@@ -6018,6 +6341,8 @@ const app = {
 
         this.saveData();
         pano.restartAutoTimer();
+        // Firebase'e push (tüm vezneler kurları görebilsin)
+        this._pushRatesToAllVezneFirebase && this._pushRatesToAllVezneFirebase().catch(()=>{});
         Swal.fire({ toast:true, position:'top-end', icon:'success', title:'Pano ayarları kaydedildi!', showConfirmButton:false, timer:2000 });
     },
 
@@ -6029,8 +6354,278 @@ const app = {
         if (urlEl)      urlEl.value      = ps.sheetsUrl || '';
         if (intervalEl) intervalEl.value = ps.updateInterval || 5;
         if (gidEl)      gidEl.value      = ps.sheetsGid || '0';
-        // Show preview if URL is set
         if (ps.sheetsUrl) _sheetsPreviewUrl(ps.sheetsUrl, ps.sheetsGid || '0');
+        // Global currency form
+        this._renderGlobalCurrencyForm();
+        // Kur Çekme unified form
+        this._renderKurCekmeForm();
+    },
+
+    // ─── Global Kur Kaynağı — Form Render ─────────────────────────────────
+    _renderGlobalCurrencyForm() {
+        const ps = this.data.panoSettings;
+        const apiSel = document.getElementById('globalCurrencyApiSelect');
+        const keyInp = document.getElementById('globalCurrencyApiKeyInput');
+        const spread = document.getElementById('globalCurrencySpreadInput');
+        const spreadLbl = document.getElementById('spreadPreviewLabel');
+        if (apiSel) { apiSel.value = ps.globalCurrencyApi || 'exchangerate'; this.onGlobalApiChange(apiSel.value, true); }
+        if (keyInp) keyInp.value = ps.globalCurrencyApiKey || '';
+        if (spread) { spread.value = ps.globalCurrencySpread !== undefined ? ps.globalCurrencySpread : 0.5; }
+        if (spreadLbl) spreadLbl.innerText = ' ' + (spread ? spread.value : '0.5') + '%';
+        // komisyon tablosu
+        this._renderGlobalCommissionTable();
+    },
+
+    // ─── Kur Çekme Birleşik Form Render ───────────────────────────────────
+    _renderKurCekmeForm() {
+        const ps = this.data.panoSettings;
+        // Kaynak belirleme
+        let src = 'off';
+        if (ps.globalCurrencyEnabled && !ps.sheetsUrl) src = 'global';
+        else if (ps.sheetsUrl) src = 'sheets';
+        else if (ps.globalCurrencyEnabled) src = 'global';
+        this.onKurCekmeSourceChange(src, true); // true = silent (no save)
+        // Spread
+        const spread = document.getElementById('globalCurrencySpreadInput');
+        const spreadLbl = document.getElementById('spreadPreviewLabel');
+        if (spread) { spread.value = ps.globalCurrencySpread !== undefined ? ps.globalCurrencySpread : 0.5; }
+        if (spreadLbl) spreadLbl.innerText = ' ' + (spread ? spread.value : '0.5') + '%';
+        // Sheets fields
+        const urlEl = document.getElementById('sheetsUrlInput');
+        const gidEl = document.getElementById('sheetsGidInput');
+        const intEl = document.getElementById('sheetsIntervalInput');
+        if (urlEl) urlEl.value = ps.sheetsUrl || '';
+        if (gidEl) gidEl.value = ps.sheetsGid || '0';
+        if (intEl) intEl.value = ps.updateInterval || 5;
+        if (ps.sheetsUrl) _sheetsPreviewUrl(ps.sheetsUrl, ps.sheetsGid || '0');
+        // Global API field
+        const apiSel = document.getElementById('globalCurrencyApiSelect');
+        const keyInp = document.getElementById('globalCurrencyApiKeyInput');
+        if (apiSel) { apiSel.value = ps.globalCurrencyApi || 'exchangerate'; this.onGlobalApiChange(apiSel.value, true); }
+        if (keyInp) keyInp.value = ps.globalCurrencyApiKey || '';
+        // Global interval field
+        const gIntEl = document.getElementById('globalCurrencyIntervalInput');
+        if (gIntEl) gIntEl.value = ps.updateInterval || 5;
+        // Commission table
+        this._renderGlobalCommissionTable();
+    },
+
+    onKurCekmeSourceChange(src, silent) {
+        // Update radio buttons
+        const radGlobal  = document.getElementById('kurSrcGlobal');
+        const radSheets  = document.getElementById('kurSrcSheets');
+        const radOff     = document.getElementById('kurSrcOff');
+        if (radGlobal) radGlobal.checked = (src === 'global');
+        if (radSheets) radSheets.checked = (src === 'sheets');
+        if (radOff)    radOff.checked    = (src === 'off');
+        // Update label borders
+        const lblGlobal = document.getElementById('kurSrcGlobalLabel');
+        const lblSheets = document.getElementById('kurSrcSheetsLabel');
+        const lblOff    = document.getElementById('kurSrcOffLabel');
+        if (lblGlobal) lblGlobal.style.borderColor = (src === 'global') ? 'var(--primary)' : 'var(--border)';
+        if (lblSheets) lblSheets.style.borderColor = (src === 'sheets') ? 'var(--primary)' : 'var(--border)';
+        if (lblOff)    lblOff.style.borderColor    = (src === 'off')    ? 'var(--danger)'  : 'var(--border)';
+        // Show/hide sections
+        const secGlobal  = document.getElementById('kurCekmeGlobalSection');
+        const secSheets  = document.getElementById('kurCekmeSheetsSection');
+        const secSpread  = document.getElementById('kurCekmeSpreadSection');
+        const secGIntv   = document.getElementById('kurCekmeGlobalIntervalSection');
+        const badge      = document.getElementById('kurCekmeBadge');
+        if (secGlobal) secGlobal.style.display = (src === 'global') ? '' : 'none';
+        if (secSheets) secSheets.style.display = (src === 'sheets') ? '' : 'none';
+        if (secSpread) secSpread.style.display = (src !== 'off')    ? '' : 'none';
+        if (secGIntv)  secGIntv.style.display  = (src === 'global') ? '' : 'none';
+        if (badge)     { badge.style.display = (src !== 'off') ? 'inline' : 'none'; }
+        this._kurCekmeSrc = src;
+    },
+
+    async saveKurCekmeSettings() {
+        if (!authMatrix.can('manageKurCekme')) return;
+        const ps   = this.data.panoSettings;
+        const src  = this._kurCekmeSrc || 'off';
+        const spread = parseFloat(document.getElementById('globalCurrencySpreadInput')?.value) || 0.5;
+        const apiSel = document.getElementById('globalCurrencyApiSelect')?.value || 'exchangerate';
+        const apiKey = document.getElementById('globalCurrencyApiKeyInput')?.value?.trim() || '';
+        const sheetsUrl = document.getElementById('sheetsUrlInput')?.value?.trim() || '';
+        const sheetsGid = document.getElementById('sheetsGidInput')?.value?.trim() || '0';
+        const intEl = document.getElementById('sheetsIntervalInput') || document.getElementById('globalCurrencyIntervalInput');
+        const interval = parseInt(intEl?.value) || 5;
+
+        ps.globalCurrencySpread  = spread;
+        ps.globalCurrencyApi     = apiSel;
+        ps.globalCurrencyApiKey  = apiKey;
+
+        if (src === 'global') {
+            ps.globalCurrencyEnabled = true;
+            ps.sheetsUrl = '';
+        } else if (src === 'sheets') {
+            ps.globalCurrencyEnabled = false;
+            ps.sheetsUrl = sheetsUrl;
+            ps.sheetsGid = sheetsGid;
+        } else {
+            ps.globalCurrencyEnabled = false;
+            ps.sheetsUrl = '';
+        }
+        ps.updateInterval = interval;
+
+        // Komisyon değerlerini topla
+        const comms = {};
+        this.data.rates.forEach(r => {
+            const buyEl  = document.getElementById(`gc_comm_buy_${r.code}`);
+            const sellEl = document.getElementById(`gc_comm_sell_${r.code}`);
+            comms[r.code] = {
+                buy:  parseFloat(buyEl?.value)  || 0,
+                sell: parseFloat(sellEl?.value) || 0,
+            };
+            const idx = this.data.rates.findIndex(x => x.code === r.code);
+            if (idx !== -1) {
+                this.data.rates[idx].commissionBuy  = comms[r.code].buy;
+                this.data.rates[idx].commissionSell = comms[r.code].sell;
+            }
+        });
+        ps.globalCurrencyCommissions = comms;
+
+        this.saveData();
+        pano.restartAutoTimer();
+
+        // Hemen çek ve Firebase'e yaz
+        if (src !== 'off') {
+            try {
+                let rates = null;
+                if (src === 'global') {
+                    rates = await globalCurrencyService.fetchRates(ps);
+                }
+                if (rates) {
+                    this.data.rates.forEach(r => {
+                        if (r.mode !== 'auto') return;
+                        const d = rates[r.code];
+                        if (!d) return;
+                        r.buy  = parseFloat(d.buy.toFixed(4));
+                        r.sell = parseFloat(d.sell.toFixed(4));
+                    });
+                    this.saveData();
+                    this.renderLiveRates();
+                    // Firebase'e de yaz — tüm vezneler okusun
+                    await this._pushRatesToAllVezneFirebase();
+                    Swal.fire({ toast:true, position:'top-end', icon:'success', title:'✅ Kur çekme ayarları kaydedildi & kurlar güncellendi', showConfirmButton:false, timer:2500 });
+                } else {
+                    Swal.fire({ toast:true, position:'top-end', icon:'success', title:'Kur çekme ayarları kaydedildi', showConfirmButton:false, timer:2000 });
+                }
+            } catch(e) {
+                Swal.fire({ toast:true, position:'top-end', icon:'warning', title:'Ayarlar kaydedildi (kur çekme hatası: ' + e.message + ')', showConfirmButton:false, timer:3500 });
+            }
+        } else {
+            Swal.fire({ toast:true, position:'top-end', icon:'info', title:'Kur çekme kapalı (simülasyon modu)', showConfirmButton:false, timer:2000 });
+        }
+    },
+
+    /* Tüm veznelerin Firebase'ine güncel kurları yaz */
+    async _pushRatesToAllVezneFirebase() {
+        if (!firebaseService._db || !firebaseService._isConnected) return;
+        const vezneler = this.data.vezneler || [];
+        for (const v of vezneler) {
+            try {
+                const ref = firebaseService._db.ref(`dovizx/${v.id}/data/rates`);
+                await ref.set(this.data.rates.map(r => ({ ...r })));
+            } catch(e) {
+                console.warn(`[Firebase] ${v.id} kur yazma hatası:`, e);
+            }
+        }
+    },
+
+    _renderGlobalCommissionTable() {
+        const container = document.getElementById('globalCommissionTable');
+        if (!container) return;
+        const ps = this.data.panoSettings;
+        const comms = ps.globalCurrencyCommissions || {};
+
+        container.innerHTML = this.data.rates.map(r => {
+            const c = comms[r.code] || { buy: 0, sell: 0 };
+            return `
+            <div style="display:grid; grid-template-columns:60px 1fr 1fr; gap:6px; align-items:center; background:var(--input); border-radius:8px; padding:8px 10px; border:1px solid var(--border);">
+                <span style="font-weight:800; font-size:13px; color:var(--primary);">${r.code}</span>
+                <div>
+                    <div style="font-size:10px; color:var(--muted); margin-bottom:3px;">Alış Komisyon (₺)</div>
+                    <input type="number" step="0.01" min="0" value="${c.buy || 0}"
+                        id="gc_comm_buy_${r.code}"
+                        style="width:100%; padding:6px 8px; border-radius:6px; border:1px solid var(--border); background:var(--card); color:var(--success); font-size:13px; font-weight:700; box-sizing:border-box;">
+                </div>
+                <div>
+                    <div style="font-size:10px; color:var(--muted); margin-bottom:3px;">Satış Komisyon (₺)</div>
+                    <input type="number" step="0.01" min="0" value="${c.sell || 0}"
+                        id="gc_comm_sell_${r.code}"
+                        style="width:100%; padding:6px 8px; border-radius:6px; border:1px solid var(--border); background:var(--card); color:var(--danger); font-size:13px; font-weight:700; box-sizing:border-box;">
+                </div>
+            </div>`;
+        }).join('');
+    },
+
+    onGlobalCurrencyToggle(checked) {
+        const ps = this.data.panoSettings;
+        ps.globalCurrencyEnabled = checked;
+        // Yeni sistem — kurCekme radio ile senkronize et
+        if (checked) this.onKurCekmeSourceChange('global');
+        else if (!ps.sheetsUrl) this.onKurCekmeSourceChange('off');
+        const badge = document.getElementById('kurCekmeBadge');
+        if (badge) badge.style.display = checked ? 'inline' : 'none';
+    },
+
+    onGlobalApiChange(val, silent) {
+        const keyRow = document.getElementById('globalCurrencyApiKeyRow');
+        if (keyRow) keyRow.style.display = (val === 'fixer') ? 'block' : 'none';
+    },
+
+    saveGlobalCurrencySettings() {
+        // Yeni sistem: saveKurCekmeSettings'e yönlendir
+        if (typeof this.saveKurCekmeSettings === 'function') {
+            this.saveKurCekmeSettings();
+            return;
+        }
+        // Fallback (eski çağrılar için)
+        const ps = this.data.panoSettings;
+        const apiSel = document.getElementById('globalCurrencyApiSelect');
+        const keyInp = document.getElementById('globalCurrencyApiKeyInput');
+        const spread = document.getElementById('globalCurrencySpreadInput');
+
+        if (apiSel) ps.globalCurrencyApi     = apiSel.value;
+        if (keyInp) ps.globalCurrencyApiKey  = keyInp.value.trim();
+        if (spread) ps.globalCurrencySpread  = parseFloat(spread.value) || 0.5;
+
+        const comms = {};
+        this.data.rates.forEach(r => {
+            const buyEl  = document.getElementById(`gc_comm_buy_${r.code}`);
+            const sellEl = document.getElementById(`gc_comm_sell_${r.code}`);
+            comms[r.code] = { buy: parseFloat(buyEl?.value)||0, sell: parseFloat(sellEl?.value)||0 };
+            const idx = this.data.rates.findIndex(x => x.code === r.code);
+            if (idx !== -1) { this.data.rates[idx].commissionBuy=comms[r.code].buy; this.data.rates[idx].commissionSell=comms[r.code].sell; }
+        });
+        ps.globalCurrencyCommissions = comms;
+        this.saveData();
+        pano.restartAutoTimer();
+        // Firebase'e push
+        this._pushRatesToAllVezneFirebase && this._pushRatesToAllVezneFirebase().catch(()=>{});
+        Swal.fire({ toast:true, position:'top-end', icon:'success', title:'Global Kur ayarları kaydedildi', showConfirmButton:false, timer:2000 });
+    },
+
+    async testGlobalCurrencyFetch() {
+        const ps = this.data.panoSettings;
+        const statusEl = document.getElementById('globalCurrencyStatus');
+        const statusTxt = document.getElementById('globalCurrencyStatusText');
+        if (statusEl) statusEl.style.display = 'block';
+        if (statusTxt) statusTxt.innerText = '⏳ Test ediliyor...';
+        try {
+            const result = await globalCurrencyService.fetchRates(ps);
+            if (result && Object.keys(result).length > 0) {
+                const preview = Object.entries(result).slice(0,5).map(([k,v])=>`${k}: ${v.buy.toFixed(4)} / ${v.sell.toFixed(4)}`).join(' · ');
+                if (statusTxt) statusTxt.innerHTML = `✅ Başarılı! Örnek: <b>${preview}</b>`;
+                if (statusEl)  statusEl.style.background = 'rgba(16,185,129,0.1)';
+            } else {
+                if (statusTxt) statusTxt.innerText = '⚠️ Veri alındı ama eşleşen kur bulunamadı.';
+            }
+        } catch(e) {
+            if (statusTxt) statusTxt.innerText = '❌ Hata: ' + e.message;
+            if (statusEl)  statusEl.style.background = 'rgba(239,68,68,0.1)';
+        }
     },
 
     setTvMode(tvNum, mode, el) {
@@ -6310,6 +6905,149 @@ function getCurrencyFlag(code) {
     return CURRENCY_FLAGS[code] || '🏳️';
 }
 
+// ═══════════════════════════════════════════════════════════════════════
+// GLOBAL KUR SERVİSİ — ExchangeRate-API / Frankfurter / Fixer.io
+// ═══════════════════════════════════════════════════════════════════════
+const globalCurrencyService = {
+
+    // Desteklenen API'ler
+    APIS: {
+        exchangerate: {
+            name: 'ExchangeRate-API',
+            // Ücretsiz endpoint — API key olmadan da çalışır (günde 1500 istek)
+            url: (base, key) => key
+                ? `https://v6.exchangerate-api.com/v6/${key}/latest/${base}`
+                : `https://open.er-api.com/v6/latest/${base}`,
+            parse: (data, base) => {
+                if (!data.rates) throw new Error('Geçersiz yanıt formatı');
+                return data.rates; // { USD: 1.0, EUR: 0.92, ... }
+            }
+        },
+        frankfurter: {
+            name: 'Frankfurter (ECB)',
+            // Tamamen ücretsiz, API key yok, EUR tabanlı
+            url: (base, key) => `https://api.frankfurter.app/latest?from=${base}`,
+            parse: (data, base) => {
+                if (!data.rates) throw new Error('Geçersiz yanıt formatı');
+                return data.rates;
+            }
+        },
+        fixer: {
+            name: 'Fixer.io',
+            url: (base, key) => `https://data.fixer.io/api/latest?access_key=${key}&base=${base}`,
+            parse: (data, base) => {
+                if (!data.success || !data.rates) throw new Error(data.error?.info || 'Fixer hatası');
+                return data.rates;
+            }
+        }
+    },
+
+    // TRY bazlı kur hesapla: API'den gelen USD/TRY gibi değerleri al
+    // ExchangeRate-API ve Frankfurter TRY bazlı istek destekler
+    // → 1 TRY = X yabancı para → ters çevir = kaç TRY = 1 yabancı para
+    // → Ham kur üzerine pano komisyon (kar) tutarları eklenir — spread % uygulanmaz
+    async fetchRates(ps) {
+        const api    = this.APIS[ps.globalCurrencyApi || 'exchangerate'];
+        const key    = ps.globalCurrencyApiKey || '';
+        const spread = parseFloat(ps.globalCurrencySpread) || 0.5;
+        const comms  = ps.globalCurrencyCommissions || {};
+        const base   = 'TRY'; // Her zaman TRY bazında iste
+
+        if (!api) throw new Error('Geçersiz API seçimi');
+        if (ps.globalCurrencyApi === 'fixer' && !key) throw new Error('Fixer.io için API Key gerekli');
+
+        // Frankfurter EUR tabanlı çalışır — önce EUR/TRY al, sonra çapraz hesapla
+        let rawRates;
+        if (ps.globalCurrencyApi === 'frankfurter') {
+            rawRates = await this._fetchFrankfurterViaEUR(spread, comms);
+            return rawRates;
+        }
+
+        const url = api.url(base, key);
+        console.log('🌐 Global kur API isteği:', url);
+
+        // CORS için proxy sırasını dene
+        const proxies = [
+            u => u, // direkt
+            u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+            u => `https://corsproxy.io/?url=${encodeURIComponent(u)}`,
+        ];
+
+        let data = null;
+        let lastErr = '';
+        for (const makeProxy of proxies) {
+            try {
+                const proxyUrl = makeProxy(url);
+                const ctrl = new AbortController();
+                const tid = setTimeout(() => ctrl.abort(), 10000);
+                const resp = await fetch(proxyUrl, { cache: 'no-cache', signal: ctrl.signal });
+                clearTimeout(tid);
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                data = await resp.json();
+                break;
+            } catch(e) {
+                lastErr = e.message;
+                console.warn('Global kur proxy hatası:', e.message);
+            }
+        }
+        if (!data) throw new Error('Tüm kaynaklar başarısız: ' + lastErr);
+
+        // API yanıtını parse et — { USD: 0.023, EUR: 0.021, ... } (1 TRY = X yabancı)
+        const rawFromApi = api.parse(data, base);
+
+        // Ters çevir: 1 yabancı = kaç TRY
+        return this._buildRatesFromInverse(rawFromApi, spread, comms);
+    },
+
+    // 1 TRY = X yabancı → 1 yabancı = 1/X TRY → komisyon (sabit ₺) uygula
+    // NOT: Spread (%) UYGULANMAZ — pano komisyon tabanlıdır.
+    // Alış  : ham kur − commissionBuy  (büro daha düşük fiyatla alır)
+    // Satış : ham kur + commissionSell (büro daha yüksek fiyatla satar)
+    _buildRatesFromInverse(rawRates, spread, comms) {
+        const result = {};
+        Object.entries(rawRates).forEach(([code, val]) => {
+            if (!val || val <= 0) return;
+            const midRate = 1 / val; // kaç TRY = 1 yabancı para (ham API kuru)
+            const c = comms[code] || { buy: 0, sell: 0 };
+            result[code] = {
+                buy:  parseFloat((midRate - (c.buy  || 0)).toFixed(4)),
+                sell: parseFloat((midRate + (c.sell || 0)).toFixed(4)),
+            };
+        });
+        return result;
+    },
+
+    // Frankfurter: EUR/TRY al → çapraz hesap
+    async _fetchFrankfurterViaEUR(spread, comms) {
+        const url = 'https://api.frankfurter.app/latest?from=EUR&to=TRY,USD,GBP,CHF,JPY,CAD,AUD,DKK,NOK,SEK,SAR,AED,KWD';
+        const ctrl = new AbortController();
+        setTimeout(() => ctrl.abort(), 10000);
+        const resp = await fetch(url, { cache: 'no-cache', signal: ctrl.signal });
+        if (!resp.ok) throw new Error(`Frankfurter HTTP ${resp.status}`);
+        const data = await resp.json();
+        if (!data.rates) throw new Error('Frankfurter yanıt formatı hatalı');
+
+        // data.rates: { TRY: 38.5, USD: 1.08, GBP: 0.85, ... } (1 EUR = X)
+        const eurToTry = data.rates['TRY'];
+        if (!eurToTry) throw new Error('EUR/TRY kuru alınamadı');
+
+        // Diğer kurlar için: 1 USD = (1 EUR / data.rates.USD) * data.rates.TRY
+        // Alış  : ham kur − commissionBuy  (büro daha düşük fiyatla alır)
+        // Satış : ham kur + commissionSell (büro daha yüksek fiyatla satar)
+        const result = {};
+        Object.entries(data.rates).forEach(([code, eurToX]) => {
+            if (code === 'TRY') return;
+            const midRate = eurToTry / eurToX; // kaç TRY = 1 yabancı (ham kur)
+            const c = comms[code] || { buy: 0, sell: 0 };
+            result[code] = {
+                buy:  parseFloat((midRate - (c.buy  || 0)).toFixed(4)),
+                sell: parseFloat((midRate + (c.sell || 0)).toFixed(4)),
+            };
+        });
+        return result;
+    },
+};
+
 const pano = {
     _timer: null,
     _countdownTimer: null,
@@ -6378,39 +7116,16 @@ const pano = {
             else categories.diger.push(r);
         });
 
-        const catLabels  = { doviz: '💱 DÖVİZ', altin: '🥇 ALTIN', coin: '🪙 COİN', diger: '🔹 DİĞER' };
-        const catColors  = { doviz: 'var(--primary)', altin: '#fbbf24', coin: '#a78bfa', diger: 'var(--muted)' };
+        // Pano kur formatı: 3 hane, son rakam 0 veya 5 (0.005 kademesine yuvarla)
+        const _fmtPano = (val) => {
+            const rounded = Math.round(val / 0.005) * 0.005;
+            return rounded.toFixed(3);
+        };
 
         let html = '';
 
         Object.entries(categories).forEach(([cat, catRates]) => {
             if (catRates.length === 0) return;
-
-            // Kayan bilgi şeridi için kategori içeriği derle
-            const tickerItems = catRates.map(r => {
-                const modeChip = r.mode === 'manual'
-                    ? `<span class="ticker-chip man">✎ ${r.code} MANUEL</span>`
-                    : `<span class="ticker-chip oto">⚡ ${r.code} OTO</span>`;
-                const comChip = (r.commissionBuy || 0) || (r.commissionSell || 0)
-                    ? `<span class="ticker-chip com">💰 Kom.A:${r.commissionBuy||0}₺ S:${r.commissionSell||0}₺</span>`
-                    : '';
-                return modeChip + comChip;
-            }).join('');
-            const tickerRepeat = tickerItems + '&nbsp;&nbsp;&nbsp;&nbsp;' + tickerItems; // çift döngü için
-
-            html += `
-            <div class="pano-cat-header">
-                <span class="pano-cat-title" style="color:${catColors[cat]}">${catLabels[cat]}</span>
-                <div class="pano-cat-ticker-wrap">
-                    <div class="pano-cat-ticker">${tickerRepeat}</div>
-                </div>
-            </div>
-            <div class="pano-board-header">
-                <span>PARA BİRİMİ</span>
-                <span style="text-align:right; padding-right:4px; color:var(--success);">ALIŞ</span>
-                <span style="text-align:right; padding-right:4px; color:var(--danger);">SATIŞ</span>
-                <span></span>
-            </div>`;
 
             catRates.forEach(r => {
                 const isManual = r.mode === 'manual';
@@ -6422,6 +7137,12 @@ const pano = {
                 const catClass = cat === 'altin' ? 'cat-altin' : (cat === 'coin' ? 'cat-coin' : '');
                 const editHint = isManual ? `<div class="pano-edit-hint"><i class="ri-pencil-line"></i> düzenle</div>` : '';
 
+                // Komisyon göstergesi — ayarlıysa küçük badge
+                const hasComm = (r.commissionBuy || 0) > 0 || (r.commissionSell || 0) > 0;
+                const commBadge = hasComm
+                    ? `<div style="font-size:9px; color:var(--accent); font-weight:700; margin-top:1px;">A:−${r.commissionBuy||0} S:+${r.commissionSell||0}</div>`
+                    : '';
+
                 html += `
                 <div class="pano-rate-item ${modeClass} ${catClass}" data-code="${r.code}" ${onclick}>
                     <div class="pano-rate-left">
@@ -6430,21 +7151,25 @@ const pano = {
                         <div style="min-width:0;">
                             <div class="pano-rate-code">${r.code}</div>
                             <div class="pano-rate-name">${r.name}</div>
+                            ${commBadge}
                             ${editHint}
                         </div>
                     </div>
-                    <div class="pano-rate-col">
-                        <div class="pano-rate-val pano-rate-buy" id="pv-buy-${r.code}">${app.fmt(r.buy, 4)}</div>
-                        <div class="pano-rate-lbl">ALIŞ</div>
+                    <div class="pano-rate-col pano-rate-buy-col">
+                        <div class="pano-rate-val pano-rate-buy" id="pv-buy-${r.code}">${_fmtPano(r.buy)}</div>
                     </div>
-                    <div class="pano-rate-col">
-                        <div class="pano-rate-val pano-rate-sell" id="pv-sell-${r.code}">${app.fmt(r.sell, 4)}</div>
-                        <div class="pano-rate-lbl">SATIŞ</div>
+                    <div class="pano-rate-col pano-rate-sell-col">
+                        <div class="pano-rate-val pano-rate-sell" id="pv-sell-${r.code}">${_fmtPano(r.sell)}</div>
                     </div>
-                    <div style="display:flex; align-items:center; justify-content:flex-end;">
+                    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px; justify-content:center;">
                         <button class="pano-mode-toggle" onclick="pano.toggleCurrencyMode('${r.code}', event)"
                             style="background:${modeColor}; color:${modeTxtColor};" title="${isManual ? 'Manuel mod' : 'Oto mod'}">
                             ${isManual ? '✎' : '⚡'}
+                        </button>
+                        <button onclick="event.stopPropagation(); pano.openCommissionEdit('${r.code}')"
+                            title="Kar/Komisyon Ayarla"
+                            style="background:${hasComm ? 'var(--accent)' : 'var(--input)'}; color:${hasComm ? '#000' : 'var(--muted)'}; border:1px solid var(--border); border-radius:6px; font-size:11px; font-weight:800; cursor:pointer; padding:2px 6px; white-space:nowrap; line-height:1.4;">
+                            💰
                         </button>
                     </div>
                 </div>`;
@@ -6491,6 +7216,144 @@ const pano = {
                 }
             });
         }
+
+        // Canlı görünüm için rastgele flash animasyonunu başlat
+        this._startFlashTimer();
+    },
+
+    // Kar/Komisyon düzenleme modalı — hem oto hem manuel modda çalışır
+    openCommissionEdit(code) {
+        const r = app.data.rates.find(x => x.code === code);
+        if (!r) return;
+
+        const isAuto = r.mode === 'auto';
+        // Ham kur (mevcut buy/sell'den komisyonu geri çıkar — tahmini gösterim)
+        const rawBuyEst  = isAuto ? parseFloat((r.buy  + (r.commissionBuy  || 0)).toFixed(4)) : r.buy;
+        const rawSellEst = isAuto ? parseFloat((r.sell - (r.commissionSell || 0)).toFixed(4)) : r.sell;
+
+        Swal.fire({
+            title: `${r.code} — Kar / Komisyon`,
+            background: 'var(--card)', color: 'var(--text)',
+            html: `
+                <div style="text-align:left;">
+                    <p style="font-size:12px; color:var(--muted); margin:0 0 14px 0;">
+                        ${r.name} · ${isAuto ? '⚡ Otomatik mod' : '✎ Manuel mod'}
+                    </p>
+
+                    <!-- Ham kur tahmini bilgi kutusu -->
+                    <div style="background:rgba(59,130,246,0.08); border:1px solid rgba(59,130,246,0.25); border-radius:8px; padding:10px 12px; margin-bottom:14px; font-size:12px; color:var(--muted);">
+                        <b style="color:var(--text);">Ham API Kuru (tahmini):</b>
+                        Alış ≈ <b style="color:var(--success);">${app.fmt(rawBuyEst, 4)}</b> &nbsp;|&nbsp;
+                        Satış ≈ <b style="color:var(--danger);">${app.fmt(rawSellEst, 4)}</b><br>
+                        <span style="font-size:10px; margin-top:3px; display:block;">Komisyon sonuçları anlık gösterilir.</span>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
+                        <div>
+                            <label style="font-size:11px; color:var(--success); font-weight:800; display:block; margin-bottom:5px;">
+                                ↓ ALIŞ Komisyon (₺)
+                            </label>
+                            <input type="number" id="swal-ck-buy" step="0.01" min="0"
+                                value="${r.commissionBuy || 0}"
+                                oninput="pano._previewCommission()"
+                                style="width:100%; padding:10px; border-radius:8px; border:2px solid var(--success);
+                                       background:var(--input); color:var(--success); box-sizing:border-box;
+                                       font-size:18px; font-weight:800; text-align:center;">
+                            <div style="font-size:10px; color:var(--muted); margin-top:4px; text-align:center;">Ham kurdan <b>düşülür</b></div>
+                        </div>
+                        <div>
+                            <label style="font-size:11px; color:var(--danger); font-weight:800; display:block; margin-bottom:5px;">
+                                ↑ SATIŞ Komisyon (₺)
+                            </label>
+                            <input type="number" id="swal-ck-sell" step="0.01" min="0"
+                                value="${r.commissionSell || 0}"
+                                oninput="pano._previewCommission()"
+                                style="width:100%; padding:10px; border-radius:8px; border:2px solid var(--danger);
+                                       background:var(--input); color:var(--danger); box-sizing:border-box;
+                                       font-size:18px; font-weight:800; text-align:center;">
+                            <div style="font-size:10px; color:var(--muted); margin-top:4px; text-align:center;">Ham kura <b>eklenir</b></div>
+                        </div>
+                    </div>
+
+                    <!-- Canlı önizleme -->
+                    <div id="swal-ck-preview" style="background:var(--input); border-radius:8px; padding:10px 12px; font-size:13px; border:1px solid var(--border);">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                            <span style="color:var(--muted);">Gösterilecek Alış:</span>
+                            <b id="swal-ck-prev-buy" style="color:var(--success);">${app.fmt(r.buy, 4)}</b>
+                        </div>
+                        <div style="display:flex; justify-content:space-between;">
+                            <span style="color:var(--muted);">Gösterilecek Satış:</span>
+                            <b id="swal-ck-prev-sell" style="color:var(--danger);">${app.fmt(r.sell, 4)}</b>
+                        </div>
+                    </div>
+
+                    <p style="font-size:10px; color:var(--muted); margin-top:10px; line-height:1.5;">
+                        Örn: Ham 43,500 · Alış kom. 0,500 → <b>43,000</b> · Satış kom. 0,800 → <b>44,300</b>
+                    </p>
+                </div>`,
+            didOpen: () => {
+                // Ham kur değerlerini Swal context'e taşı (preview için)
+                window._ckRawBuy  = rawBuyEst;
+                window._ckRawSell = rawSellEst;
+                pano._previewCommission();
+            },
+            showCancelButton: true,
+            confirmButtonText: '💾 Kaydet',
+            confirmButtonColor: 'var(--primary)',
+            cancelButtonText: 'İptal',
+            preConfirm: () => {
+                const commBuy  = parseFloat(document.getElementById('swal-ck-buy').value)  || 0;
+                const commSell = parseFloat(document.getElementById('swal-ck-sell').value) || 0;
+                if (commBuy < 0 || commSell < 0) {
+                    Swal.showValidationMessage('Komisyon değerleri negatif olamaz!');
+                    return false;
+                }
+                return { commBuy, commSell };
+            }
+        }).then(result => {
+            if (!result.isConfirmed) return;
+            const { commBuy, commSell } = result.value;
+            const idx = app.data.rates.findIndex(x => x.code === code);
+            if (idx === -1) return;
+
+            app.data.rates[idx].commissionBuy  = commBuy;
+            app.data.rates[idx].commissionSell = commSell;
+
+            // Ham kur üzerine komisyonu uygula (oto mod: tahmini ham kurdan hesapla)
+            if (isAuto) {
+                app.data.rates[idx].buy  = parseFloat((rawBuyEst  - commBuy ).toFixed(4));
+                app.data.rates[idx].sell = parseFloat((rawSellEst + commSell).toFixed(4));
+            }
+
+            // panoSettings komisyon tablosunu da güncelle (Ayarlar ile senkron)
+            if (!app.data.panoSettings.globalCurrencyCommissions) app.data.panoSettings.globalCurrencyCommissions = {};
+            app.data.panoSettings.globalCurrencyCommissions[code] = { buy: commBuy, sell: commSell };
+
+            app.saveData();
+            app.renderLiveRates();
+            this.renderRateList();
+
+            // Firebase'e güncel kurları gönder
+            app._pushRatesToAllVezneFirebase && app._pushRatesToAllVezneFirebase().catch(() => {});
+
+            Swal.fire({ toast: true, position: 'top-end', icon: 'success',
+                title: `${code} komisyon kaydedildi`, showConfirmButton: false, timer: 1800 });
+        });
+    },
+
+    // Komisyon modal canlı önizleme
+    _previewCommission() {
+        const buyEl  = document.getElementById('swal-ck-buy');
+        const sellEl = document.getElementById('swal-ck-sell');
+        const prevBuy  = document.getElementById('swal-ck-prev-buy');
+        const prevSell = document.getElementById('swal-ck-prev-sell');
+        if (!buyEl || !sellEl || !prevBuy || !prevSell) return;
+        const commBuy  = parseFloat(buyEl.value)  || 0;
+        const commSell = parseFloat(sellEl.value) || 0;
+        const rawB = window._ckRawBuy  || 0;
+        const rawS = window._ckRawSell || 0;
+        prevBuy.innerText  = app.fmt(parseFloat((rawB - commBuy ).toFixed(4)), 4);
+        prevSell.innerText = app.fmt(parseFloat((rawS + commSell).toFixed(4)), 4);
     },
 
     toggleCurrencyMode(code, event) {
@@ -6535,7 +7398,10 @@ const pano = {
                     <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:4px;">Satış Komisyon (Sabit ₺)</label>
                     <input type="number" id="swal-commission-sell" step="0.01" min="0" value="${r.commissionSell || 0}"
                         style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border); background:var(--input); color:var(--text); box-sizing:border-box; font-size:16px;">
-                    <p style="font-size:11px; color:var(--muted); margin-top:6px;">Komisyon alış ve satış kuruna eklenerek uygulanır. Örn: Sheets 43,500 + Komisyon 0,300 = 43,800 gösterilir.</p>
+                    <p style="font-size:11px; color:var(--muted); margin-top:6px;">
+                        Alış komisyonu ham kurdan <b>düşülür</b> (büro düşük alır). Satış komisyonu ham kura <b>eklenir</b> (büro yüksek satar).<br>
+                        Örn: Ham 43,500 · Alış −0,500 = <b>43,000</b> · Satış +0,800 = <b>44,300</b>
+                    </p>
                 </div>`,
             showCancelButton: true,
             confirmButtonText: 'Kaydet',
@@ -6596,6 +7462,33 @@ const pano = {
         });
     },
 
+    // Rastgele fiyat hareketi animasyonu — pano'ya canlılık verir
+    _startFlashTimer() {
+        this._stopFlashTimer();
+        const container = document.getElementById('panoRateList');
+        if (!container) return;
+        const jitter = () => Math.floor(Math.random() * 1200) + 800; // 800–2000ms arası rastgele
+        const doFlash = () => {
+            const els = container.querySelectorAll('.pano-rate-val');
+            if (!els.length) return;
+            // Her seferinde 1–2 rastgele hücre seç
+            const count = Math.random() < 0.4 ? 2 : 1;
+            const shuffled = Array.from(els).sort(() => Math.random() - 0.5).slice(0, count);
+            shuffled.forEach(el => {
+                const up = Math.random() < 0.5;
+                el.classList.remove('price-flash-up', 'price-flash-down');
+                void el.offsetWidth; // reflow
+                el.classList.add(up ? 'price-flash-up' : 'price-flash-down');
+            });
+            this._flashTimer = setTimeout(doFlash, jitter());
+        };
+        this._flashTimer = setTimeout(doFlash, jitter());
+    },
+
+    _stopFlashTimer() {
+        if (this._flashTimer) { clearTimeout(this._flashTimer); this._flashTimer = null; }
+    },
+
     restartAutoTimer() {
         this._stopTimer();
         const mode = app.data.panoSettings.mode || 'auto';
@@ -6617,8 +7510,12 @@ const pano = {
         const statusDot  = document.getElementById('panoStatusDot');
         const statusText = document.getElementById('panoStatusText');
         if (statusDot)  statusDot.className = 'pano-status-dot green';
-        const url = app.data.panoSettings.sheetsUrl;
-        if (statusText) statusText.innerText = url ? 'Google Sheets — Aktif' : 'Otomatik (Simülasyon)';
+        const ps2 = app.data.panoSettings;
+        const url = ps2.sheetsUrl;
+        let statusLabel = 'Simülasyon Modu';
+        if (url && url.includes('spreadsheets')) statusLabel = '📊 Google Sheets — Aktif';
+        else if (ps2.globalCurrencyEnabled) statusLabel = `🌐 Global Kur (${ps2.globalCurrencyApi}) — Aktif`;
+        if (statusText) statusText.innerText = statusLabel;
     },
 
     _stopTimer() {
@@ -6626,6 +7523,7 @@ const pano = {
         if (this._countdownTimer) clearInterval(this._countdownTimer);
         this._timer = null;
         this._countdownTimer = null;
+        this._stopFlashTimer();
     },
 
     _tick() {
@@ -6900,7 +7798,8 @@ const pano = {
                             const idx = app.data.rates.findIndex(r => r.code === code);
                             if (idx !== -1 && app.data.rates[idx].mode === 'auto') {
                                 const rate = app.data.rates[idx];
-                                app.data.rates[idx].buy  = parseFloat((rawBuy  + (rate.commissionBuy  || 0)).toFixed(4));
+                                // Alış: ham − komisyon | Satış: ham + komisyon
+                                app.data.rates[idx].buy  = parseFloat((rawBuy  - (rate.commissionBuy  || 0)).toFixed(4));
                                 app.data.rates[idx].sell = parseFloat((rawSell + (rate.commissionSell || 0)).toFixed(4));
                                 alreadyUpdated.add(code);
                                 updated++;
@@ -6929,7 +7828,8 @@ const pano = {
                     const idx = app.data.rates.findIndex(r => r.code === code2);
                     if (idx !== -1 && app.data.rates[idx].mode === 'auto') {
                         const rate = app.data.rates[idx];
-                        app.data.rates[idx].buy  = parseFloat((rawBuy2  + (rate.commissionBuy  || 0)).toFixed(4));
+                        // Alış: ham − komisyon | Satış: ham + komisyon
+                        app.data.rates[idx].buy  = parseFloat((rawBuy2  - (rate.commissionBuy  || 0)).toFixed(4));
                         app.data.rates[idx].sell = parseFloat((rawSell2 + (rate.commissionSell || 0)).toFixed(4));
                         alreadyUpdated.add(code2);
                         updated++;
@@ -6946,6 +7846,8 @@ const pano = {
                 app.renderLiveRates();
                 this.renderRateList();
                 this._updateLastUpdateLabel();
+                // Firebase'e yaz — diğer vezneler okusun
+                app._pushRatesToAllVezneFirebase && app._pushRatesToAllVezneFirebase().catch(()=>{});
                 const dotOk = document.getElementById('panoStatusDot');
                 const txtOk = document.getElementById('panoStatusText');
                 if (dotOk) dotOk.className = 'pano-status-dot green';
@@ -6964,13 +7866,81 @@ const pano = {
             return;
         }
 
-        // Sheets yoksa simülasyon
+        // Sheets yok — Global Kur Kaynağı aktif mi?
+        const ps = app.data.panoSettings;
+        if (ps.globalCurrencyEnabled) {
+            const dotGl = document.getElementById('panoStatusDot');
+            const txtGl = document.getElementById('panoStatusText');
+            if (dotGl) dotGl.className = 'pano-status-dot green';
+            if (txtGl) txtGl.innerText = '🌐 Global Kur çekiliyor...';
+            try {
+                const rates = await globalCurrencyService.fetchRates(ps);
+                let updGl = 0;
+                app.data.rates.forEach(r => {
+                    if (r.mode !== 'auto') return;
+                    const d = rates[r.code];
+                    if (!d) return;
+                    r.buy  = parseFloat(d.buy.toFixed(4));
+                    r.sell = parseFloat(d.sell.toFixed(4));
+                    updGl++;
+                });
+                ps.globalCurrencyLastFetch = Date.now();
+                this._lastUpdate = new Date();
+                app.saveData();
+                app.renderLiveRates();
+                this.renderRateList();
+                this._updateLastUpdateLabel();
+                // Firebase'e yaz — diğer vezneler okusun
+                app._pushRatesToAllVezneFirebase && app._pushRatesToAllVezneFirebase().catch(()=>{});
+                if (dotGl) dotGl.className = 'pano-status-dot green';
+                if (txtGl) txtGl.innerText = `🌐 Global Kur — ${updGl} kur güncellendi (${this._lastUpdate.toLocaleTimeString('tr-TR')})`;
+                return;
+            } catch(e) {
+                const txtGlErr = document.getElementById('panoStatusText');
+                if (txtGlErr) txtGlErr.innerText = '❌ Global Kur hatası: ' + e.message + ' — Simülasyona geçildi';
+                console.warn('Global kur hatası:', e);
+            }
+        }
+
+        // Global da yoksa → VZN02/03 ise VZN01 Firebase'inden kur çek, değilse simülasyon
+        const activeVezne = app.data.activeVezneId;
+        if (activeVezne !== 'VZN01' && firebaseService._db) {
+            // VZN02/VZN03: VZN01'in kurlarını Firebase'den çek
+            try {
+                const snap = await firebaseService._db.ref('dovizx/VZN01/data/rates').once('value');
+                const fbRates = snap.val();
+                if (Array.isArray(fbRates) && fbRates.length > 0) {
+                    let updCnt = 0;
+                    fbRates.forEach(fbR => {
+                        const idx = app.data.rates.findIndex(r => r.code === fbR.code);
+                        if (idx !== -1 && app.data.rates[idx].mode === 'auto') {
+                            app.data.rates[idx].buy  = fbR.buy;
+                            app.data.rates[idx].sell = fbR.sell;
+                            updCnt++;
+                        }
+                    });
+                    if (updCnt > 0) {
+                        this._lastUpdate = new Date();
+                        app.saveData();
+                        app.renderLiveRates();
+                        this.renderRateList();
+                        this._updateLastUpdateLabel();
+                        const simTxt = document.getElementById('panoStatusText');
+                        const simDot = document.getElementById('panoStatusDot');
+                        if (simDot) simDot.className = 'pano-status-dot green';
+                        if (simTxt) simTxt.innerText = `☁️ VZN01 Firebase — ${updCnt} kur senkronize (${this._lastUpdate.toLocaleTimeString('tr-TR')})`;
+                        return;
+                    }
+                }
+            } catch(e) {
+                console.warn('[VZN02/03] Firebase kur senkronizasyon hatası:', e);
+            }
+        }
+
+        // Simülasyon (VZN01 veya Firebase yoksa)
         app.data.rates.forEach(r => {
-            // Sadece 'auto' moddaki currency'leri güncelle
             if (r.mode === 'auto') {
                 const change = 1 + (Math.random() * 0.004 - 0.002);
-                // BUG FIX: komisyon zaten kayıtlı kurların içinde; her tick'te tekrar eklenmez.
-                // Ekleme yapılırsa her güncelleme ile kurlar şişer → SADECE change faktörü uygulanır.
                 r.buy  = parseFloat((r.buy  * change).toFixed(4));
                 r.sell = parseFloat((r.sell * change).toFixed(4));
                 if (r.buy >= r.sell) r.sell = parseFloat((r.buy * 1.005).toFixed(4));
@@ -6983,7 +7953,7 @@ const pano = {
         this._updateLastUpdateLabel();
         if (!sheetsUrl) {
             const simTxt = document.getElementById('panoStatusText');
-            if (simTxt) simTxt.innerText = 'Simülasyon modu (Sheets URL girilmedi)';
+            if (simTxt) simTxt.innerText = 'Simülasyon modu (Sheets veya Global Kur girilmedi)';
         }
     }
 };
@@ -7037,11 +8007,45 @@ const hareket = {
     },
 
     render() {
-        const { start, end } = this.getDateRange(this.currentPeriod);
-        const txs = app.data.transactions.filter(tx =>
-            !tx.isCancelled && tx.date >= start && tx.date <= end
-        );
+        // VZN02/VZN03 hareketler göremez
+        if (app.data.activeVezneId !== 'VZN01') {
+            // BUG FIX v26: null güvenli erişim
+            const pnlEl = document.getElementById('har-pnl-amount');
+            const subEl = document.getElementById('har-pnl-sub');
+            if (pnlEl) { pnlEl.innerText = '⛔ Yetki Yok'; pnlEl.className = 'pnl-hero-amount pnl-neutral'; }
+            if (subEl) subEl.innerText = 'Hareketler bölümüne erişim yetkiniz bulunmamaktadır.';
+            return;
+        }
+        // VZN01 için tüm veznelerin verilerini birleştir
+        this._renderWithAllVezne();
+    },
 
+    async _renderWithAllVezne() {
+        const { start, end } = this.getDateRange(this.currentPeriod);
+        // Kendi işlemleri
+        let allTxs = (app.data.transactions || []).filter(tx => !tx.isCancelled && tx.date >= start && tx.date <= end);
+
+        // Firebase'den diğer veznelerin işlemlerini çek
+        if (firebaseService._db) {
+            const otherVezneler = (app.data.vezneler || []).filter(v => v.id !== 'VZN01');
+            for (const v of otherVezneler) {
+                try {
+                    const snap = await firebaseService._db.ref(`dovizx/${v.id}/data/transactions`).once('value');
+                    const fbTxs = snap.val();
+                    if (Array.isArray(fbTxs)) {
+                        const filtered = fbTxs.filter(tx => !tx.isCancelled && tx.date >= start && tx.date <= end);
+                        allTxs = allTxs.concat(filtered);
+                    }
+                } catch(e) {
+                    console.warn(`[Hareketler] ${v.id} okunamadı:`, e);
+                }
+            }
+        }
+
+        this._doRender(allTxs);
+    },
+
+    _doRender(txs) {
         if (txs.length === 0) {
             this._setEmpty();
             return;
@@ -7052,17 +8056,28 @@ const hareket = {
         let totalSellTL  = 0, sellCount = 0;
         let estimatedPnL = 0;
 
-        // Kur spread'inden kâr hesabı:
-        // ALIŞ işlemi: büro düşük fiyatla alıyor → spread kârı = (satış_kuru - alış_kuru) * miktar
-        // SATIŞ işlemi: büro yüksek fiyatla satıyor → aynı formül
-        // Basit yaklaşım: Her işlem için o anki rate'lerdeki spread'in yarısını kâr say
+        // Kur kâr hesabı — komisyon tabanlı:
+        // Her işlem için o anki rate'lerdeki (buy/sell) fiyat farkından kâr tahmini:
+        // ALIŞ: büro düşük fiyatla alıyor → kâr = (sell - buy) * miktar
+        // SATIŞ: büro yüksek fiyatla satıyor → aynı formül
+        // Pano komisyon değerleri (commissionBuy / commissionSell) zaten buy/sell içinde yansıtılmış.
         const currencyMap = {};
 
         txs.forEach(tx => {
             const rateInfo = app.data.rates.find(r => r.code === tx.code);
-            const spread   = rateInfo ? (rateInfo.sell - rateInfo.buy) : 0;
-            // Her işlem için spread farkından kâr: spread * miktar
-            const txPnL = spread * tx.amount;
+            const isCoin = rateInfo && rateInfo.category === 'coin';
+            let txPnL;
+            if (isCoin) {
+                // Coin: spread USD cinsinden, TL'ye çevir
+                const spreadUSD = rateInfo ? (rateInfo.sell - rateInfo.buy) : 0;
+                const usdRateObj = app.data.rates.find(r => r.code === 'USD');
+                const usdToTL = usdRateObj ? usdRateObj.buy : 1;
+                txPnL = spreadUSD * tx.amount * usdToTL;
+            } else {
+                // Spread = satış kuru - alış kuru (TL cinsinden)
+                const spread = rateInfo ? (rateInfo.sell - rateInfo.buy) : 0;
+                txPnL = spread * tx.amount;
+            }
 
             if (tx.type === 'buy') {
                 totalBuyTL += tx.total;
@@ -7089,25 +8104,29 @@ const hareket = {
         // ---- Hero ----
         const pnlEl  = document.getElementById('har-pnl-amount');
         const subEl  = document.getElementById('har-pnl-sub');
-        // BUG FIX: hareketler sekmesi kapalıyken DOM elementleri yoktur
+        // BUG FIX v26: hareketler sekmesi kapalıyken tüm KPI DOM elementleri yoktur
+        const _kpi = (id, prop, val) => { const el = document.getElementById(id); if (el) el[prop] = val; };
         if (!pnlEl || !subEl) return;
         pnlEl.innerText = app.fmt(estimatedPnL) + ' ₺';
         pnlEl.className = 'pnl-hero-amount ' + (estimatedPnL > 0 ? 'pnl-positive' : estimatedPnL < 0 ? 'pnl-negative' : 'pnl-neutral');
         subEl.innerText = `${txs.length} işlem • ${receiptSet.size} fiş • Spread farkı bazlı hesaplama`;
 
         // ---- KPI ----
-        document.getElementById('har-buy-tl').innerText    = app.fmt(totalBuyTL) + ' ₺';
-        document.getElementById('har-buy-count').innerText = buyCount + ' alış işlemi';
-        document.getElementById('har-sell-tl').innerText   = app.fmt(totalSellTL) + ' ₺';
-        document.getElementById('har-sell-count').innerText = sellCount + ' satış işlemi';
-        document.getElementById('har-receipt-count').innerText = receiptSet.size;
+        _kpi('har-buy-tl',        'innerText', app.fmt(totalBuyTL) + ' ₺');
+        _kpi('har-buy-count',     'innerText', buyCount + ' alış işlemi');
+        _kpi('har-sell-tl',       'innerText', app.fmt(totalSellTL) + ' ₺');
+        _kpi('har-sell-count',    'innerText', sellCount + ' satış işlemi');
+        _kpi('har-receipt-count', 'innerText', receiptSet.size);
         const netEl = document.getElementById('har-net-tl');
-        netEl.innerText = app.fmt(Math.abs(netTL)) + ' ₺';
-        netEl.className = 'kpi-val ' + (netTL >= 0 ? 'text-success' : 'text-danger');
-        document.getElementById('har-net-dir').innerText = netTL >= 0 ? '↑ Kasaya Giriş' : '↓ Kasadan Çıkış';
+        if (netEl) {
+            netEl.innerText = app.fmt(Math.abs(netTL)) + ' ₺';
+            netEl.className = 'kpi-val ' + (netTL >= 0 ? 'text-success' : 'text-danger');
+        }
+        _kpi('har-net-dir', 'innerText', netTL >= 0 ? '↑ Kasaya Giriş' : '↓ Kasadan Çıkış');
 
         // ---- Döviz satırları ----
         const rowsEl = document.getElementById('har-currency-rows');
+        if (!rowsEl) return; // BUG FIX v26: element yoksa dur
         const currencies = Object.values(currencyMap).sort((a, b) => b.pnl - a.pnl);
         const maxPnl = Math.max(...currencies.map(c => Math.abs(c.pnl)), 1);
 
@@ -7173,7 +8192,17 @@ const hareket = {
             let pnl = 0;
             dayTxs.forEach(t => {
                 const r = app.data.rates.find(x => x.code === t.code);
-                if (r) pnl += (r.sell - r.buy) * t.amount;
+                if (r) {
+                    const isCoin = r.category === 'coin';
+                    if (isCoin) {
+                        const spreadUSD = r.sell - r.buy;
+                        const usdR = app.data.rates.find(x => x.code === 'USD');
+                        const usdToTL = usdR ? usdR.buy : 1;
+                        pnl += spreadUSD * t.amount * usdToTL;
+                    } else {
+                        pnl += (r.sell - r.buy) * t.amount;
+                    }
+                }
             });
 
             labels.push(d.toLocaleDateString('tr-TR', {day:'2-digit', month:'2-digit'}));
@@ -7226,19 +8255,19 @@ const hareket = {
     },
 
     _setEmpty() {
-        document.getElementById('har-pnl-amount').innerText = '0,00 ₺';
-        document.getElementById('har-pnl-amount').className = 'pnl-hero-amount pnl-neutral';
-        document.getElementById('har-pnl-sub').innerText    = 'Seçili dönemde işlem bulunamadı';
-        document.getElementById('har-buy-tl').innerText     = '0,00 ₺';
-        document.getElementById('har-buy-count').innerText  = '0 alış işlemi';
-        document.getElementById('har-sell-tl').innerText    = '0,00 ₺';
-        document.getElementById('har-sell-count').innerText = '0 satış işlemi';
-        document.getElementById('har-receipt-count').innerText = '0';
-        document.getElementById('har-net-tl').innerText     = '0,00 ₺';
-        document.getElementById('har-net-tl').className     = 'kpi-val pnl-neutral';
-        document.getElementById('har-net-dir').innerText    = '—';
-        document.getElementById('har-currency-rows').innerHTML =
-            '<div class="har-empty"><i class="ri-bar-chart-2-line"></i>Bu dönemde işlem bulunamadı</div>';
+        const _s = (id, prop, val) => { const el = document.getElementById(id); if (el) el[prop] = val; };
+        _s('har-pnl-amount', 'innerText',  '0,00 ₺');
+        _s('har-pnl-amount', 'className',  'pnl-hero-amount pnl-neutral');
+        _s('har-pnl-sub',    'innerText',  'Seçili dönemde işlem bulunamadı');
+        _s('har-buy-tl',     'innerText',  '0,00 ₺');
+        _s('har-buy-count',  'innerText',  '0 alış işlemi');
+        _s('har-sell-tl',    'innerText',  '0,00 ₺');
+        _s('har-sell-count', 'innerText',  '0 satış işlemi');
+        _s('har-receipt-count','innerText','0');
+        _s('har-net-tl',     'innerText',  '0,00 ₺');
+        _s('har-net-tl',     'className',  'kpi-val pnl-neutral');
+        _s('har-net-dir',    'innerText',  '—');
+        _s('har-currency-rows','innerHTML','<div class="har-empty"><i class="ri-bar-chart-2-line"></i>Bu dönemde işlem bulunamadı</div>');
     }
 };
 
@@ -7461,13 +8490,32 @@ const pos = {
 
     updateCalculations() {
         const amount = parseFloat(this.state.amountStr.replace(',', '.')) || 0;
-        const rate = this.getCurrentRate();
-        const total = amount * rate;
-        // Mevcut kalemin işaretli değeri (SATIŞ → pozitif, ALIŞ → negatif)
-        const signedCurrent = this.state.type === 'sell' ? total : -total;
+        const rate = this.getCurrentRate(); // coin için USD kuru, diğerleri için TL kuru
+        const rateInfo = app.data.rates.find(r => r.code === this.state.code);
+        const isCoin = rateInfo && rateInfo.category === 'coin';
+
+        let totalTL, totalUSD;
+        if (isCoin) {
+            // rate = USD fiyatı (örn: 65000 USD/BTC)
+            totalUSD = amount * rate;
+            const usdRateObj = app.data.rates.find(r => r.code === 'USD');
+            const usdToTL = usdRateObj ? usdRateObj.buy : 1;
+            totalTL = totalUSD * usdToTL;
+        } else {
+            totalTL = amount * rate;
+            totalUSD = 0;
+        }
+
+        // Mevcut kalemin işaretli TL değeri (SATIŞ → pozitif, ALIŞ → negatif)
+        const signedCurrent = this.state.type === 'sell' ? totalTL : -totalTL;
 
         document.getElementById('displayAmount').innerText = app.fmt(amount, 2);
-        document.getElementById('currentTotalTL').innerText = app.fmt(total) + ' ₺';
+        if (isCoin) {
+            document.getElementById('currentTotalTL').innerText = 
+                app.fmt(totalUSD, 2) + ' USD  ≈  ' + app.fmt(totalTL) + ' ₺';
+        } else {
+            document.getElementById('currentTotalTL').innerText = app.fmt(totalTL) + ' ₺';
+        }
 
         // Sepet neti = önceki kilitli kalemlerin neti + mevcut kalemin işaretli değeri
         const overallNet = this.calculateTotalLockedTL() + signedCurrent;
@@ -7481,8 +8529,10 @@ const pos = {
     calculateTotalLockedTL() {
         // ALIŞ (büro alıyor): müşteri TL alır → vezneden çıkış → negatif
         // SATIŞ (büro satıyor): müşteri TL öder → vezneye giriş → pozitif
+        // Coin işlemleri için totalTL alanı kullanılır
         return this.transactionList.reduce((sum, tx) => {
-            return sum + (tx.type === 'sell' ? tx.total : -tx.total);
+            const tl = tx.totalTL !== undefined ? tx.totalTL : tx.total;
+            return sum + (tx.type === 'sell' ? tl : -tl);
         }, 0);
     },
 
@@ -7494,7 +8544,8 @@ const pos = {
 
         const amount = parseFloat(this.state.amountStr.replace(',', '.')) || 0;
         const rate = this.getCurrentRate();
-        const total = amount * rate;
+        const rateInfo = app.data.rates.find(r => r.code === this.state.code);
+        const isCoin = rateInfo && rateInfo.category === 'coin';
 
         if (amount <= 0) {
             Swal.fire('Hata', 'Miktar sıfırdan büyük olmalıdır.', 'error');
@@ -7506,12 +8557,28 @@ const pos = {
             return;
         }
 
+        let total, totalTL;
+        if (isCoin) {
+            // rate = USD kuru (örn: 65000 USD/BTC)
+            const totalUSD = amount * rate;
+            const usdRateObj = app.data.rates.find(r => r.code === 'USD');
+            const usdToTL = usdRateObj ? usdRateObj.buy : 1;
+            total = totalUSD;           // USD cinsinden sakla
+            totalTL = totalUSD * usdToTL; // TL karşılığı
+        } else {
+            total = amount * rate;
+            totalTL = total;
+        }
+
         this.transactionList.push({
             code: this.state.code,
             type: this.state.type,
             amount: amount,
-            rate: rate,
-            total: total
+            rate: rate,       // coin için USD/coin kuru, diğerleri için TL kuru
+            total: isCoin ? totalTL : total, // her zaman TL (payment/kasa uyumu için)
+            totalUSD: isCoin ? total : undefined,  // sadece coin için USD tutar
+            totalTL: totalTL, // her zaman TL (hesaplama kolaylığı)
+            isCoin: isCoin || false
         });
 
         this.state.amountStr = '0';
@@ -7546,12 +8613,18 @@ const pos = {
 
         let html = '';
         this.transactionList.forEach((item, index) => {
+            const totalDisplay = item.isCoin && item.totalUSD !== undefined
+                ? `${app.fmt(item.totalUSD, 2)} USD ≈ ${app.fmt(item.total)} ₺`
+                : `${app.fmt(item.total)} ₺`;
+            const rateLabel = item.isCoin
+                ? `${app.fmt(item.amount, 6)} × ${app.fmt(item.rate, 2)} USD`
+                : `${app.fmt(item.amount, 2)} × ${app.fmt(item.rate, 4)}`;
             html += `
                 <div class="transaction-item">
                     <div class="item-info">
                         <span style="color:${item.type === 'buy' ? 'var(--success)' : 'var(--danger)'}">${item.type === 'buy' ? 'ALIŞ' : 'SATIŞ'} ${item.code}</span>
-                        <span>${app.fmt(item.amount, 2)} × ${app.fmt(item.rate, 4)}</span>
-                        <span style="font-weight:800">${app.fmt(item.total)} ₺</span>
+                        <span>${rateLabel}</span>
+                        <span style="font-weight:800">${totalDisplay}</span>
                     </div>
                     <button class="remove-btn" onclick="pos.removeTransactionItem(${index})">
                         <i class="ri-close-line"></i>
@@ -7615,15 +8688,22 @@ const payment = {
         let summaryHtml = '';
         
         pos.transactionList.forEach(tx => {
+            const isCoin = tx.isCoin && tx.totalUSD !== undefined;
+            const rateLabel = isCoin
+                ? `@ ${app.fmt(tx.rate, 2)} USD`
+                : `@ ${app.fmt(tx.rate, 4)}`;
+            const totalLabel = isCoin
+                ? `${app.fmt(tx.totalUSD, 2)} USD ≈ ${app.fmt(tx.total)} ₺`
+                : `${app.fmt(tx.total)} ₺`;
             summaryHtml += `
                 <div class="transaction-summary-item">
                     <div style="display:flex; justify-content:space-between;">
                         <span class="label">${tx.type === 'buy' ? 'ALIŞ' : 'SATIŞ'} ${tx.code}</span>
-                        <span class="summary-value-bold">${app.fmt(tx.amount, 2)}</span>
+                        <span class="summary-value-bold">${app.fmt(tx.amount, isCoin ? 6 : 2)}</span>
                     </div>
                     <div style="display:flex; justify-content:space-between; margin-top:5px;">
-                        <span style="font-size:12px; color:var(--muted);">@ ${app.fmt(tx.rate, 4)}</span>
-                        <span class="summary-tl-amount">${app.fmt(tx.total)} ₺</span>
+                        <span style="font-size:12px; color:var(--muted);">${rateLabel}</span>
+                        <span class="summary-tl-amount">${totalLabel}</span>
                     </div>
                 </div>
             `;
@@ -7810,7 +8890,7 @@ const payment = {
             if (txRateObj && txRateObj.category === 'coin') {
                 const usdRateObj = app.data.rates.find(r => r.code === 'USD');
                 const usdBuyRate = usdRateObj ? usdRateObj.buy : 1;
-                const usdEquiv = tx.total / usdBuyRate;
+                const usdEquiv = tx.totalUSD !== undefined ? tx.totalUSD : tx.total / usdBuyRate;
                 if (tx.type === 'buy') {
                     // Müşteri coin sattı → biz ödedik → SGKUSD azaldı
                     app.data.balances['SGKUSD'] = (app.data.balances['SGKUSD'] || 0) - usdEquiv;
@@ -7837,7 +8917,7 @@ const payment = {
             app.data.transactions.push({
                 date: Date.now(), 
                 code: tx.code, type: tx.type, 
-                amount: tx.amount, rate: tx.rate, total: tx.total,
+                amount: tx.amount, rate: tx.rate, total: tx.total, totalUSD: tx.totalUSD, isCoin: tx.isCoin || false,
                 paymentMethod: method, 
                 changeDue: changeDue,
                 vezneId: app.data.activeVezneId, 
@@ -7865,14 +8945,20 @@ const payment = {
         document.getElementById('posScreen').classList.add('hidden');
         app.updateCartCount(); // float btn güncelle
         
-        const itemDetailsHtml = transactionList.map(tx => `
+        const itemDetailsHtml = transactionList.map(tx => {
+            const txRInfo = app.data.rates.find(r => r.code === tx.code);
+            const isCoin = txRInfo && txRInfo.category === 'coin';
+            const totalDisp = isCoin && tx.totalUSD !== undefined
+                ? `${app.fmt(tx.totalUSD, 2)} USD ≈ ${app.fmt(tx.total)} ₺`
+                : `${app.fmt(tx.total)} ₺`;
+            return `
             <div style="display:flex; justify-content:space-between; font-size:14px; padding:5px 0; border-bottom:1px dotted var(--muted); margin-top:5px;">
                 <span style="font-weight:600; color:${tx.type === 'buy' ? 'var(--success)' : 'var(--danger)'}">
-                    ${tx.type === 'buy' ? 'ALIŞ' : 'SATIŞ'} ${app.fmt(tx.amount, 2)} ${tx.code}
+                    ${tx.type === 'buy' ? 'ALIŞ' : 'SATIŞ'} ${app.fmt(tx.amount, isCoin ? 6 : 2)} ${tx.code}
                 </span>
-                <span style="font-weight:800">${app.fmt(tx.total)} ₺</span>
+                <span style="font-weight:800">${totalDisp}</span>
             </div>
-        `).join('');
+        `}).join('');
         
         const changeAbs = Math.abs(changeDue);
         
@@ -8867,6 +9953,8 @@ const firebaseService = {
                 panoSettings: app.data.panoSettings,
                 panoTv: app.data.panoTv,
                 vezneler: app.data.vezneler,
+                customers: app.data.customers || [],
+                auditLogs: (app.data.auditLogs || []).slice(-500),
             };
             const ok = await this.write(dataToSave);
             Swal.close();
@@ -9568,6 +10656,7 @@ const desktop = {
         if (btn) app.filterHistory(btn);
         pano.openTab();
         hareket.render();
+        app._applyRoleBasedUI && app._applyRoleBasedUI(vezneId);
       }, 250);
     };
   },
