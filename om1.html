@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DövizX — Pano TV</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@300;400;600;700&family=Barlow+Condensed:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:#060a0e; --surface:#0c1219; --border:#182030; --accent:#c9a84c;
+  --text:#cdd8e3; --muted:#3d5468; --up:#22c55e; --down:#ef4444;
+}
+body.gun-modu {
+  --bg:#eef2f7; --surface:#dce4ef; --border:#b8c8da; --accent:#8a6200;
+  --text:#1a2a3a; --muted:#6480a0; --up:#16a34a; --down:#dc2626;
+}
+body.gun-modu { background:var(--bg); }
+body.gun-modu header { background:var(--surface); border-bottom-color:var(--border); }
+body.gun-modu .logo { color:var(--accent); }
+body.gun-modu .saat { color:var(--accent); }
+body.gun-modu .kur-satir { border-color:var(--border); }
+body.gun-modu .tablo-head { background:rgba(0,0,0,.04); border-color:var(--border); }
+body.gun-modu .off-no  { color:#c5d0db; }
+body.gun-modu .off-lbl { color:var(--muted); }
+body.gun-modu #ekran-bloomberg { background:#111; }
+body.gun-modu .cnbce-no { text-shadow:0 0 80px rgba(239,68,68,.3); }
+body.gun-modu main::before { opacity:.5; }
+body.gun-modu #bloomberg-banner { background:#1a2535; border-top-color:#b8860b; }
+body.gun-modu .b-row-1 { background:#b8860b; }
+body.gun-modu .b-row-2 { background:#131e2d; }
+body.gun-modu .b-row-4 { background:#0d1724; }
+
+html, body {
+  width:100vw; height:100vh;
+  background:var(--bg); color:var(--text);
+  font-family:'Barlow Condensed',sans-serif;
+  overflow:hidden; display:flex; flex-direction:column;
+  transition:background .8s, color .8s;
+}
+header {
+  flex-shrink:0; height:54px; padding:0 22px;
+  display:flex; align-items:center; justify-content:space-between;
+  background:var(--surface); border-bottom:1px solid var(--border);
+  position:relative; z-index:100;
+  transition:background .8s, border-color .8s, opacity .4s;
+}
+header::after {
+  content:''; position:absolute; bottom:-2px; left:0; right:0; height:2px;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);
+}
+body.mod-off header { opacity:0; pointer-events:none; }
+.logo { font-family:'Bebas Neue',sans-serif; font-size:28px; letter-spacing:5px; color:var(--accent); transition:color .8s; }
+.logo em { color:var(--muted); font-style:normal; font-size:13px; letter-spacing:3px; margin-left:8px; vertical-align:middle; }
+.header-right { display:flex; align-items:center; gap:12px; }
+#modBadge {
+  display:flex; align-items:center; gap:6px; padding:3px 11px;
+  border-radius:3px; border:1px solid var(--border);
+  font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; letter-spacing:2px;
+  transition:all .5s;
+}
+.badge-dot { width:6px; height:6px; border-radius:50%; background:var(--muted); transition:background .5s; }
+.badge-dot.live { animation:blink 2s ease-in-out infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+.badge-off         { border-color:#374151!important; color:#6b7280!important; }
+.badge-off .badge-dot { background:#6b7280!important; }
+.badge-doviz       { border-color:#3b82f6!important; color:#60a5fa!important; }
+.badge-doviz .badge-dot { background:#3b82f6!important; }
+.badge-altin       { border-color:#f59e0b!important; color:#fbbf24!important; }
+.badge-altin .badge-dot { background:#f59e0b!important; }
+.badge-karma       { border-color:#8b5cf6!important; color:#a78bfa!important; }
+.badge-karma .badge-dot { background:#8b5cf6!important; }
+.badge-cnbce       { border-color:#ef4444!important; color:#f87171!important; }
+.badge-cnbce .badge-dot { background:#ef4444!important; }
+.badge-bloomberght { border-color:#eab308!important; color:#fde047!important; }
+.badge-bloomberght .badge-dot { background:#eab308!important; }
+.saat { font-family:'IBM Plex Mono',monospace; font-size:20px; font-weight:700; letter-spacing:3px; color:var(--accent); transition:color .8s; }
+
+main { flex:1; display:flex; overflow:hidden; position:relative; }
+main::before { content:''; position:absolute; inset:0; pointer-events:none; transition:background 1s; z-index:0; }
+main > * { position:relative; z-index:1; }
+body.glow-doviz     main::before { background:radial-gradient(ellipse at 50% 50%,rgba(59,130,246,.07)  0%,transparent 70%); }
+body.glow-altin     main::before { background:radial-gradient(ellipse at 50% 50%,rgba(245,158,11,.07)  0%,transparent 70%); }
+body.glow-karma     main::before { background:radial-gradient(ellipse at 50% 50%,rgba(139,92,246,.06)  0%,transparent 70%); }
+body.glow-cnbce     main::before { background:radial-gradient(ellipse at 50% 50%,rgba(239,68,68,.08)   0%,transparent 70%); }
+body.glow-bloomberg main::before { background:radial-gradient(ellipse at 50% 50%,rgba(234,179,8,.05)   0%,transparent 70%); }
+
+.ekran { display:none; position:absolute; inset:0; animation:fadeIn .45s ease; }
+.ekran.aktif { display:flex; }
+@keyframes fadeIn { from{opacity:0;transform:scale(.985)} to{opacity:1;transform:scale(1)} }
+
+#ekran-off { align-items:center; justify-content:center; flex-direction:column; gap:14px; }
+.off-no  { font-family:'Bebas Neue',sans-serif; font-size:clamp(130px,28vw,280px); line-height:1; color:#1c2733; letter-spacing:-4px; transition:color .8s; }
+.off-lbl { font-family:'Bebas Neue',sans-serif; font-size:clamp(20px,3.5vw,44px); letter-spacing:12px; color:var(--muted); transition:color .8s; }
+#ekran-doviz { flex-direction:column; padding:18px 28px; gap:9px; }
+#ekran-altin { flex-direction:column; padding:18px 28px; gap:9px; }
+#ekran-karma { flex-direction:row; }
+#ekran-karma .yari { flex:1; display:flex; flex-direction:column; padding:18px 20px; gap:9px; overflow:hidden; }
+#ekran-karma .yari:first-child { border-right:1px solid var(--border); }
+#ekran-cnbce { align-items:center; justify-content:center; flex-direction:column; gap:14px; }
+.cnbce-no  { font-family:'Bebas Neue',sans-serif; font-size:clamp(110px,23vw,240px); line-height:1; color:#ef4444; text-shadow:0 0 80px rgba(239,68,68,.4); letter-spacing:-4px; }
+.cnbce-lbl { font-family:'Bebas Neue',sans-serif; font-size:clamp(20px,3.8vw,50px); letter-spacing:10px; color:#f87171; }
+
+#ekran-bloomberg { flex-direction:column; background:#000; }
+#yt-player-wrap  { flex:1; position:relative; overflow:hidden; background:#000; }
+#yt-player-div   { width:100%; height:100%; }
+#yt-player-div iframe { width:100%!important; height:100%!important; border:none!important; }
+#yt-novideo {
+  display:none; position:absolute; inset:0;
+  flex-direction:column; align-items:center; justify-content:center; gap:12px; background:#050a0f;
+}
+#yt-novideo.goster { display:flex; }
+.novid-ikon { font-size:52px; }
+.novid-yazi { font-family:'Bebas Neue',sans-serif; font-size:32px; letter-spacing:5px; color:#eab308; }
+.novid-alt  { font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--muted); }
+#yt-loading {
+  display:none; position:absolute; inset:0;
+  align-items:center; justify-content:center; flex-direction:column; gap:16px;
+  background:#000; z-index:10;
+}
+#yt-loading.goster { display:flex; }
+.spinner { width:48px; height:48px; border-radius:50%; border:3px solid #1a2535; border-top-color:#eab308; animation:spin 1s linear infinite; }
+@keyframes spin { to{transform:rotate(360deg)} }
+.spinner-lbl { font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--muted); letter-spacing:2px; }
+
+#bloomberg-banner { flex-shrink:0; display:flex; flex-direction:column; background:#08111c; border-top:2px solid #eab308; z-index:50; transition:background .8s; }
+.b-row-1 { display:flex; align-items:center; height:28px; padding:0; background:#eab308; flex-shrink:0; overflow:hidden; }
+.b-row-1-tag { flex-shrink:0; height:100%; display:flex; align-items:center; padding:0 12px; background:#000; color:#eab308; font-family:'Bebas Neue',sans-serif; font-size:13px; letter-spacing:2px; white-space:nowrap; }
+.b-row-1-haber { flex:1; padding:0 12px; font-family:'Barlow Condensed',sans-serif; font-size:14px; font-weight:700; color:#000; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition:opacity .4s; }
+.b-row-2 { display:flex; align-items:center; height:28px; background:#0d1724; border-bottom:1px solid #162030; flex-shrink:0; overflow:hidden; }
+.b-row-2-tag { flex-shrink:0; height:100%; display:flex; align-items:center; padding:0 12px; background:#162030; border-right:1px solid #1e2e40; font-family:'Bebas Neue',sans-serif; font-size:12px; letter-spacing:1px; color:#eab308; white-space:nowrap; gap:6px; }
+.b-row-2-track-outer { flex:1; overflow:hidden; height:100%; display:flex; align-items:center; }
+.b-row-2-track { display:flex; align-items:center; white-space:nowrap; animation:scrollLeft 70s linear infinite; }
+.b-row-2-track:hover { animation-play-state:paused; }
+@keyframes scrollLeft { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+.b2-item { display:flex; align-items:center; gap:5px; padding:0 16px; height:28px; border-right:1px solid #1a2535; font-family:'IBM Plex Mono',monospace; font-size:11.5px; }
+.b2-isim  { color:#64748b; letter-spacing:.4px; }
+.b2-deger { color:#e2e8f0; font-weight:700; margin-left:2px; }
+.b2-pct   { font-size:10.5px; font-weight:700; margin-left:1px; }
+.b2-pct.up   { color:var(--up); }
+.b2-pct.down { color:var(--down); }
+.b-row-3 { display:flex; align-items:center; height:36px; padding:0; gap:0; background:#090f18; border-bottom:1px solid #111c28; flex-shrink:0; overflow:hidden; }
+.b3-kur { display:flex; align-items:center; gap:7px; flex:1; height:100%; padding:0 14px; border-right:1px solid #162030; }
+.b3-kur:last-child { border-right:none; }
+.b3-kod { font-family:'Bebas Neue',sans-serif; font-size:14px; letter-spacing:1px; color:#475569; }
+.b3-val { font-family:'IBM Plex Mono',monospace; font-size:16px; font-weight:700; color:#f1f5f9; transition:color .3s; }
+.b3-pct { font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; }
+.b3-pct.up   { color:var(--up); }
+.b3-pct.down { color:var(--down); }
+@keyframes flashUp2   { 0%,100%{color:#f1f5f9} 40%{color:var(--up)} }
+@keyframes flashDown2 { 0%,100%{color:#f1f5f9} 40%{color:var(--down)} }
+.flash-up2   { animation:flashUp2   .8s ease; }
+.flash-down2 { animation:flashDown2 .8s ease; }
+.b-row-4 { display:flex; align-items:center; justify-content:space-between; height:24px; padding:0 14px; background:#050c14; flex-shrink:0; }
+.b4-sol  { display:flex; align-items:center; gap:14px; }
+.b4-saat { font-family:'IBM Plex Mono',monospace; font-size:13px; font-weight:700; letter-spacing:2px; color:#eab308; }
+.b4-tarih{ font-family:'IBM Plex Mono',monospace; font-size:10px; color:#374151; letter-spacing:1px; }
+.b4-kanal{ font-family:'Bebas Neue',sans-serif; font-size:15px; letter-spacing:4px; color:#eab308; opacity:.6; }
+
+.panel-baslik { font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:4px; padding-left:12px; flex-shrink:0; }
+.panel-baslik.doviz { border-left:3px solid #3b82f6; color:#60a5fa; }
+.panel-baslik.altin { border-left:3px solid #f59e0b; color:#fbbf24; }
+.tablo-head { display:grid; grid-template-columns:2fr 1fr 1fr; padding:5px 14px; background:rgba(255,255,255,.025); border:1px solid var(--border); border-radius:4px 4px 0 0; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:2px; color:var(--muted); text-transform:uppercase; flex-shrink:0; transition:background .8s, border-color .8s; }
+.tablo-head span:not(:first-child) { text-align:right; }
+.tablo-body { flex:1; overflow:hidden; display:flex; flex-direction:column; }
+.kur-satir { display:grid; grid-template-columns:2fr 1fr 1fr; align-items:center; padding:0 14px; border:1px solid var(--border); border-top:none; flex:1; min-height:0; transition:background .15s, border-color .8s; }
+.kur-satir:last-child { border-radius:0 0 4px 4px; }
+.kur-satir:hover { background:rgba(255,255,255,.02); }
+.kur-isim { display:flex; align-items:center; gap:10px; }
+.kur-ikon { font-size:clamp(16px,2.8vh,28px); width:34px; text-align:center; flex-shrink:0; }
+.kur-kod  { font-family:'IBM Plex Mono',monospace; font-size:clamp(13px,2.2vh,22px); font-weight:700; letter-spacing:1px; color:var(--text); line-height:1.1; }
+.kur-ad   { font-size:clamp(10px,1.3vh,13px); color:var(--muted); font-weight:300; }
+.kur-fiyat{ font-family:'IBM Plex Mono',monospace; font-size:clamp(13px,2.4vh,24px); font-weight:400; text-align:right; color:var(--text); }
+.kur-fiyat.satis { color:#c9a84c; }
+@keyframes flashUp   { 0%,100%{background:transparent} 50%{background:rgba(34,197,94,.12)} }
+@keyframes flashDown { 0%,100%{background:transparent} 50%{background:rgba(239,68,68,.12)} }
+.flash-up   { animation:flashUp   .7s ease; }
+.flash-down { animation:flashDown .7s ease; }
+
+#overlay-offline { display:none; position:fixed; inset:0; z-index:8888; background:rgba(4,8,12,.94); backdrop-filter:blur(8px); flex-direction:column; align-items:center; justify-content:center; gap:18px; }
+#overlay-offline.goster { display:flex; animation:fadeIn .35s ease; }
+.offline-dots { display:flex; gap:10px; }
+.offline-dots span { width:11px; height:11px; border-radius:50%; background:#dc2626; animation:dotBlink 1.4s ease-in-out infinite; }
+.offline-dots span:nth-child(2) { animation-delay:.22s; }
+.offline-dots span:nth-child(3) { animation-delay:.44s; }
+@keyframes dotBlink { 0%,100%{opacity:.15} 50%{opacity:1} }
+.offline-yazi { font-family:'Bebas Neue',sans-serif; font-size:clamp(90px,20vw,210px); line-height:1; letter-spacing:-2px; color:#dc2626; text-shadow:0 0 60px rgba(220,38,38,.45); animation:offPulse 2.8s ease-in-out infinite; }
+@keyframes offPulse { 0%,100%{opacity:1} 50%{opacity:.6} }
+.offline-alt { font-family:'IBM Plex Mono',monospace; font-size:clamp(12px,1.8vw,18px); letter-spacing:4px; color:#4b5563; text-transform:uppercase; }
+body::after { content:''; position:fixed; inset:0; background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.04) 2px,rgba(0,0,0,.04) 4px); pointer-events:none; z-index:9999; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">DÖVİZX<em>PANO TV</em></div>
+  <div class="header-right">
+    <div id="modBadge" class="badge-off">
+      <div class="badge-dot"></div>
+      <span id="modBadgeText">OFF</span>
+    </div>
+    <div class="saat" id="saat">--:--:--</div>
+  </div>
+</header>
+
+<main>
+  <div class="ekran aktif" id="ekran-off">
+    <div style="font-size:clamp(36px,7vw,64px)">📴</div>
+    <div class="off-no">0</div>
+    <div class="off-lbl">Ekran Kapalı</div>
+  </div>
+  <div class="ekran" id="ekran-doviz">
+    <div class="panel-baslik doviz">💱 &nbsp;DÖVİZ KURLARI</div>
+    <div class="tablo-head"><span>Para Birimi</span><span>Alış ₺</span><span>Satış ₺</span></div>
+    <div class="tablo-body" id="tbl-doviz"></div>
+  </div>
+  <div class="ekran" id="ekran-altin">
+    <div class="panel-baslik altin">🥇 &nbsp;ALTIN FİYATLARI</div>
+    <div class="tablo-head"><span>Tür</span><span>Alış ₺</span><span>Satış ₺</span></div>
+    <div class="tablo-body" id="tbl-altin"></div>
+  </div>
+  <div class="ekran" id="ekran-karma">
+    <div class="yari">
+      <div class="panel-baslik doviz">💱 &nbsp;DÖVİZ</div>
+      <div class="tablo-head"><span>Birim</span><span>Alış ₺</span><span>Satış ₺</span></div>
+      <div class="tablo-body" id="tbl-karma-doviz"></div>
+    </div>
+    <div class="yari">
+      <div class="panel-baslik altin">🥇 &nbsp;ALTIN</div>
+      <div class="tablo-head"><span>Tür</span><span>Alış ₺</span><span>Satış ₺</span></div>
+      <div class="tablo-body" id="tbl-karma-altin"></div>
+    </div>
+  </div>
+  <div class="ekran" id="ekran-cnbce">
+    <div style="font-size:clamp(36px,6vw,60px)">📺</div>
+    <div class="cnbce-no">4</div>
+    <div class="cnbce-lbl">CNBC-E</div>
+  </div>
+  <div class="ekran" id="ekran-bloomberg">
+    <div id="yt-player-wrap">
+      <div id="yt-player-div" style="width:100%;height:100%;"></div>
+      <div id="yt-novideo">
+        <div class="novid-ikon">📡</div>
+        <div class="novid-yazi">EKOTÜRK TV</div>
+        <div class="novid-alt">Firebase'e YouTube canlı yayın linki ekleyin</div>
+      </div>
+      <div id="yt-loading" class="goster">
+        <div class="spinner"></div>
+        <div class="spinner-lbl">YAYINA BAĞLANIYOR…</div>
+      </div>
+    </div>
+    <div id="bloomberg-banner">
+      <div class="b-row-1">
+        <div class="b-row-1-tag">🔴 SON DAKİKA</div>
+        <div class="b-row-1-haber" id="rss-haber">Ekonomi haberleri yükleniyor…</div>
+      </div>
+      <div class="b-row-2">
+        <div class="b-row-2-tag">📈 DÜNYA PİYASALARI</div>
+        <div class="b-row-2-track-outer">
+          <div class="b-row-2-track" id="b2-track"></div>
+        </div>
+      </div>
+      <div class="b-row-3" id="b3-row"></div>
+      <div class="b-row-4">
+        <div class="b4-sol">
+          <span class="b4-saat" id="b4-saat">--:--</span>
+          <span class="b4-tarih" id="b4-tarih"></span>
+        </div>
+        <div class="b4-kanal">EKOTÜRK TV</div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="overlay-offline">
+  <div class="offline-dots"><span></span><span></span><span></span></div>
+  <div class="offline-yazi">OFFLİNE</div>
+  <div class="offline-alt">Firebase bağlantısı kesildi</div>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey:            "AIzaSyCqsgIgXsF1YfbeUjA-fYtH_mTLa9zihZo",
+  authDomain:        "karsi-abc05.firebaseapp.com",
+  databaseURL:       "https://karsi-abc05-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId:         "karsi-abc05",
+  storageBucket:     "karsi-abc05.firebasestorage.app",
+  messagingSenderId: "271972503606",
+  appId:             "1:271972503606:web:965325fabc4d5d2b614897",
+  measurementId:     "G-YTVLHVBKJ5"
+};
+
+function temaUygula() {
+  const h = new Date().getHours(), m = new Date().getMinutes();
+  document.body.classList.toggle('gun-modu', (h > 6 || (h === 6 && m >= 0)) && h < 20);
+}
+temaUygula();
+setInterval(temaUygula, 60_000);
+
+const MOD_MAP = {
+  0:{ ekran:'ekran-off',       badge:'badge-off',         label:'OFF',        glow:'' },
+  1:{ ekran:'ekran-doviz',     badge:'badge-doviz',       label:'DÖVİZ',      glow:'glow-doviz' },
+  2:{ ekran:'ekran-altin',     badge:'badge-altin',       label:'ALTIN',      glow:'glow-altin' },
+  3:{ ekran:'ekran-karma',     badge:'badge-karma',       label:'KARMA',      glow:'glow-karma' },
+  4:{ ekran:'ekran-cnbce',     badge:'badge-cnbce',       label:'CNBC-E',     glow:'glow-cnbce' },
+  5:{ ekran:'ekran-bloomberg', badge:'badge-bloomberght', label:'EKOTÜRK TV', glow:'glow-bloomberg' },
+};
+const IKONLAR = {
+  USD:'🇺🇸',EUR:'🇪🇺',GBP:'🇬🇧',CHF:'🇨🇭',JPY:'🇯🇵',SAR:'🇸🇦',AED:'🇦🇪',RUB:'🇷🇺',
+  GRAM:'⚖️',CEYREK:'🪙',YARIM:'🪙',TAM:'🥇',ATA:'🥇',ONS:'📊',KULCE:'🏅',
+};
+const PIYASALAR = [
+  {isim:'BIST 100',  deger:'11.842',pct:'+0.34'},{isim:'S&P 500',   deger:'5.308', pct:'-0.12'},
+  {isim:'DOW JONES', deger:'39.512',pct:'+0.21'},{isim:'NASDAQ',    deger:'16.724',pct:'-0.08'},
+  {isim:'DAX',       deger:'18.612',pct:'+0.44'},{isim:'FTSE 100',  deger:'8.312', pct:'+0.18'},
+  {isim:'NIKKEI',    deger:'37.934',pct:'-0.31'},{isim:'HANG SENG', deger:'18.207',pct:'+0.55'},
+  {isim:'CAC 40',    deger:'8.022', pct:'+0.12'},{isim:'WTI PETROL',deger:'78.42', pct:'-0.23'},
+  {isim:'BRENT',     deger:'82.61', pct:'-0.17'},{isim:'ONS ALTIN', deger:'2.334', pct:'+0.42'},
+  {isim:'GÜMÜŞ',    deger:'27.44', pct:'+0.88'},{isim:'BTC/USD',   deger:'64.820',pct:'+1.24'},
+  {isim:'ETH/USD',   deger:'3.148', pct:'+0.96'},
+];
+
+/* ── YouTube ── */
+let ytPlayer=null, ytApiHazir=false, ytBekleyen=null;
+window.onYouTubeIframeAPIReady = function(){
+  ytApiHazir=true;
+  if(ytBekleyen){ ytPlayerOlustur(ytBekleyen); ytBekleyen=null; }
+};
+function ytUrldenId(url){
+  if(!url) return null;
+  let m;
+  m=url.match(/youtube\.com\/live\/([a-zA-Z0-9_-]{11})/);  if(m) return m[1];
+  m=url.match(/[?&]v=([a-zA-Z0-9_-]{11})/);               if(m) return m[1];
+  m=url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);          if(m) return m[1];
+  m=url.match(/youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/);if(m) return m[1];
+  if(/^[a-zA-Z0-9_-]{11}$/.test(url.trim())) return url.trim();
+  return null;
+}
+function ytPlayerOlustur(videoId){
+  const loading=document.getElementById('yt-loading');
+  const noVid  =document.getElementById('yt-novideo');
+  if(!videoId){ loading?.classList.remove('goster'); noVid?.classList.add('goster'); return; }
+  noVid?.classList.remove('goster');
+  loading?.classList.add('goster');
+  if(ytPlayer){ try{ ytPlayer.destroy(); }catch(e){ console.warn('[YT] destroy:',e); } ytPlayer=null; }
+  const wrap=document.getElementById('yt-player-wrap');
+  document.getElementById('yt-player-div')?.remove();
+  const div=document.createElement('div');
+  div.id='yt-player-div'; div.style.cssText='width:100%;height:100%;';
+  wrap.insertBefore(div,wrap.firstChild);
+  ytPlayer=new YT.Player('yt-player-div',{
+    videoId,
+    playerVars:{autoplay:1,mute:1,controls:0,rel:0,modestbranding:1,iv_load_policy:3,playsinline:1,loop:1,playlist:videoId},
+    events:{
+      onReady:      e=>{ e.target.playVideo(); loading?.classList.remove('goster'); },
+      onStateChange:e=>{
+        if(e.data===YT.PlayerState.PLAYING) loading?.classList.remove('goster');
+        if(e.data===YT.PlayerState.ENDED||e.data===YT.PlayerState.PAUSED)
+          setTimeout(()=>{ try{ if(ytPlayer&&typeof ytPlayer.playVideo==='function') ytPlayer.playVideo(); }catch(_){} },1500);
+      },
+      onError:e=>{ console.warn('[YT] hata:',e.data); loading?.classList.remove('goster'); noVid?.classList.add('goster'); }
+    }
+  });
+}
+function bloombergVideoAyarla(url){
+  const id=ytUrldenId(url);
+  if(!id){ document.getElementById('yt-loading')?.classList.remove('goster'); document.getElementById('yt-novideo')?.classList.add('goster'); return; }
+  if(ytApiHazir) ytPlayerOlustur(id); else ytBekleyen=id;
+}
+
+/* ── Banner katman 2 ── */
+function b2Olustur(){
+  const track=document.getElementById('b2-track'); if(!track) return;
+  const html=PIYASALAR.map(p=>{
+    const pos=p.pct.startsWith('+');
+    return `<div class="b2-item"><span class="b2-isim">${p.isim}</span><span class="b2-deger">${p.deger}</span><span class="b2-pct ${pos?'up':'down'}">${pos?'▲':'▼'} ${p.pct.replace('+','')}%</span></div>`;
+  }).join('');
+  track.innerHTML=html+html;
+}
+
+/* ── Banner katman 3 ── */
+let oncekiKurlar={};
+function b3Guncelle(doviz){
+  const el=document.getElementById('b3-row'); if(!el||!doviz.length) return;
+  const slice=doviz.slice(0,6);
+  if(el.children.length!==slice.length){
+    el.innerHTML=slice.map(r=>`
+      <div class="b3-kur">
+        <span class="b3-kod">${r.code}/TRY</span>
+        <span class="b3-val" id="b3v-${r.code}">${fmt(r.sell,4)}</span>
+        <span class="b3-pct" id="b3p-${r.code}">— %—</span>
+      </div>`).join('');
+  }
+  slice.forEach(r=>{
+    const valEl=document.getElementById(`b3v-${r.code}`);
+    const pctEl=document.getElementById(`b3p-${r.code}`);
+    if(!valEl||!pctEl) return;
+    const eskiSell=oncekiKurlar[r.code]??0, yeniSell=r.sell??0;
+    valEl.textContent=fmt(yeniSell,4);
+    if(eskiSell&&eskiSell!==yeniSell){
+      valEl.classList.remove('flash-up2','flash-down2');
+      void valEl.offsetWidth;
+      valEl.classList.add(yeniSell>eskiSell?'flash-up2':'flash-down2');
+    }
+    if(r.buy!=null&&r.sell!=null){
+      const fark=(r.sell-r.buy)/r.buy*100, pos=fark>=0;
+      pctEl.textContent=`${pos?'▲':'▼'} ${Math.abs(fark).toFixed(2)}%`;
+      pctEl.className=`b3-pct ${pos?'up':'down'}`;
+    }
+    oncekiKurlar[r.code]=yeniSell;
+  });
+}
+
+/* ── RSS ── */
+let rssHaberler=[],rssIdx=0,rssIntervalId=null;
+function rssGoster(){
+  const el=document.getElementById('rss-haber'); if(!el||!rssHaberler.length) return;
+  el.style.opacity='0';
+  setTimeout(()=>{ el.textContent=rssHaberler[rssIdx++%rssHaberler.length]; el.style.opacity='1'; },400);
+}
+function rssBaslat(){
+  if(rssIntervalId) clearInterval(rssIntervalId);
+  rssGoster();
+  rssIntervalId=setInterval(rssGoster,8000);
+}
+function rssYukle(url,deneme=0){
+  if(!url) return;
+  fetch('https://api.allorigins.win/get?url='+encodeURIComponent(url))
+    .then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+    .then(d=>{
+      const xml=new DOMParser().parseFromString(d.contents,'text/xml');
+      const b=Array.from(xml.querySelectorAll('item title')).map(i=>i.textContent.trim()).filter(Boolean);
+      if(b.length){ rssHaberler=b; rssBaslat(); } else throw new Error('Boş liste');
+    })
+    .catch(err=>{
+      console.warn('[RSS]',err.message,`(${deneme+1}/3)`);
+      if(deneme<2) setTimeout(()=>rssYukle(url,deneme+1),5000);
+      else{ const el=document.getElementById('rss-haber'); if(el) el.textContent='Haber akışı alınamadı'; }
+    });
+}
+
+/* ── Kur tabloları ── */
+let ilkYukleme=true;
+function fmt(n,dec){
+  const num=Number(n);
+  if(n==null||n===''||isNaN(num)) return '—';
+  return num.toLocaleString('tr-TR',{minimumFractionDigits:dec,maximumFractionDigits:dec});
+}
+function satirHTML(r){
+  const dec=r.category==='altin'?2:4, ikon=IKONLAR[r.code]||r.icon||'💰';
+  return `<div class="kur-satir" data-code="${r.code}">
+    <div class="kur-isim">
+      <div class="kur-ikon">${ikon}</div>
+      <div><div class="kur-kod">${r.code}</div><div class="kur-ad">${r.name||''}</div></div>
+    </div>
+    <div class="kur-fiyat alis"  data-field="buy"  data-val="${r.buy ??0}">${fmt(r.buy, dec)}</div>
+    <div class="kur-fiyat satis" data-field="sell" data-val="${r.sell??0}">${fmt(r.sell,dec)}</div>
+  </div>`;
+}
+function tabloDoldur(id,rates){
+  const el=document.getElementById(id); if(el) el.innerHTML=rates.map(satirHTML).join('');
+}
+function tabloGuncelle(id,rates){
+  const el=document.getElementById(id); if(!el) return;
+  rates.forEach(r=>{
+    const satir=el.querySelector(`[data-code="${r.code}"]`); if(!satir) return;
+    const dec=r.category==='altin'?2:4;
+    ['buy','sell'].forEach(f=>{
+      const cell=satir.querySelector(`[data-field="${f}"]`); if(!cell) return;
+      if(r[f]==null){ console.warn(`[tabloGuncelle] ${r.code}.${f} yok`); return; }
+      const eski=parseFloat(cell.dataset.val??0), yeni=parseFloat(r[f]);
+      if(eski!==yeni){
+        cell.textContent=fmt(yeni,dec); cell.dataset.val=yeni;
+        cell.classList.remove('flash-up','flash-down');
+        void cell.offsetWidth;
+        cell.classList.add(yeni>eski?'flash-up':'flash-down');
+      }
+    });
+  });
+}
+function ratesUygula(rates){
+  if(!Array.isArray(rates)||!rates.length) return;
+  const doviz=rates.filter(r=>r.category==='doviz');
+  const altin=rates.filter(r=>r.category==='altin');
+  if(ilkYukleme){
+    tabloDoldur('tbl-doviz',doviz); tabloDoldur('tbl-altin',altin);
+    tabloDoldur('tbl-karma-doviz',doviz); tabloDoldur('tbl-karma-altin',altin);
+    ilkYukleme=false;
+  } else {
+    tabloGuncelle('tbl-doviz',doviz); tabloGuncelle('tbl-altin',altin);
+    tabloGuncelle('tbl-karma-doviz',doviz); tabloGuncelle('tbl-karma-altin',altin);
+  }
+  b3Guncelle(doviz);
+}
+
+/* ── Mod geçişi ── */
+let mevcutMod=-1;
+function modUygula(modeCode){
+  const kod=parseInt(modeCode)??0; if(kod===mevcutMod) return;
+  mevcutMod=kod;
+  const bilgi=MOD_MAP[kod]||MOD_MAP[0];
+  document.querySelectorAll('.ekran').forEach(e=>e.classList.remove('aktif'));
+  document.getElementById(bilgi.ekran)?.classList.add('aktif');
+  const badge=document.getElementById('modBadge');
+  badge.className=bilgi.badge;
+  document.getElementById('modBadgeText').textContent=bilgi.label;
+  badge.querySelector('.badge-dot').className='badge-dot live';
+  document.body.classList.toggle('mod-off',kod===0);
+  ['glow-doviz','glow-altin','glow-karma','glow-cnbce','glow-bloomberg'].forEach(c=>document.body.classList.remove(c));
+  if(bilgi.glow) document.body.classList.add(bilgi.glow);
+  if(kod===5 &&typeof ytPlayer?.playVideo ==='function'){ try{ ytPlayer.playVideo();  }catch(_){} }
+  if(kod!==5 &&typeof ytPlayer?.pauseVideo==='function'){ try{ ytPlayer.pauseVideo(); }catch(_){} }
+}
+
+/* ── Saat ── */
+function saatGuncelle(){
+  const now=new Date();
+  document.getElementById('saat').textContent    =now.toLocaleTimeString('tr-TR');
+  document.getElementById('b4-saat').textContent =now.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('b4-tarih').textContent=now.toLocaleDateString('tr-TR',{weekday:'short',day:'2-digit',month:'long',year:'numeric'});
+}
+saatGuncelle();
+setInterval(saatGuncelle,1000);
+b2Olustur();
+
+/* ── Firebase ── */
+try {
+  if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  const db=firebase.database();
+  const overlay=document.getElementById('overlay-offline');
+  let offlineTimer=null;
+
+  db.ref('.info/connected').on('value',snap=>{
+    if(snap.val()!==true){
+      if(!offlineTimer) offlineTimer=setTimeout(()=>overlay.classList.add('goster'),1500);
+    } else {
+      if(offlineTimer){ clearTimeout(offlineTimer); offlineTimer=null; }
+      overlay.classList.remove('goster');
+    }
+  });
+  db.ref('dovizx/shared/panoTv/tv1').on('value',
+    snap=>modUygula(snap.val()?.modeCode??0),
+    err=>{ console.warn('[panoTv]',err.message); overlay.classList.add('goster'); }
+  );
+  db.ref('dovizx/shared/rates').on('value',
+    snap=>ratesUygula(snap.val()),
+    err=>console.warn('[rates]',err.message)
+  );
+  db.ref('dovizx/shared/panoTvYoutube').on('value',snap=>{
+    const d=snap.val(); bloombergVideoAyarla(d?.bloomberght||d?.url||'');
+  });
+  db.ref('dovizx/shared/panoTvRss').once('value')
+    .then(snap=>{ const d=snap.val(); rssYukle(d?.url||d?.rssUrl||'https://www.aa.com.tr/tr/teyithatti/rss/news?cat=ekonomi'); })
+    .catch(()=>rssYukle('https://www.aa.com.tr/tr/teyithatti/rss/news?cat=ekonomi'));
+} catch(e) {
+  console.error('[Firebase] başlatma hatası:',e);
+  document.getElementById('overlay-offline').classList.add('goster');
+  modUygula(0);
+}
+</script>
+
+<!-- YouTube API callback tanımlandıktan SONRA yüklenir -->
+<script src="https://www.youtube.com/iframe_api"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+</body>
+</html>
